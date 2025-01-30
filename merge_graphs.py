@@ -42,7 +42,7 @@ def merge_graphs(graphs):
 
     for graph in graphs:
         for edge in graph[1]:  # Graph edges
-            v1, v2 = edge
+            v1, v2 = edge[0], edge[1]
             merged_edges.add((vertex_mapping[v1], vertex_mapping[v2]))
 
     # Step 3: Construct the merged graph
@@ -54,8 +54,12 @@ def create_graphs_from_folder(folder):
     # Iterate over all folders in the folder
     for root, dirs, files in os.walk(folder):
         for dir in dirs:
-            graph = graph(data_path = os.path.join(root, dir, f"{dir}_confidences.json"), structure_path = os.path.join(root, dir, f"{dir}_model.cif"), af_version = 3)
-            graphs.append(graph)
+            data_path = os.path.join(root, dir, f"{dir}_confidences.json")
+            data_path = os.path.abspath(data_path)
+            structure_path = os.path.join(root, dir, f"{dir}_model.cif")
+            structure_path = os.path.abspath(structure_path)
+            graph1 = graph(structure_path, data_path, af_version = '3')
+            graphs.append(graph1)
     return graphs
 
 
