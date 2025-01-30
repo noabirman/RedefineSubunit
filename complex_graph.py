@@ -27,10 +27,10 @@ class SubunitInfo:
     indexs: Tuple[int, int]
     sequence: str
 
-class Vertice:
-    name:
-    chain:
-
+# class Vertice:
+#     name:
+#     chain:
+#
 
 
 def extract_sequence_with_seqio(mmcif_path,af_version: int):
@@ -368,7 +368,7 @@ def plot_pae_plddt2(pae_as_arr: np.array, plddt_array, nodes, edges, plot_name: 
     plt.show()
 
 
-def find_edges(subunit_info: SubunitInfo, pae_matrix: np.array, threshold: int = 15) -> list[tuple[str, str, float]]:
+def find_edges(subunits_info: SubunitInfo, pae_matrix: np.array, threshold: int = 15) -> list[tuple[str, str, float]]:
     edges = []
     for subunit1, subunit2 in itertools.combinations(subunits_info, 2):
         pae_rect = pae_matrix[subunit1.indexs[0]:subunit1.indexs[1], subunit2.indexs[0]:subunit2.indexs[1]]
@@ -392,7 +392,7 @@ def get_chain_ids_per_residue(structure):
 
     return chain_ids
 
-def graph(structure_path, data_path, af_version)->tuple[list,list]:
+def graph(structure_path: str, data_path:str, af_version: str)->tuple[list,list]:
     # args: "fold_mll4_1100_end_rbbp5_wdr5_p53x2/fold_mll4_1100_end_rbbp5_wdr5_p53x2_model_0.cif" "fold_mll4_1100_end_rbbp5_wdr5_p53x2/fold_mll4_1100_end_rbbp5_wdr5_p53x2_full_data_0.json" 3
     with open(data_path, "r") as file:
         json_full_data = json.load(file)
@@ -429,6 +429,7 @@ if __name__ == '__main__':
         structure_path, data_path, af_version = os.path.abspath(sys.argv[1]),os.path.abspath(sys.argv[2]),sys.argv[3]
     else:
         print("usage: <script> structure_path data_path af_version")
-
+    g = graph(structure_path, data_path, af_version)
+    print (g)
     #plot_pae_plddt(pae_as_arr, plddt_array, nodes_as_req, edges, 'skip4_pae15_')
     #plot_pae_plddt2(pae_as_arr, plddt_array, nodes_as_req, edges, 'with_weights')
