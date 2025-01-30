@@ -118,7 +118,7 @@ def extract_subunit_info(indexs: List[Tuple[int, int]], token_chain_ids: List[st
         # Extract chain IDs in the current node and ensure uniqueness
         chains_ids_in_node = list(dict.fromkeys(token_chain_ids[start:end + 1]))  # keep order
         subunit_name = "".join(f"{chain_id}{chain_occ_counter[chain_id] + 1}" for chain_id in chains_ids_in_node)
-        for chain_id in chains_ids_in_node:
+        for chain_id in chains_ids_in_node:  #count occurrences for each chain in cur node
             chain_occ_counter[chain_id] += 1
         subunit_infos.append(SubunitInfo(
             name=subunit_name,
@@ -434,11 +434,15 @@ def graph(structure_path: str, data_path:str, af_version: str)->tuple[list,list]
     token_chain_ids_updated = [replacement_dict.get(item, item) for item in token_chain_ids]
 
     subunits_info = extract_subunit_info(groups_indexs, token_chain_ids_updated, full_seq)
-    vertices = []
-    for subunit in subunits_info:
-        vertices.append({'name': subunit.name, 'chain': subunit.chain_names[0],
-                         'start': subunit.indexs[0], 'end': subunit.indexs[1]})
     edges = find_edges(subunits_info, pae_as_arr, threshold=15)
+    vertices = []
+    # for subunit in subunits_info:
+    #     vertices.append({'name': subunit.name, 'chain': subunit.chain_names[0],
+    #                      'start': subunit.indexs[0], 'end': subunit.indexs[1]})
+    for subunit in subunits_info: #todo: this change the index to be per chain!
+        vertices.append({'name': subunit.name, 'chain': subunit.chain_names[0],
+                         'start': token_res_ids[subunit.indexs[0]], 'end': token_res_ids[subunit.indexs[1]]})
+
     return (vertices, edges)
 
 if __name__ == '__main__':
