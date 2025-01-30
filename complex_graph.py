@@ -27,6 +27,11 @@ class SubunitInfo:
     indexs: Tuple[int, int]
     sequence: str
 
+class Vertice:
+    name:
+    chain:
+
+
 
 def extract_sequence_with_seqio(mmcif_path,af_version: int):
     """
@@ -362,57 +367,68 @@ def plot_pae_plddt2(pae_as_arr: np.array, plddt_array, nodes, edges, plot_name: 
     plt.savefig(f'{plot_name}_plot.png', format='png', dpi=300, bbox_inches='tight')
     plt.show()
 
-def find_edges(nodes: list[tuple[str, int, int]], pae_matrix: np.array, threshold: int = 15) -> list[tuple[str, str, float]]:
+
+def find_edges(subunit_info: SubunitInfo, pae_matrix: np.array, threshold: int = 15) -> list[tuple[str, str, float]]:
     edges = []
-    for node1, node2 in itertools.combinations(nodes, 2):
-        pae_rect = pae_matrix[node1[1]:node1[2], node2[1]:node2[2]]
+    for subunit1, subunit2 in itertools.combinations(subunits_info, 2):
+        pae_rect = pae_matrix[subunit1.indexs[0]:subunit1.indexs[1], subunit2.indexs[0]:subunit2.indexs[1]]
         # pae_rect.
         # print(f"[{node1[0]}:{node1[1]][node2[0]:node2[1]]")
         pae_score = np.mean(pae_rect)
         # print(pae_score)
         if pae_score < threshold:
-            edges.append((node1[0], node2[0], float(pae_score)))
+            edges.append((subunit1.name, subunit2.name, float(pae_score)))
     return edges
 
-#def extract_full_data()
-#def merge_graphs()
+
+def get_chain_ids_per_residue(structure):
+    chain_ids = []  # List to store chain IDs per residue
+
+    for model in structure:  # Iterate through models (usually only 1)
+        for chain in model:  # Iterate through chains
+            for residue in chain:  # Iterate through residues
+                if residue.id[0] == " ":  # Exclude heteroatoms (like water, ligands)
+                    chain_ids.append(chain.id)  # Store chain ID per residue
+
+    return chain_ids
+
+def graph(structure_path, data_path, af_version)->tuple[list,list]:
+    # args: "fold_mll4_1100_end_rbbp5_wdr5_p53x2/fold_mll4_1100_end_rbbp5_wdr5_p53x2_model_0.cif" "fold_mll4_1100_end_rbbp5_wdr5_p53x2/fold_mll4_1100_end_rbbp5_wdr5_p53x2_full_data_0.json" 3
+    with open(data_path, "r") as file:
+        json_full_data = json.load(file)
+    pae_as_arr = np.array(json_full_data['pae'])
+    if af_version == '3':
+        atom_plddts = json_full_data['atom_plddts']
+        atom_chain_ids = json_full_data['atom_chain_ids']
+        token_res_ids = json_full_data['token_res_ids']
+        token_chain_ids = json_full_data['token_chain_ids']  # per res
+        # Parse the CIF file
+        parser = MMCIFParser(QUIET=True)
+        structure = parser.get_structure("model", structure_path)
+        plddt_array = atom_plddt_to_res_plddt(structure, atom_plddts)
+    elif af_version == '2':
+        # json data include ['max_pae', 'pae', 'plddt', 'ptm', 'iptm']
+        # plddt per res and not per atom
+        plddt_array = np.array(json_full_data['pae'])  # todo: not sure if it keeps order this way
+        parser = Bio.PDB.PDBParser(QUIET=True)
+        structure = parser.get_structure("original_pdb", structure_path)
+        token_chain_ids = get_chain_ids_per_residue(structure)
+    full_seq = extract_sequence_with_seqio(structure_path,
+                                           af_version)  # todo: take the full seq from complex file instead!!
+    groups_indexs = find_high_confidence_regions(plddt_array, confidence_threshold=40)
+    subunits_info = extract_subunit_info(groups_indexs, token_chain_ids, full_seq)
+    vertices = []
+    for subunit in subunits_info:
+        vertices.append({'name': subunit.name, 'chain': subunit.chain_names[0],
+                         'start': subunit.indexs[0], 'end': subunit.indexs[1]})
+    edges = find_edges(subunits_info, pae_as_arr, threshold=15)
+    return (vertices, edges)
 
 if __name__ == '__main__':
     if len(sys.argv) == 4:
         structure_path, data_path, af_version = os.path.abspath(sys.argv[1]),os.path.abspath(sys.argv[2]),sys.argv[3]
     else:
         print("usage: <script> structure_path data_path af_version")
-    # Load the JSON file
-    # prev version : data_path = "fold_mll4_1100_end_rbbp5_wdr5_p53x2/fold_mll4_1100_end_rbbp5_wdr5_p53x2_full_data_0.json"
-    # structure_path = "fold_mll4_1100_end_rbbp5_wdr5_p53x2/fold_mll4_1100_end_rbbp5_wdr5_p53x2_model_0.cif"
-    with open(data_path, "r") as file:
-        json_full_data = json.load(file)
 
-    pae_as_arr = np.array(json_full_data['pae'])
-    if af_version == 3:
-        atom_plddts = json_full_data['atom_plddts']
-        atom_chain_ids = json_full_data['atom_chain_ids']
-        token_res_ids = json_full_data['token_res_ids']
-        token_chain_ids = json_full_data['token_chain_ids'] #per res
-        # Parse the CIF file
-        parser = MMCIFParser(QUIET=True)
-        structure = parser.get_structure("model", structure_path)
-        plddt_array = atom_plddt_to_res_plddt(structure, atom_plddts)
-    elif af_version == 2:
-        #json data include ['max_pae', 'pae', 'plddt', 'ptm', 'iptm']
-        # plddt per res and not per atom
-        plddt_array = np.array(json_full_data['pae']) #todo: not sure if it keeps order this way
-        parser = Bio.PDB.PDBParser(QUIET=True)
-        structure = parser.get_structure("original_pdb", structure_path)
-    full_seq = extract_sequence_with_seqio(structure_path, af_version) #todo: take the full seq from complex file instead!!
-    groups_indexs = find_high_confidence_regions(plddt_array, confidence_threshold=40)
-
-    subunits_info = extract_subunit_info(groups_indexs, token_chain_ids, full_seq)
-    nodes_as_req = []
-    for subunit in subunits_info: #to give find_edges input as before
-        nodes_as_req.append((subunit.name, subunit.indexs[0], subunit.indexs[1]))
-        # print(subunit)
-    edges = find_edges(nodes_as_req, pae_as_arr, threshold=15)
-    print(edges)
     #plot_pae_plddt(pae_as_arr, plddt_array, nodes_as_req, edges, 'skip4_pae15_')
     #plot_pae_plddt2(pae_as_arr, plddt_array, nodes_as_req, edges, 'with_weights')
