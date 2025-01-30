@@ -34,6 +34,7 @@ def extract_sequence_with_seqio(mmcif_path,af_version: int):
 
     Args:
         mmcif_path (str): Path to the mmCIF file.
+        af_version if 2 then PDB and if 3 cif
 
     Returns:
         str: The amino acid sequence as a single-letter code string.
@@ -267,6 +268,7 @@ def plot_pae_plddt(pae_as_arr: np.array, plddt_array, nodes, edges, plot_name: s
     # plt.savefig('all_plot.png', format='png', dpi=300, bbox_inches='tight')
     plt.savefig(plot_name + 'all_plot.png', format='png', dpi=300, bbox_inches='tight')
     plt.show()
+
 
 def plot_pae_plddt2(pae_as_arr: np.array, plddt_array, nodes, edges, plot_name: str, use_edge_weights: bool = True, weight_threshold: float = 15):
     """
