@@ -382,6 +382,16 @@ def find_edges(subunits_info: SubunitInfo, pae_matrix: np.array, threshold: int 
 
 
 def get_chain_ids_per_residue(structure):
+    """
+    Made for getting the token_chain_ids which require for extract_subunit_info() in AF2 case. #todo: not a good practice
+    token_chain_ids len equals to the sequance len (number of residues).
+
+    Args:
+        structure (int): structure from PDB file.
+
+    Returns:
+        List[char]: token_chain_ids will look like ['A','A',..,'A','B','B',..,'B',..,'E','E',..,'E']
+    """
     chain_ids = []  # List to store chain IDs per residue
 
     for model in structure:  # Iterate through models (usually only 1)
@@ -416,7 +426,9 @@ def graph(structure_path: str, data_path:str, af_version: str)->tuple[list,list]
     full_seq = extract_sequence_with_seqio(structure_path,
                                            af_version)  # todo: take the full seq from complex file instead!!
     groups_indexs = find_high_confidence_regions(plddt_array, confidence_threshold=40)
-    subunits_info = extract_subunit_info(groups_indexs, token_chain_ids, full_seq)
+    replacement_dict = {'A': data_path.split('_')[0], 'B': data_path.split('_')[1]}  # Define replacements #todo: huraney
+    token_chain_ids_updated = [replacement_dict.get(item, item) for item in token_chain_ids]
+    subunits_info = extract_subunit_info(groups_indexs, token_chain_ids_updated, full_seq)
     vertices = []
     for subunit in subunits_info:
         vertices.append({'name': subunit.name, 'chain': subunit.chain_names[0],
