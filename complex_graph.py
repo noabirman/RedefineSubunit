@@ -404,6 +404,7 @@ def get_chain_ids_per_residue(structure):
 
 def graph(structure_path: str, data_path:str, af_version: str)->tuple[list,list]:
     # args: "fold_mll4_1100_end_rbbp5_wdr5_p53x2/fold_mll4_1100_end_rbbp5_wdr5_p53x2_model_0.cif" "fold_mll4_1100_end_rbbp5_wdr5_p53x2/fold_mll4_1100_end_rbbp5_wdr5_p53x2_full_data_0.json" 3
+    # args: "example/cdf_ddf/cdf_ddf_model.cif" "example/cdf_ddf/cdf_ddf_confidences.json" 3
     with open(data_path, "r") as file:
         json_full_data = json.load(file)
     pae_as_arr = np.array(json_full_data['pae'])
@@ -426,8 +427,12 @@ def graph(structure_path: str, data_path:str, af_version: str)->tuple[list,list]
     full_seq = extract_sequence_with_seqio(structure_path,
                                            af_version)  # todo: take the full seq from complex file instead!!
     groups_indexs = find_high_confidence_regions(plddt_array, confidence_threshold=40)
-    replacement_dict = {'A': data_path.split('_')[0], 'B': data_path.split('_')[1]}  # Define replacements #todo: huraney
+
+    filename = os.path.basename(data_path)  # Extract 'cdf_ddf' #todo: huraney
+    parts = filename.split('_')  # Now split by '_'
+    replacement_dict = {'A': parts[0], 'B': parts[1]}  # Use only the last part
     token_chain_ids_updated = [replacement_dict.get(item, item) for item in token_chain_ids]
+
     subunits_info = extract_subunit_info(groups_indexs, token_chain_ids_updated, full_seq)
     vertices = []
     for subunit in subunits_info:
