@@ -31,12 +31,12 @@ class SubunitInfo:
 #     name:
 #     chain:
 #
-def extract_sequence_with_seqio(mmcif_path,af_version: int):
+def extract_sequence_with_seqio(structure_path,af_version: int):
     """
-    Extracts the sequence from an mmCIF file using Bio.SeqIO.
+    Extracts the sequence from an mmCIF/PDB file using Bio.SeqIO.
 
     Args:
-        mmcif_path (str): Path to the mmCIF file.
+        structure_path (str): Path to the mmCIF/PDB file.
         af_version if 2 then PDB and if 3 cif
 
     Returns:
@@ -48,31 +48,6 @@ def extract_sequence_with_seqio(mmcif_path,af_version: int):
         sequences.append(str(record.seq))
         print(record.id)
     return ''.join(sequences)
-
-
-def extract_sequence_from_mmcif(mmcif_path):
-    """
-    Extracts the amino acid sequence from the ATOM records of an mmCIF file.
-
-    Args:
-        mmcif_path (str): Path to the mmCIF file.
-
-    Returns:
-        str: The amino acid sequence as a single-letter code string.
-    """
-    parser = MMCIFParser(QUIET=True)
-    structure = parser.get_structure("Model", mmcif_path)
-
-    # Use the PPBuilder to build polypeptides and extract the sequence
-    ppb = PPBuilder()
-    sequences = []
-
-    for pp in ppb.build_peptides(structure):
-        sequences.append(pp.get_sequence())  # Seq object
-        pp.get_id()
-
-    # Combine sequences if there are multiple chains
-    return ''.join(str(seq) for seq in sequences)
 
 
 def find_high_confidence_regions(plddt_array, confidence_threshold=40, gap_threshold=1):
@@ -108,6 +83,17 @@ def find_high_confidence_regions(plddt_array, confidence_threshold=40, gap_thres
 
 
 def extract_subunit_info(indexs: List[Tuple[int, int]], token_chain_ids: List[str], full_seq: str) -> List[SubunitInfo]:
+    """
+     Build a list of SubunitInfo
+
+     Args:
+         indexs (List[Tuple[int, int]]): List containing the index of each subunit.
+         token_chain_ids (List[str]): Indicate the chain ids of each subunit.
+         full_seq (str): The residues sequence of the current protein.
+
+     Returns:
+         list[SubunitInfo]: A list of SubunitInfo.
+     """
     subunit_infos = []
     # todo: change subunit name to be from file
     chain_occ_counter = Counter()  # Counter to track occurrences of each chain ID
@@ -127,8 +113,17 @@ def extract_subunit_info(indexs: List[Tuple[int, int]], token_chain_ids: List[st
 
     return subunit_infos
 
+def atom_plddt_to_res_plddt(structure, atom_plddts:List[float]):
+    """
+        Convert plddt list in AF3 case to be per residue instead of per atom, calculate the average plddt for each res.
 
-def atom_plddt_to_res_plddt(structure, atom_plddts):
+        Args:
+            structure: cif structure from AF
+            atom_plddts (List[float]): plddt per atom
+
+        Returns:
+            List[float]: plddt per residue.
+        """
     # Map atoms to residues
     residue_plddt_sum = defaultdict(float)
     residue_atom_count = defaultdict(int)
@@ -157,10 +152,6 @@ def atom_plddt_to_res_plddt(structure, atom_plddts):
     # Convert average_residue_plddt to a list in the correct order
     plddt_values = [average_residue_plddt[key] for key in sorted(average_residue_plddt)]
     return np.array(plddt_values)
-
-# for each multimer in Ben's data print how many nodes, len before and after and
-
-
 def plot_pae_plddt(pae_as_arr: np.array, plddt_array, nodes, edges, plot_name: str): #todo: add edge width due weight
     # Define AlphaFold plDDT color scheme
     plddt_cmap = ListedColormap(['#FF7D45', '#FFDB13', '#65CBF3', '#0053D6'])  # Orange, Yellow, Cyan, Blue
@@ -366,14 +357,22 @@ def plot_pae_plddt2(pae_as_arr: np.array, plddt_array, nodes, edges, plot_name: 
     plt.show()
 
 
-def find_edges(subunits_info: SubunitInfo, pae_matrix: np.array, threshold: int = 15) -> list[tuple[str, str, float]]:
+def find_edges(subunits_info: List[SubunitInfo], pae_matrix: np.array, threshold: int = 15) -> list[tuple[str, str, float]]:
+    """
+    Find edges by pae_matrix and threshold. adding edge iff pae of the link between two vertices > threshold.
+
+    Args:
+        subunits_info (List[SubunitInfo]): vertices information.
+        pae_matrix (np.array): PAE matrix.
+        threshold (int): adding edge iff pae of the link between two vertices > threshold.
+
+    Returns:
+        List[tuple[str,str,float]]: edges list, each edge is a tuple (v1, v2, weight).
+    """
     edges = []
     for subunit1, subunit2 in itertools.combinations(subunits_info, 2):
         pae_rect = pae_matrix[subunit1.indexs[0]:subunit1.indexs[1], subunit2.indexs[0]:subunit2.indexs[1]]
-        # pae_rect.
-        # print(f"[{node1[0]}:{node1[1]][node2[0]:node2[1]]")
         pae_score = np.mean(pae_rect)
-        # print(pae_score)
         if pae_score < threshold:
             edges.append((subunit1.name, subunit2.name, float(pae_score)))
     return edges
