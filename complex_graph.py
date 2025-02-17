@@ -31,8 +31,6 @@ class SubunitInfo:
 #     name:
 #     chain:
 #
-
-
 def extract_sequence_with_seqio(mmcif_path,af_version: int):
     """
     Extracts the sequence from an mmCIF file using Bio.SeqIO.
@@ -420,7 +418,7 @@ def graph(structure_path: str, data_path:str, af_version: str)->tuple[list,list]
     elif af_version == '2':
         # json data include ['max_pae', 'pae', 'plddt', 'ptm', 'iptm']
         # plddt per res and not per atom
-        plddt_array = np.array(json_full_data['pae'])  # todo: not sure if it keeps order this way
+        plddt_array = np.array(json_full_data['plddt'])  # todo: not sure if it keeps order this way
         parser = Bio.PDB.PDBParser(QUIET=True)
         structure = parser.get_structure("original_pdb", structure_path)
         token_chain_ids = get_chain_ids_per_residue(structure)
