@@ -221,7 +221,7 @@ def rename_chains_from_file(data_path: str, token_chain_ids: list[str]) -> list[
     return [replacement_dict.get(chain, chain) for chain in token_chain_ids]
 
 
-def graph(structure_path: str, data_path:str, af_version: str)->nx.Graph:
+def graph(structure_path: str, data_path:str, af_version: str)->nx.Graph: # het
     # args: "fold_mll4_1100_end_rbbp5_wdr5_p53x2/fold_mll4_1100_end_rbbp5_wdr5_p53x2_model_0.cif" "fold_mll4_1100_end_rbbp5_wdr5_p53x2/fold_mll4_1100_end_rbbp5_wdr5_p53x2_full_data_0.json" 3
     # args: "example/cdf_ddf/cdf_ddf_model.cif" "example/cdf_ddf/cdf_ddf_confidences.json" 3
     with open(data_path, "r") as file:
