@@ -10,13 +10,16 @@ import Bio.SeqUtils
 import Bio.PDB, Bio.PDB.Residue
 from Bio import SeqIO
 import dataclasses
+import networkx as nx
+from pathlib import Path
 
 SubunitName = str
 @dataclasses.dataclass
 class SubunitInfo:
     name: SubunitName
     chain_names: List[str]
-    indexs: Tuple[int, int]
+    start: int  # was before indexs: Tuple[int, int]
+    end: int
     sequence: str
 
 # class Vertice:
@@ -99,7 +102,8 @@ def extract_subunit_info(indexs: List[Tuple[int, int]], token_chain_ids: List[st
         subunit_infos.append(SubunitInfo(
             name=subunit_name,
             chain_names=chains_ids_in_node,
-            indexs=(start, end),
+            start=start,
+            end=end,
             sequence=full_seq[start:end + 1]
         ))
 
@@ -161,7 +165,7 @@ def find_edges(subunits_info: List[SubunitInfo], pae_matrix: np.array, threshold
     """
     edges = []
     for subunit1, subunit2 in itertools.combinations(subunits_info, 2):
-        pae_rect = pae_matrix[subunit1.indexs[0]:subunit1.indexs[1], subunit2.indexs[0]:subunit2.indexs[1]]
+        pae_rect = pae_matrix[subunit1.start:subunit1.end, subunit2.start:subunit2.end]
         pae_score = np.mean(pae_rect)
         if pae_score < threshold:
             edges.append((subunit1.name, subunit2.name, float(pae_score)))
@@ -170,7 +174,7 @@ def find_edges(subunits_info: List[SubunitInfo], pae_matrix: np.array, threshold
 
 def get_chain_ids_per_residue(structure):
     """
-    Made for getting the token_chain_ids which require for extract_subunit_info() in AF2 case. #todo: not a good practice
+    Made for getting the token_chain_ids which require for extract_subunit_info() in AF2 case.
     token_chain_ids len equals to the sequance len (number of residues).
 
     Args:
@@ -189,7 +193,35 @@ def get_chain_ids_per_residue(structure):
 
     return chain_ids
 
-def graph(structure_path: str, data_path:str, af_version: str)->tuple[list,list]:
+def rename_chains_from_file(data_path: str, token_chain_ids: list[str]) -> list[str]:
+    """Renames chain identifiers based on filename components.
+
+    Args:
+        data_path (Path): Path to the data file (used for extracting chain names).
+        token_chain_ids (list[str]): Original chain identifiers.
+
+    Returns:
+        list[str]: Updated chain identifiers.
+    """
+
+    # Extract filename without extension
+    #filename = data_path.stem  # "cdf_afg_ajs_confidences" → "cdf_afg_ajs"
+    filename = os.path.basename(data_path)  # Extract 'cdf_ddf' #todo: assume here there is only 2 chains
+    # Split by '_' to get chain names
+    parts = filename.split('_')
+
+    # Ensure we have enough parts to map chains
+    if len(parts) < 2:
+        raise ValueError(f"Unexpected filename format: {filename}. Expected at least 2 parts.")
+
+    # Generate a mapping dynamically (A → first part, B → second, etc.)
+    replacement_dict = {chr(65 + i): part for i, part in enumerate(parts)}
+
+    # Update token_chain_ids based on mapping
+    return [replacement_dict.get(chain, chain) for chain in token_chain_ids]
+
+
+def graph(structure_path: str, data_path:str, af_version: str)->nx.Graph:
     # args: "fold_mll4_1100_end_rbbp5_wdr5_p53x2/fold_mll4_1100_end_rbbp5_wdr5_p53x2_model_0.cif" "fold_mll4_1100_end_rbbp5_wdr5_p53x2/fold_mll4_1100_end_rbbp5_wdr5_p53x2_full_data_0.json" 3
     # args: "example/cdf_ddf/cdf_ddf_model.cif" "example/cdf_ddf/cdf_ddf_confidences.json" 3
     with open(data_path, "r") as file:
@@ -215,23 +247,21 @@ def graph(structure_path: str, data_path:str, af_version: str)->tuple[list,list]
                                            af_version)
     groups_indexs = find_high_confidence_regions(plddt_array, confidence_threshold=40)
 
-    filename = os.path.basename(data_path)  # Extract 'cdf_ddf' #todo: assume here there is only 2 chains
-    parts = filename.split('_')  # Now split by '_'
-    replacement_dict = {'A': parts[0], 'B': parts[1]}  # Use only the last part
-    token_chain_ids_updated = [replacement_dict.get(item, item) for item in token_chain_ids]
+    token_chain_ids_updated = rename_chains_from_file(data_path, token_chain_ids)
 
     subunits_info = extract_subunit_info(groups_indexs, token_chain_ids_updated, full_seq)
+    G = nx.Graph()
     edges = find_edges(subunits_info, pae_as_arr, threshold=15)
-    vertices = []
-    # for subunit in subunits_info:
-    #     vertices.append({'name': subunit.name, 'chain': subunit.chain_names[0],
-    #                      'start': subunit.indexs[0], 'end': subunit.indexs[1]})
-    for subunit in subunits_info:
-        vertices.append({'name': subunit.name, 'chain': subunit.chain_names[0], #todo: here we assume node can be only from 1 chain
-                         'start': token_res_ids[subunit.indexs[0]], 'end': token_res_ids[subunit.indexs[1]]})
-        #class SubunitInfo: name: SubunitName / chain_names: List[str] / indexs: Tuple[int, int] / sequence: str
-
-    return (vertices, edges)
+    # index per chain instead of per full seq (by doing token_res_ids[subunit.start])
+    updated_subunits = [
+        dataclasses.replace(subunit, start=token_res_ids[subunit.start], end=token_res_ids[subunit.end])
+        for subunit in subunits_info
+    ]
+    for subunit in updated_subunits:
+        G.add_node(subunit.name, data=subunit)
+    for e in edges: # e is (v1, v2, weight)
+        G.add_edge(e[0], e[1], weight=e[2])
+    return G
 
 if __name__ == '__main__':
     if len(sys.argv) == 4:
