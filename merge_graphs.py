@@ -4,6 +4,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from complex_graph import graph
 
+
 def merge_graphs(graphs):
     # Helper to determine if two vertices overlap
     def overlap(v1, v2):
@@ -48,6 +49,7 @@ def merge_graphs(graphs):
     # Step 3: Construct the merged graph
     merged_graph = (list(merged_vertices.values()), list(merged_edges))
     return merged_graph
+
 
 def create_graphs_from_folder(folder):
     graphs = []
