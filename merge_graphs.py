@@ -2,54 +2,81 @@ import os
 from collections import defaultdict
 import networkx as nx
 import matplotlib.pyplot as plt
-from complex_graph import graph
+from complex_graph import graph, SubunitName, SubunitInfo
+from typing import List
 
 
-def merge_graphs(graphs):
-    # Helper to determine if two vertices overlap
-    def overlap(v1, v2):
-        return v1["chain"] == v2["chain"] and not (v1["end"] < v2["start"] or v2["end"] < v1["start"])
+def overlap(v1: SubunitInfo, v2: SubunitInfo) -> bool:
+    """Check if two SubunitInfo nodes overlap in at least one chain."""
+    return any(chain in v2.chain_names for chain in v1.chain_names) and not (v1.end < v2.start or v2.end < v1.start)
 
-    # Step 1: Merge vertices
-    merged_vertices = {}
-    vertex_groups = defaultdict(list)
 
-    # Create a mapping of vertices to groups by overlap
-    for graph in graphs:
-        for vertex in graph[0]:  # Graph vertices
-            merged = False
-            for group_key in list(vertex_groups.keys()):
-                if any(overlap(vertex, v) for v in vertex_groups[group_key]):
-                    vertex_groups[group_key].append(vertex)
-                    merged = True
-                    break
-            if not merged:
-                vertex_groups[vertex["name"]].append(vertex)
+def merge_graphs(graphs: List[nx.Graph]) -> nx.Graph:
+    """Merge nodes with overlapping indices in the same chain across multiple graphs."""
+    merged_graph = nx.Graph()
 
-    # Create merged vertices
-    for group_key, vertices in vertex_groups.items():
-        names = "_".join(v["name"] for v in vertices)
-        chain = vertices[0]["chain"]
-        start = min(v["start"] for v in vertices)
-        end = max(v["end"] for v in vertices)
-        merged_vertices[names] = {"name": names, "chain": chain, "start": start, "end": end}
+    # Step 1: Build an overlap graph
+    overlap_graph = nx.Graph()  # Temporary graph for finding connected components
 
-    # Step 2: Update edges
-    merged_edges = set()
-    vertex_mapping = {}
-    for names, merged_vertex in merged_vertices.items():
-        for original_vertex in vertex_groups[names.split("_")[0]]:
-            vertex_mapping[original_vertex["name"]] = merged_vertex["name"]
+    # Add all nodes to the overlap graph
+    all_nodes = {}
+    for G in graphs:
+        for node, data in G.nodes(data=True):
+            all_nodes[node] = data['data']
+            overlap_graph.add_node(node, data=data['data'])
 
-    for graph in graphs:
-        for edge in graph[1]:  # Graph edges
-            v1, v2 = edge[0], edge[1]
-            merged_edges.add((vertex_mapping[v1], vertex_mapping[v2]))
+    # Add edges between overlapping nodes
+    nodes_list = list(all_nodes.items())  # Convert to list for pairwise comparison
+    for i in range(len(nodes_list)):
+        name1, subunit1 = nodes_list[i]
+        for j in range(i + 1, len(nodes_list)):
+            name2, subunit2 = nodes_list[j]
+            if overlap(subunit1, subunit2):
+                overlap_graph.add_edge(name1, name2)
 
-    # Step 3: Construct the merged graph
-    merged_graph = (list(merged_vertices.values()), list(merged_edges))
+    # Step 2: Find connected components (groups of merged nodes)
+    connected_components = list(nx.connected_components(overlap_graph))
+
+    # Step 3: Merge nodes in each component
+    merged_nodes = {}
+    node_mapping = {}
+
+    for component in connected_components:
+        subunits = [all_nodes[name] for name in component]
+
+        # Merge properties
+        merged_name = SubunitName(f"{subunits[0].name[0:-1]}: {subunits[0].start}-{subunits[0].end}")
+        merged_chains = sorted(set(chain for subunit in subunits for chain in subunit.chain_names))
+        merged_start = min(subunit.start for subunit in subunits)
+        merged_end = max(subunit.end for subunit in subunits)
+        # merged_sequence = "".join(subunit.sequence for subunit in subunits)  # Optional
+
+        merged_subunit = SubunitInfo(
+            name=merged_name,
+            chain_names=merged_chains,
+            start=merged_start,
+            end=merged_end,
+            sequence=''
+        )
+
+        merged_nodes[merged_name] = merged_subunit
+
+        # Map original nodes to merged node name
+        for name in component:
+            node_mapping[name] = merged_name
+
+    # Step 4: Add merged nodes to the final graph
+    for merged_name, subunit in merged_nodes.items():
+        merged_graph.add_node(merged_name, data=subunit)
+
+    # Step 5: Update edges based on merged nodes
+    for G in graphs:
+        for u, v in G.edges():
+            merged_u = node_mapping[u]
+            merged_v = node_mapping[v]
+            merged_graph.add_edge(merged_u, merged_v)
+
     return merged_graph
-
 
 def create_graphs_from_folder(folder):
     graphs = []
@@ -65,54 +92,29 @@ def create_graphs_from_folder(folder):
     return graphs
 
 
+def show_graph(graph: nx.Graph):
+    """Print the nodes and edges of a graph."""
+    print("Nodes:")
+    for node, data in graph.nodes(data=True):
+        print(f"  {node}: {data['data']}")
+
+    print("Edges:")
+    for u, v in graph.edges():
+        print(f"  {u} -- {v}")
+    # Draw the graph
+    plt.figure(figsize=(6, 6))
+    nx.draw(graph, with_labels=True, node_color='lightblue', edge_color='gray', node_size=800, font_size=10)
+    plt.show()
+
+
+
+
 
 # main
 if __name__ == "__main__":
-    # Example usage
-    # g1 = (
-    #     [
-    #         {"name": "a1", "chain": "A", "start": 20, "end": 65},
-    #         {"name": "b1", "chain": "B", "start": 30, "end": 100},
-    #     ],
-    #     [("a1", "b1")],
-    # )
-    #
-    # g2 = (
-    #     [
-    #         {"name": "b2", "chain": "B", "start": 10, "end": 80},
-    #         {"name": "c1", "chain": "C", "start": 20, "end": 90},
-    #     ],
-    #     [("b2", "c1")],
-    # )
-    #
-    # g3 = (
-    #     [
-    #         {"name": "a2", "chain": "A", "start": 60, "end": 70},
-    #         {"name": "c2", "chain": "C", "start": 80, "end": 150},
-    #     ],
-    #     [("a2", "c2")],
-    # )
-
-    # graphs = [g1, g2, g3]
-    graphs = create_graphs_from_folder("example")
+    graphs = create_graphs_from_folder("data//7ARC_Ben_AF3__20250217//7ARC_partial")
     merged_graph = merge_graphs(graphs)
+    show_graph(merged_graph)
 
-
-    # Create a mapping of old names to new formatted names
-    vertex_map = {v['name']: f"{v['chain']}_{v['start']}-{v['end']}" for v in merged_graph[0]}
-
-    # Transform edges using the new vertex names
-    transformed_edges = [(vertex_map[v1], vertex_map[v2]) for v1, v2 in merged_graph[1]]
-
-    # Create a NetworkX graph
-    G = nx.Graph()
-    G.add_nodes_from(vertex_map.values())  # Add renamed nodes
-    G.add_edges_from(transformed_edges)  # Add transformed edges
-
-    # Draw the graph
-    plt.figure(figsize=(6, 6))
-    nx.draw(G, with_labels=True, node_color='lightblue', edge_color='gray', node_size=800, font_size=10)
-    plt.show()
-    # Plot the merged graph
 
 

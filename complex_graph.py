@@ -258,7 +258,7 @@ def graph(structure_path: str, data_path:str, af_version: str)->nx.Graph: # het
         for subunit in subunits_info
     ]
     for subunit in updated_subunits:
-        G.add_node(subunit.name, data=subunit)
+            G.add_node(subunit.name, data=subunit)
     for e in edges: # e is (v1, v2, weight)
         G.add_edge(e[0], e[1], weight=e[2])
     return G
