@@ -102,6 +102,9 @@ def create_graphs_from_folder(folder):
 
 def show_graph(graph: nx.Graph, folder_path:str):
     """Print the nodes and edges of a graph."""
+    print(f"total number of Nodes: {graph.number_of_nodes()}")
+    print(f"total number of Edges: {graph.number_of_edges()}")
+
     print("Nodes:")
     for node, data in graph.nodes(data=True):
         print(f"  {node}: {data['data']}")
@@ -113,6 +116,14 @@ def show_graph(graph: nx.Graph, folder_path:str):
     plt.figure(figsize=(6, 6))
     nx.draw(graph, with_labels=True, node_color='lightblue', edge_color='gray', node_size=300, font_size=3)
     plt.savefig(os.path.join(folder_path, "merged_graph.png"))
+    plt.show()
+
+    nodes_with_edges = [node for node, degree in graph.degree() if degree > 0]
+    # Create a subgraph with only these nodes
+    graph_filtered = graph.subgraph(nodes_with_edges).copy()
+    plt.figure(figsize=(6, 6))
+    nx.draw(graph_filtered, with_labels=True, node_color='lightblue', edge_color='gray', node_size=300, font_size=3)
+    plt.savefig(os.path.join(folder_path, "edges_only_merged_graph.png"))
     plt.show()
 
 
