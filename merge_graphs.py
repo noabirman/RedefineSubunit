@@ -121,7 +121,7 @@ if __name__ == "__main__":
     if len(sys.argv) == 2:
         folder_path = os.path.abspath(sys.argv[1])
         folder_name = os.path.split(folder_path)[1]
-        graphs = create_graphs_from_folder(folder_name)
+        graphs = create_graphs_from_folder(folder_path)
         merged_graph = merge_graphs(graphs)
         show_graph(merged_graph, folder_path)
     else:
