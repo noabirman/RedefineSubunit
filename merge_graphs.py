@@ -113,7 +113,7 @@ def show_graph(graph: nx.Graph, folder_path:str):
     for u, v in graph.edges():
         print(f"  {u} -- {v}")
     # Draw the graph
-    plt.figure(figsize=(6, 6))
+    plt.figure(figsize=(12, 12))
     nx.draw(graph, with_labels=True, node_color='lightblue', edge_color='gray', node_size=300, font_size=3)
     plt.savefig(os.path.join(folder_path, "merged_graph.png"))
     plt.show()
@@ -121,7 +121,7 @@ def show_graph(graph: nx.Graph, folder_path:str):
     nodes_with_edges = [node for node, degree in graph.degree() if degree > 0]
     # Create a subgraph with only these nodes
     graph_filtered = graph.subgraph(nodes_with_edges).copy()
-    plt.figure(figsize=(6, 6))
+    plt.figure(figsize=(12, 12))
     nx.draw(graph_filtered, with_labels=True, node_color='lightblue', edge_color='gray', node_size=300, font_size=3)
     plt.savefig(os.path.join(folder_path, "edges_only_merged_graph.png"))
     plt.show() #gg
