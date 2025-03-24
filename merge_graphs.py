@@ -1,4 +1,5 @@
 import os
+import sys
 from collections import defaultdict
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -112,9 +113,12 @@ def show_graph(graph: nx.Graph):
 
 # main
 if __name__ == "__main__":
-    graphs = create_graphs_from_folder("data//7ARC_Ben_AF3__20250217//7ARC_partial")
-    merged_graph = merge_graphs(graphs)
-    show_graph(merged_graph)
-
+    if len(sys.argv) == 2:
+        folder_name = os.path.abspath(sys.argv[1])
+        graphs = create_graphs_from_folder(folder_name)
+        merged_graph = merge_graphs(graphs)
+        show_graph(merged_graph)
+    else:
+        print("usage: <script> enter folder_name")
 
 
