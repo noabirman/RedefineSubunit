@@ -111,7 +111,7 @@ def show_graph(graph: nx.Graph, folder_path:str):
         print(f"  {u} -- {v}")
     # Draw the graph
     plt.figure(figsize=(6, 6))
-    nx.draw(graph, with_labels=True, node_color='lightblue', edge_color='gray', node_size=800, font_size=10)
+    nx.draw(graph, with_labels=True, node_color='lightblue', edge_color='gray', node_size=300, font_size=3)
     plt.savefig(os.path.join(folder_path, "merged_graph.png"))
     plt.show()
 
