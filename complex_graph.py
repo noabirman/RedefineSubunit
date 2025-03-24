@@ -71,7 +71,7 @@ def find_high_confidence_regions(plddt_array, confidence_threshold=40, gap_thres
             # Add the current region when a gap is found
             if indices[i - 1] - start_index >= 5:
                 regions.append((int(start_index), int(indices[i - 1])))
-                start_index = indices[i]
+            start_index = indices[i]
 
     # Append the last region
     if indices[i - 1] - start_index >= 5:
