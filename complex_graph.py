@@ -79,39 +79,80 @@ def find_high_confidence_regions(plddt_array, confidence_threshold=40, gap_thres
     return regions
 
 
+# def extract_subunit_info(indexs: List[Tuple[int, int]], token_chain_ids: List[str], full_seq: str) -> List[SubunitInfo]:
+#     """
+#      Build a list of SubunitInfo
+#
+#      Args:
+#          indexs (List[Tuple[int, int]]): List containing the index of each subunit.
+#          token_chain_ids (List[str]): Indicate the chain ids of each subunit.
+#          full_seq (str): The residues sequence of the current protein.
+#
+#      Returns:
+#          list[SubunitInfo]: A list of SubunitInfo.
+#      """
+#     subunit_infos = []
+#     # todo: change subunit name to be from file
+#     chain_occ_counter = Counter()  # Counter to track occurrences of each chain ID
+#
+#     for start, end in indexs:
+#         # Extract chain IDs in the current node and ensure uniqueness
+#         chains_ids_in_node = list(dict.fromkeys(token_chain_ids[start:end + 1]))  # keep order
+#         #subunit_name = "".join(f"{chain_id}{chain_occ_counter[chain_id] + 1}" for chain_id in chains_ids_in_node)
+#         for chain_id in chains_ids_in_node:  #count occurrences for each chain in cur node
+#             chain_occ_counter[chain_id] += 1
+#         subunit_infos.append(SubunitInfo(
+#             name=subunit_name,
+#             chain_names=chains_ids_in_node,
+#             start=start,
+#             end=end,
+#             sequence=full_seq[start:end + 1]
+#         ))
+#
+#     return subunit_infos
+
 def extract_subunit_info(indexs: List[Tuple[int, int]], token_chain_ids: List[str], full_seq: str) -> List[SubunitInfo]:
     """
-     Build a list of SubunitInfo
+    Build a list of SubunitInfo ensuring different chains are treated as separate subunits.
 
-     Args:
-         indexs (List[Tuple[int, int]]): List containing the index of each subunit.
-         token_chain_ids (List[str]): Indicate the chain ids of each subunit.
-         full_seq (str): The residues sequence of the current protein.
+    Args:
+        indexs (List[Tuple[int, int]]): List containing the index of each subunit.
+        token_chain_ids (List[str]): Indicate the chain IDs of each subunit.
+        full_seq (str): The residue sequence of the current protein.
 
-     Returns:
-         list[SubunitInfo]: A list of SubunitInfo.
-     """
+    Returns:
+        list[SubunitInfo]: A list of SubunitInfo objects.
+    """
     subunit_infos = []
-    # todo: change subunit name to be from file
-    chain_occ_counter = Counter()  # Counter to track occurrences of each chain ID
+    chain_occ_counter = Counter()  # Track occurrences for each chain separately
 
     for start, end in indexs:
-        # Extract chain IDs in the current node and ensure uniqueness
-        chains_ids_in_node = list(dict.fromkeys(token_chain_ids[start:end + 1]))  # keep order
-        subunit_name = "".join(f"{chain_id}{chain_occ_counter[chain_id] + 1}" for chain_id in chains_ids_in_node)
-        for chain_id in chains_ids_in_node:  #count occurrences for each chain in cur node
+        # Find unique chain IDs in the segment (preserving order)
+        chains_ids_in_node = list(dict.fromkeys(token_chain_ids[start:end + 1]))
+
+        # Process each chain separately
+        for chain_id in chains_ids_in_node:
+            # Identify residues belonging to this chain in the given range
+            chain_positions = [i for i in range(start, end + 1) if token_chain_ids[i] == chain_id]
+
+            if not chain_positions:  # Skip if no positions found (shouldn't happen)
+                continue
+
+            chain_start, chain_end = chain_positions[0], chain_positions[-1]
+            subunit_name = f"{chain_id}{chain_occ_counter[chain_id] + 1}"  # Unique numbering per chain
+
+            # Increment the occurrence counter for this chain
             chain_occ_counter[chain_id] += 1
-        subunit_infos.append(SubunitInfo(
-            name=subunit_name,
-            chain_names=chains_ids_in_node,
-            start=start,
-            end=end,
-            sequence=full_seq[start:end + 1]
-        ))
+
+            subunit_infos.append(SubunitInfo(
+                name=subunit_name,
+                chain_names=[chain_id],  # Only one chain per subunit
+                start=chain_start,
+                end=chain_end,
+                sequence=full_seq[chain_start:chain_end + 1]
+            ))
 
     return subunit_infos
-
-
 def atom_plddt_to_res_plddt(structure, atom_plddts:List[float]):
     """
         Convert plddt list in AF3 case to be per residue instead of per atom, calculate the average plddt for each res.
