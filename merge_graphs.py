@@ -124,7 +124,7 @@ def show_graph(graph: nx.Graph, folder_path:str):
     plt.figure(figsize=(6, 6))
     nx.draw(graph_filtered, with_labels=True, node_color='lightblue', edge_color='gray', node_size=300, font_size=3)
     plt.savefig(os.path.join(folder_path, "edges_only_merged_graph.png"))
-    plt.show()
+    plt.show() #gg
 
 
 # main
