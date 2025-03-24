@@ -101,6 +101,36 @@ def create_graphs_from_folder(folder):
     return graphs
 
 
+def show_graph_with_spacing(graph: nx.Graph, folder_path: str, name:str):
+    """
+    Displays the graph with more space between nodes using spring_layout and adjusting the k parameter.
+
+    Args:
+        graph (nx.Graph): The graph to display.
+        folder_path (str): Path to save the output image.
+    """
+    # Calculate the figure size dynamically based on the number of nodes
+    num_nodes = len(graph.nodes())
+    figsize = (max(6, num_nodes / 10), max(6, num_nodes / 10))  # Adjust figure size
+
+    # Dynamically calculate proportional node size and font size
+    node_size = max(100, 500 / num_nodes)
+    font_size = max(8, 20 / num_nodes)
+
+    # Use spring_layout to position nodes with more space (increase k value)
+    pos = nx.spring_layout(graph, k=0.3, iterations=50)  # Increase 'k' for more space between nodes
+
+    # Draw the graph with adjusted layout and sizes
+    plt.figure(figsize=figsize)
+    nx.draw(graph, pos, with_labels=True, node_size=node_size, font_size=font_size, edge_color='gray',
+            node_color='lightblue')
+
+    # Save the graph image
+    save_path = os.path.join(folder_path, name+"graph_with_spacing.png")
+    plt.savefig(save_path, bbox_inches='tight')
+    plt.show()
+
+
 def show_graph(graph: nx.Graph, folder_path:str):
     """Print the nodes and edges of a graph."""
     print(f"total number of Nodes: {graph.number_of_nodes()}")
@@ -134,7 +164,8 @@ def show_graph(graph: nx.Graph, folder_path:str):
     nx.draw(graph_filtered, with_labels=True, node_color='lightblue', edge_color='gray', node_size=800, font_size=10)
     plt.savefig(os.path.join(folder_path, "edges_only_merged_graph.png"))
     plt.show() #gg
-
+    show_graph_with_spacing(graph, folder_path,"reg_")
+    show_graph_with_spacing(graph_filtered, folder_path, "filtered")
 
 # main
 if __name__ == "__main__":
