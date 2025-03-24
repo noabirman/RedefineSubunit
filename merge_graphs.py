@@ -87,12 +87,13 @@ def create_graphs_from_folder(folder):
     print(f"Creating graphs from folder {folder}")
     graphs = []
     # Iterate over all folders in the folder
-    for root, dirs, files in os.walk(folder):
-        for dir in dirs:
-            print(f"Processing {dir}")
-            data_path = os.path.join(root, dir, f"{dir}_confidences.json")
+    for item in os.listdir(folder):
+        item_path = os.path.join(folder, item)
+        if os.path.isdir(item_path):
+            print(f"Processing {item}")
+            data_path = os.path.join(item_path, f"{item}_confidences.json")
             data_path = os.path.abspath(data_path)
-            structure_path = os.path.join(root, dir, f"{dir}_model.cif")
+            structure_path = os.path.join(item_path, f"{item}_model.cif")
             structure_path = os.path.abspath(structure_path)
             graph1 = graph(structure_path, data_path, af_version = '3')
             graphs.append(graph1)
