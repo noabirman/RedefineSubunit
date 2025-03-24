@@ -45,7 +45,7 @@ def extract_sequence_with_seqio(structure_path,af_version: int):
     return ''.join(sequences)
 
 
-def find_high_confidence_regions(plddt_array, confidence_threshold=40, gap_threshold=1):
+def find_high_confidence_regions(plddt_array, confidence_threshold=40, gap_threshold=3):
     """
     Finds ranges of high-confidence regions in a plDDT array while preserving the order.
 
@@ -69,11 +69,13 @@ def find_high_confidence_regions(plddt_array, confidence_threshold=40, gap_thres
     for i in range(1, len(indices)):
         if indices[i] - indices[i - 1] > gap_threshold:
             # Add the current region when a gap is found
-            regions.append((int(start_index), int(indices[i - 1])))
-            start_index = indices[i]
+            if indices[i - 1] - start_index >= 5:
+                regions.append((int(start_index), int(indices[i - 1])))
+                start_index = indices[i]
 
     # Append the last region
-    regions.append((int(start_index), int(indices[-1])))
+    if indices[i - 1] - start_index >= 5:
+        regions.append((int(start_index), int(indices[-1])))
     return regions
 
 
