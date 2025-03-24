@@ -13,10 +13,12 @@ def overlap(v1: SubunitInfo, v2: SubunitInfo) -> bool:
 
 
 def merge_graphs(graphs: List[nx.Graph]) -> nx.Graph:
+    print("Merging graphs")
     """Merge nodes with overlapping indices in the same chain across multiple graphs."""
     merged_graph = nx.Graph()
 
     # Step 1: Build an overlap graph
+    print("Building overlap graph")
     overlap_graph = nx.Graph()  # Temporary graph for finding connected components
 
     # Add all nodes to the overlap graph
@@ -36,9 +38,11 @@ def merge_graphs(graphs: List[nx.Graph]) -> nx.Graph:
                 overlap_graph.add_edge(name1, name2)
 
     # Step 2: Find connected components (groups of merged nodes)
+    print("Finding connected components")
     connected_components = list(nx.connected_components(overlap_graph))
 
     # Step 3: Merge nodes in each component
+    print("Merging nodes")
     merged_nodes = {}
     node_mapping = {}
 
@@ -80,10 +84,12 @@ def merge_graphs(graphs: List[nx.Graph]) -> nx.Graph:
     return merged_graph
 
 def create_graphs_from_folder(folder):
+    print(f"Creating graphs from folder {folder}")
     graphs = []
     # Iterate over all folders in the folder
     for root, dirs, files in os.walk(folder):
         for dir in dirs:
+            print(f"Processing {dir}")
             data_path = os.path.join(root, dir, f"{dir}_confidences.json")
             data_path = os.path.abspath(data_path)
             structure_path = os.path.join(root, dir, f"{dir}_model.cif")
@@ -105,12 +111,8 @@ def show_graph(graph: nx.Graph, folder_path:str):
     # Draw the graph
     plt.figure(figsize=(6, 6))
     nx.draw(graph, with_labels=True, node_color='lightblue', edge_color='gray', node_size=800, font_size=10)
-    plt.savefig(plot_name + 'all_plot.png', format='png')
+    plt.savefig(os.path.join(folder_path, "merged_graph.png"))
     plt.show()
-
-
-
-
 
 
 # main
