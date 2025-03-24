@@ -93,7 +93,7 @@ def create_graphs_from_folder(folder):
     return graphs
 
 
-def show_graph(graph: nx.Graph):
+def show_graph(graph: nx.Graph, folder_path:str):
     """Print the nodes and edges of a graph."""
     print("Nodes:")
     for node, data in graph.nodes(data=True):
@@ -105,7 +105,9 @@ def show_graph(graph: nx.Graph):
     # Draw the graph
     plt.figure(figsize=(6, 6))
     nx.draw(graph, with_labels=True, node_color='lightblue', edge_color='gray', node_size=800, font_size=10)
+    plt.savefig(plot_name + 'all_plot.png', format='png')
     plt.show()
+
 
 
 
@@ -114,10 +116,11 @@ def show_graph(graph: nx.Graph):
 # main
 if __name__ == "__main__":
     if len(sys.argv) == 2:
-        folder_name = os.path.abspath(sys.argv[1])
+        folder_path = os.path.abspath(sys.argv[1])
+        folder_name = os.path.split(folder_path)[1]
         graphs = create_graphs_from_folder(folder_name)
         merged_graph = merge_graphs(graphs)
-        show_graph(merged_graph)
+        show_graph(merged_graph, folder_path)
     else:
         print("usage: <script> enter folder_name")
 
