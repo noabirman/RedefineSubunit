@@ -114,16 +114,16 @@ def show_graph(graph: nx.Graph, folder_path:str):
     for u, v in graph.edges():
         print(f"  {u} -- {v}")
 
-    # Extract chain names from node attributes
-    chain_names = {graph.nodes[node]['chain'] for node in graph.nodes}
-    # Assign unique colors to each chain
-    chain_colors = {chain: (random.random(), random.random(), random.random()) for chain in chain_names}
-    # Get node colors based on their chain
-    node_colors = [chain_colors[graph.nodes[node]['chain']] for node in graph.nodes]
+    # # Extract chain names from node attributes
+    # chain_names = {graph.nodes[node][1]['chain'] for node in graph.nodes(data=True)}
+    # # Assign unique colors to each chain
+    # chain_colors = {chain: (random.random(), random.random(), random.random()) for chain in chain_names}
+    # # Get node colors based on their chain
+    # node_colors = [chain_colors[graph.nodes[node][1]['chain']] for node in graph.nodes(data=True)]
 
     # Draw the graph
     plt.figure(figsize=(12, 12))
-    nx.draw(graph, with_labels=True, node_color=node_colors, edge_color='gray', node_size=300, font_size=5)
+    nx.draw(graph, with_labels=True, node_color='lightblue', edge_color='gray', node_size=300, font_size=5)
     plt.savefig(os.path.join(folder_path, "merged_graph.png"))
     plt.show()
 
@@ -131,7 +131,7 @@ def show_graph(graph: nx.Graph, folder_path:str):
     # Create a subgraph with only these nodes
     graph_filtered = graph.subgraph(nodes_with_edges).copy()
     plt.figure(figsize=(12, 12))
-    nx.draw(graph_filtered, with_labels=True, node_color=node_colors, edge_color='gray', node_size=300, font_size=5)
+    nx.draw(graph_filtered, with_labels=True, node_color='lightblue', edge_color='gray', node_size=800, font_size=10)
     plt.savefig(os.path.join(folder_path, "edges_only_merged_graph.png"))
     plt.show() #gg
 
