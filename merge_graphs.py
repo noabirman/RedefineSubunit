@@ -3,9 +3,11 @@ import sys
 import random
 from collections import defaultdict
 import networkx as nx
+from networkx.readwrite import json_graph
 import matplotlib.pyplot as plt
 from complex_graph import graph, SubunitName, SubunitInfo
 from typing import List
+import numpy as np
 
 
 def overlap(v1: SubunitInfo, v2: SubunitInfo) -> bool:
@@ -100,7 +102,6 @@ def create_graphs_from_folder(folder):
             graphs.append(graph1)
     return graphs
 
-
 def show_graph_with_spacing(graph: nx.Graph, folder_path: str, name:str):
     """
     Displays the graph with more space between nodes using spring_layout and adjusting the k parameter.
@@ -130,6 +131,64 @@ def show_graph_with_spacing(graph: nx.Graph, folder_path: str, name:str):
     plt.savefig(save_path, bbox_inches='tight')
     plt.show()
 
+def show_circle(graph: nx.Graph, folder_path:str, name:str):
+    from matplotlib.path import Path
+    from matplotlib.patches import PathPatch
+
+    # Sample graph creation for demonstration
+    graph = nx.Graph()
+    graph.add_edges_from([('A', 'B'), ('B', 'C'), ('C', 'A'), ('A', 'D'), ('B', 'D'), ('C', 'D')])
+
+    plt.figure(figsize=(12, 12))
+
+    # Sort nodes alphabetically
+    sorted_nodes = sorted(graph.nodes())
+
+    # Generate positions for the nodes in circular layout
+    pos = nx.circular_layout(sorted_nodes)
+
+    # Draw nodes
+    nx.draw_networkx_nodes(graph, pos, node_color='lightblue', node_size=300)
+    nx.draw_networkx_labels(graph, pos, font_size=5)
+
+    # Function to compute the control points for a cubic Bezier curve
+    def compute_control_points(p1, p2, curve_factor):
+        midpoint = (p1 + p2) / 2
+        dir_v = p2 - p1
+        perp_v = np.array([dir_v[1], -dir_v[0]])
+        perp_v /= np.linalg.norm(perp_v)
+        contrl1 = midpoint - curve_factor * perp_v
+        contrl2 = midpoint + curve_factor * perp_v
+        return contrl1, contrl2
+
+    # Draw edges with dynamic curvature
+    for edge in graph.edges():
+        p1 = np.array(pos[edge[0]])
+        p2 = np.array(pos[edge[1]])
+
+        # Distance between nodes
+        distance = np.linalg.norm(p1 - p2)
+
+        # Curve factor: closer nodes = more curve
+        max_dist = 2.0  # Max distance for unit circle nodes
+        normalized_dist = distance / max_dist
+        curve_factor = 0.5 * (1 - normalized_dist)
+
+        # Compute control points for cubic Bezier curve
+        contrl1, contrl2 = compute_control_points(p1, p2, curve_factor)
+
+        # Create Bezier path
+        verts = [p1, contrl1, contrl2, p2]
+        codes = [Path.MOVETO, Path.CURVE4, Path.CURVE4, Path.CURVE4]
+        path = Path(verts, codes)
+
+        # Add path to plot
+        patch = PathPatch(path, edgecolor='gray', fill=False)
+        plt.gca().add_patch(patch)
+
+    # Hide axes
+    plt.axis('off')
+    plt.savefig(os.path.join(folder_path,f"curved_{name}.png"))
 
 def show_graph(graph: nx.Graph, folder_path:str):
     """Print the nodes and edges of a graph."""
@@ -174,7 +233,13 @@ if __name__ == "__main__":
         folder_name = os.path.split(folder_path)[1]
         graphs = create_graphs_from_folder(folder_path)
         merged_graph = merge_graphs(graphs)
+        json_graph.dumps(merged_graph)
+        nodes_with_edges = [node for node, degree in merged_graph.degree() if degree > 0]
+        sub_graph = merged_graph.subgraph(nodes_with_edges).copy()
         show_graph(merged_graph, folder_path)
+        show_circle(merged_graph, folder_path, 'graph')
+        show_circle(sub_graph, folder_path, 'sub_graph')
+
     else:
         print("usage: <script> enter folder_name")
 
