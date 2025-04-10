@@ -60,7 +60,12 @@ def merge_graphs(graphs: List[nx.Graph],folder) -> nx.Graph:
         merged_end = max(subunit.end for subunit in subunits)
         merged_sequence = [''] * (merged_end - merged_start)
         for subunit in subunits:
-            merged_sequence[subunit.start-merged_start:subunit.end-merged_start] = list(subunit.sequence)
+            for i, char in enumerate(subunit.sequence):
+                pos = subunit.start - merged_start + i
+                if merged_sequence[pos] == '':
+                    merged_sequence[pos] = char
+                elif merged_sequence[pos] != char:
+                    raise ValueError(f"Conflict detected at position {pos}: {merged_sequence[pos]} vs {char}")
         merged_sequence = "".join(merged_sequence)
         merged_subunit = SubunitInfo(
             name=merged_name,
