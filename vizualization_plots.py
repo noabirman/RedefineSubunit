@@ -1,3 +1,6 @@
+import os
+
+import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
@@ -206,3 +209,127 @@ def plot_pae_plddt2(pae_as_arr: np.array, plddt_array, nodes, edges, plot_name: 
     fig.suptitle("Predicted Aligned Error (PAE) with plDDT Bars and Edge Weights", fontsize=16, x=0.4, y=0.9)
     plt.savefig(f'{plot_name}_plot.png', format='png', dpi=300, bbox_inches='tight')
     plt.show()
+
+def show_graph_with_spacing(graph: nx.Graph, folder_path: str, name:str):
+    """
+    Displays the graph with more space between nodes using spring_layout and adjusting the k parameter.
+
+    Args:
+        graph (nx.Graph): The graph to display.
+        folder_path (str): Path to save the output image.
+    """
+    # Calculate the figure size dynamically based on the number of nodes
+    num_nodes = len(graph.nodes())
+    figsize = (max(6, num_nodes / 10), max(6, num_nodes / 10))  # Adjust figure size
+
+    # Dynamically calculate proportional node size and font size
+    node_size = max(100, 500 / num_nodes)
+    font_size = max(8, 20 / num_nodes)
+
+    # Use spring_layout to position nodes with more space (increase k value)
+    pos = nx.spring_layout(graph, k=0.3, iterations=50)  # Increase 'k' for more space between nodes
+
+    # Draw the graph with adjusted layout and sizes
+    plt.figure(figsize=figsize)
+    nx.draw(graph, pos, with_labels=True, node_size=node_size, font_size=font_size, edge_color='gray',
+            node_color='lightblue')
+
+    # Save the graph image
+    save_path = os.path.join(folder_path, name+"graph_with_spacing.png")
+    plt.savefig(save_path, bbox_inches='tight')
+    plt.show()
+
+def show_circle(graph: nx.Graph, folder_path:str, name:str):
+    from matplotlib.path import Path
+    from matplotlib.patches import PathPatch
+
+    # Sample graph creation for demonstration
+    graph = nx.Graph()
+    graph.add_edges_from([('A', 'B'), ('B', 'C'), ('C', 'A'), ('A', 'D'), ('B', 'D'), ('C', 'D')])
+
+    plt.figure(figsize=(12, 12))
+
+    # Sort nodes alphabetically
+    sorted_nodes = sorted(graph.nodes())
+
+    # Generate positions for the nodes in circular layout
+    pos = nx.circular_layout(sorted_nodes)
+
+    # Draw nodes
+    nx.draw_networkx_nodes(graph, pos, node_color='lightblue', node_size=300)
+    nx.draw_networkx_labels(graph, pos, font_size=5)
+
+    # Function to compute the control points for a cubic Bezier curve
+    def compute_control_points(p1, p2, curve_factor):
+        midpoint = (p1 + p2) / 2
+        dir_v = p2 - p1
+        perp_v = np.array([dir_v[1], -dir_v[0]])
+        perp_v /= np.linalg.norm(perp_v)
+        contrl1 = midpoint - curve_factor * perp_v
+        contrl2 = midpoint + curve_factor * perp_v
+        return contrl1, contrl2
+
+    # Draw edges with dynamic curvature
+    for edge in graph.edges():
+        p1 = np.array(pos[edge[0]])
+        p2 = np.array(pos[edge[1]])
+
+        # Distance between nodes
+        distance = np.linalg.norm(p1 - p2)
+
+        # Curve factor: closer nodes = more curve
+        max_dist = 2.0  # Max distance for unit circle nodes
+        normalized_dist = distance / max_dist
+        curve_factor = 0.5 * (1 - normalized_dist)
+
+        # Compute control points for cubic Bezier curve
+        contrl1, contrl2 = compute_control_points(p1, p2, curve_factor)
+
+        # Create Bezier path
+        verts = [p1, contrl1, contrl2, p2]
+        codes = [Path.MOVETO, Path.CURVE4, Path.CURVE4, Path.CURVE4]
+        path = Path(verts, codes)
+
+        # Add path to plot
+        patch = PathPatch(path, edgecolor='gray', fill=False)
+        plt.gca().add_patch(patch)
+
+    # Hide axes
+    plt.axis('off')
+    plt.savefig(os.path.join(folder_path,f"curved_{name}.png"))
+
+def show_graph(graph: nx.Graph, folder_path:str):
+    """Print the nodes and edges of a graph."""
+    print(f"total number of Nodes: {graph.number_of_nodes()}")
+    print(f"total number of Edges: {graph.number_of_edges()}")
+
+    print("Nodes:")
+    for node, data in graph.nodes(data=True):
+        print(f"  {node}: {data['data']}")
+
+    print("Edges:")
+    for u, v in graph.edges():
+        print(f"  {u} -- {v}")
+
+    # # Extract chain names from node attributes
+    # chain_names = {graph.nodes[node][1]['chain'] for node in graph.nodes(data=True)}
+    # # Assign unique colors to each chain
+    # chain_colors = {chain: (random.random(), random.random(), random.random()) for chain in chain_names}
+    # # Get node colors based on their chain
+    # node_colors = [chain_colors[graph.nodes[node][1]['chain']] for node in graph.nodes(data=True)]
+
+    # Draw the graph
+    plt.figure(figsize=(12, 12))
+    nx.draw(graph, with_labels=True, node_color='lightblue', edge_color='gray', node_size=300, font_size=5)
+    plt.savefig(os.path.join(folder_path, "merged_graph.png"))
+    plt.show()
+
+    nodes_with_edges = [node for node, degree in graph.degree() if degree > 0]
+    # Create a subgraph with only these nodes
+    graph_filtered = graph.subgraph(nodes_with_edges).copy()
+    plt.figure(figsize=(12, 12))
+    nx.draw(graph_filtered, with_labels=True, node_color='lightblue', edge_color='gray', node_size=800, font_size=10)
+    plt.savefig(os.path.join(folder_path, "edges_only_merged_graph.png"))
+    plt.show() #gg
+    show_graph_with_spacing(graph, folder_path,"reg_")
+    show_graph_with_spacing(graph_filtered, folder_path, "filtered")
