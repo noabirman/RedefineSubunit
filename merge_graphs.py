@@ -16,7 +16,7 @@ def overlap(v1: SubunitInfo, v2: SubunitInfo) -> bool:
     return any(chain in v2.chain_names for chain in v1.chain_names) and not (v1.end < v2.start or v2.end < v1.start)
 
 
-def merge_graphs(graphs: List[nx.Graph],folder) -> nx.Graph:
+def merge_graphs(graphs: List[nx.Graph], folder: str) -> nx.Graph:
     print("Merging graphs")
     """Merge nodes with overlapping indices in the same chain across multiple graphs."""
     merged_graph = nx.Graph()
@@ -58,7 +58,7 @@ def merge_graphs(graphs: List[nx.Graph],folder) -> nx.Graph:
         merged_chains = sorted(set(chain for subunit in subunits for chain in subunit.chain_names)) #change
         merged_start = min(subunit.start for subunit in subunits)
         merged_end = max(subunit.end for subunit in subunits)
-        merged_sequence = [''] * (merged_end - merged_start)
+        merged_sequence = [''] * (merged_end  + 1 - merged_start) #inclusion of end position
         for subunit in subunits:
             for i, char in enumerate(subunit.sequence):
                 pos = subunit.start - merged_start + i
