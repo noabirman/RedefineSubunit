@@ -1,0 +1,115 @@
+"""
+Script Name: preprocess.py
+
+Description:
+    Preprocessing pipeline for AlphaFold 3 input:
+    1) Converts AF3 input JSON to a multi-FASTA file.
+    2) Splits the multi-FASTA into individual FASTA files (one per chain).
+    3) Runs IUPred3 on each sequence.
+    4) Splits long sequences (>1000 residues) only at disordered regions (avoiding ordered blocks).
+    5) Renames chain IDs to alphabetical characters and saves a mapping.
+    6) Creates a cleaned JSON file ready for AlphaFold 3 MSA input.
+    7) splits the JSON file into individual JSON files (one per chain).
+
+Usage:
+    python preprocess.py <input_json> <complex_name>
+
+Author: Noa Birman
+Date: 2025-04-21
+"""
+
+import sys
+import subprocess
+import os
+import json
+from rename_protein_ids import rename_protein_ids
+
+def json_to_fasta(json_file:str, complexname:str): #should be path/synapse.json
+    # Load your JSON file
+    with open(json_file) as f:
+        data = json.load(f)
+
+    # Write to a FASTA file
+    with open(f"{complexname}/sequences.fasta", "w") as fasta:
+        for entry in data["sequences"]:
+            pid = entry["protein"]["id"]
+            seq = entry["protein"]["sequence"]
+            fasta.write(f">{pid}\n{seq}\n")
+
+
+
+def split_af3_json_by_chain(input_json_path, output_dir="msa_input"):
+    """
+    Splits an AF3-style JSON file into separate files per protein sequence.
+
+    Args:
+        input_json_path (str): Path to the full AF3 input JSON file.
+        output_dir (str): Directory to save individual chain JSONs.
+    """
+    os.makedirs(output_dir, exist_ok=True)
+
+    with open(input_json_path, 'r') as f:
+        af3_data = json.load(f)
+
+    for protein_entry in af3_data["sequences"]:
+        chain_id = protein_entry["protein"]["id"]
+        chain_data = {
+            "name": f"{af3_data.get('name', 'AF3')}_{chain_id}",
+            "modelSeeds": af3_data.get("modelSeeds", [1]),
+            "sequences": [protein_entry],
+            "dialect": af3_data.get("dialect", "alphafold3"),
+            "version": af3_data.get("version", 1)
+        }
+
+        output_path = os.path.join(output_dir, f"{chain_id}.json")
+        with open(output_path, 'w') as out_file:
+            json.dump(chain_data, out_file, indent=2)
+
+        print(f"✅ Saved {output_path}")
+
+if __name__ == '__main__':
+    # === Input Arguments ===
+    json_file = sys.argv[1]            # Input AF3 JSON (e.g., synapse.json) data_from_Dina/synapse_pre_msa.json
+    complex_name = sys.argv[2]
+
+    # === Paths ===
+    split_script = "split_fasta_and_run_iupred_on_folder.sh"
+
+    os.makedirs(complex_name, exist_ok=True)
+    split_fasta_dir = os.path.join(complex_name,"input_fastas") # Where per-chain FASTA files go
+    split_mapping_file = os.path.join(complex_name,"iupred_split_mapping.json")
+    split_fasta_out = os.path.join(complex_name,"iupred_split_sequences.fasta")
+    iupred_outputs_path = os.path.join(complex_name,"iupred_outputs")
+    fasta_path = os.path.join(complex_name,"sequences.fasta")
+    af3_json = os.path.join(complex_name,"af3_input.json")
+    af3_json_renamed = os.path.join(complex_name,"af3_input_renamed.json")
+    mapping_file_path = os.path.join(complex_name,"chain_id_mapping.json")
+    msa_inputs_path = os.path.join(complex_name,"msa_inputs")
+
+    # === Step 1: Convert JSON to full FASTA ===
+    print("🔄 Converting JSON to FASTA...")
+    json_to_fasta(json_file, complex_name)
+
+    # === Step 2: Split FASTA and run IUPred3 on each chain ===
+    print("🔬 Splitting FASTA and running IUPred3...")
+    subprocess.run(["bash", split_script, complex_name], check=True)
+
+    # === Step 3: Split long sequences based on IUPred3 disorder ===
+    print("✂️  Splitting long sequences at disordered regions...")
+    subprocess.run([
+        "python3", "split_sequences_on_disorder.py",
+        iupred_outputs_path,
+        fasta_path,
+        complex_name
+    ], check=True)
+
+    # === Step 4: Rename chain IDs and save mapping ===
+    print("🔠 Renaming chain IDs...")
+
+    # Rename chain IDs and save mapping
+    rename_protein_ids(af3_json, af3_json_renamed, mapping_file_path)
+
+    # === Step 5: Split the renamed json into per chain===
+    split_af3_json_by_chain(af3_json_renamed, msa_inputs_path)
+
+    print("✅ Preprocessing complete.")
