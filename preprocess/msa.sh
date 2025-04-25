@@ -9,7 +9,7 @@
 
 #SBATCH --exclude=sm-01,sm-16
 
-#SBATCH --output=slurms_outs/msa/%j.out
+#SBATCH --output=/cs/labs/dina/tsori/af3_example/slurms_outs/msa/%j.out
 
 export XLA_FLAGS="--xla_disable_hlo_passes=custom-kernel-fusion-rewriter"
 
@@ -29,7 +29,6 @@ export PATH="/sci/labs/dina/bshor/projects/af_combdock/tools/conda_install/minic
 . "/sci/labs/dina/bshor/projects/af_combdock/tools/conda_install/miniconda3/etc/profile.d/conda.sh"
 conda activate /cs/usr/bshor/sci/installations/af3_variations/deepmind/localalphafold3/alphafold3-conda
 
-cd /cs/labs/dina/tsori/af3_example/
 
 # Check for required arguments
 if [ "$#" -lt 1 ]; then

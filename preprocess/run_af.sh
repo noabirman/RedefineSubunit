@@ -8,7 +8,7 @@
 #SBATCH --mail-type=END
 #SBATCH --mail-user=tsori.kislev@gmail.com
 
-#SBATCH --output=slurms_outs/AF/%j.out
+#SBATCH --output=/cs/labs/dina/tsori/af3_example/slurms_outs/msa/%j.out
 
 # Documentation:
 # This script runs the AlphaFold3 pipeline on a specified input directory.
@@ -22,8 +22,6 @@
 export PATH="/sci/labs/dina/bshor/projects/af_combdock/tools/conda_install/miniconda3/bin:$PATH"
 . "/sci/labs/dina/bshor/projects/af_combdock/tools/conda_install/miniconda3/etc/profile.d/conda.sh"
 conda activate /cs/usr/bshor/sci/installations/af3_variations/deepmind/localalphafold3/alphafold3-conda
-
-cd /cs/labs/dina/tsori/af3_example/
 
 if [ -z "$1" ]; then
   echo "Usage: $0 <INPUT_DIR>"
