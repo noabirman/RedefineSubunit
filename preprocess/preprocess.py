@@ -49,7 +49,9 @@ def subunit_to_fasta(json_file: str, complexname: str):
         data = json.load(f)
 
     # Copy the input JSON file to the output directory with the name 'subunits.json'
-    shutil.copy(json_file, os.path.join(complexname, "subunits.json"))
+    subunits_json_path = os.path.join(complexname, "subunits.json")
+    with open(subunits_json_path, "w") as f:
+        json.dump(data, f, indent=4)
 
     # Write to a FASTA file
     with open(f"{complexname}/sequences.fasta", "w") as fasta:
