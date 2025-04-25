@@ -49,7 +49,7 @@ def subunit_to_fasta(json_file: str, complexname: str):
         data = json.load(f)
 
     # Copy the input JSON file to the output directory with the name 'subunits.json'
-    subunits_json_path = os.path.join(complexname, "subunits.json")
+    subunits_json_path = os.path.join(complexname, "subunits_info.json")
     with open(subunits_json_path, "w") as f:
         json.dump(data, f, indent=4)
 
@@ -112,6 +112,8 @@ if __name__ == '__main__':
     mapping_file_path = os.path.join(complex_name,"chain_id_mapping.json")
     msa_inputs_path = os.path.join(complex_name,"msa_inputs")
 
+    # Print preprocessing message
+    print(f"⚙️ Preprocessing \"{complex_name}\"...")
     # === Step 1: Convert JSON to full FASTA ===
     print("🔄 Converting JSON to FASTA...")
     if mode:
