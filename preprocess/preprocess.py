@@ -97,7 +97,7 @@ if __name__ == '__main__':
     # === Step 3: Split long sequences based on IUPred3 disorder ===
     print("✂️  Splitting long sequences at disordered regions...")
     subprocess.run([
-        "python3", "split_sequences_on_disorder.py",
+        "python3",os.path.join(script_dir, "split_sequences_on_disorder.py"),
         iupred_outputs_path,
         fasta_path,
         complex_name
