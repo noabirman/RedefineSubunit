@@ -69,8 +69,8 @@ def split_af3_json_by_chain(input_json_path, output_dir="msa_input"):
 
 if __name__ == '__main__':
     # === Input Arguments ===
-    json_file = sys.argv[1]            # Input AF3 JSON (e.g., synapse.json) data_from_Dina/synapse_pre_msa.json
-    complex_name = sys.argv[2]
+    json_file = os.path.abspath(sys.argv[1])           # Input AF3 JSON (e.g., synapse.json) data_from_Dina/synapse_pre_msa.json
+    complex_name = os.path.abspath(sys.argv[2])
 
     # === Paths ===
     split_script = os.path.join(os.getcwd(), "split_script")
