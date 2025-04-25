@@ -73,7 +73,8 @@ if __name__ == '__main__':
     complex_name = os.path.abspath(sys.argv[2])
 
     # === Paths ===
-    split_script = os.path.join(os.getcwd(), "split_fasta_and_run_iupred_on_folder.sh")
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    split_script = os.path.join(script_dir, "split_fasta_and_run_iupred_on_folder.sh")
     os.makedirs(complex_name, exist_ok=True)
     split_fasta_dir = os.path.join(complex_name,"input_fastas") # Where per-chain FASTA files go
     split_mapping_file = os.path.join(complex_name,"iupred_split_mapping.json")
