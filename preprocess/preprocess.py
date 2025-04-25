@@ -36,7 +36,26 @@ def json_to_fasta(json_file:str, complexname:str): #should be path/synapse.json
             seq = entry["protein"]["sequence"]
             fasta.write(f">{pid}\n{seq}\n")
 
+def subunit_to_fasta(json_file: str, complexname: str):
+    """
+    Converts a subunits-style JSON file to a FASTA file.
 
+    Args:
+        json_file (str): Path to the subunits JSON file.
+        complexname (str): Directory to save the FASTA file.
+    """
+    # Load the JSON file
+    with open(json_file) as f:
+        data = json.load(f)
+
+    # Write to a FASTA file
+    with open(f"{complexname}/sequences.fasta", "w") as fasta:
+        for subunit in data.values():
+            sequence_info = {
+                "id": subunit["chain_names"][0].upper(),
+                "sequence": subunit["sequence"]
+            }
+            fasta.write(f">{sequence_info['id']}\n{sequence_info['sequence']}\n")
 
 def split_af3_json_by_chain(input_json_path, output_dir="msa_input"):
     """
@@ -67,10 +86,12 @@ def split_af3_json_by_chain(input_json_path, output_dir="msa_input"):
 
         print(f"✅ Saved {output_path}")
 
+
 if __name__ == '__main__':
     # === Input Arguments ===
-    json_file = sys.argv[1]            # Input AF3 JSON (e.g., synapse.json) data_from_Dina/synapse_pre_msa.json
+    json_file = sys.argv[1]            # Input JSON file (AF3 or subunits)
     complex_name = os.path.abspath(sys.argv[2])
+    mode = sys.argv[3] if len(sys.argv) > 3 else None  # Optional argument
 
     # === Paths ===
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -88,8 +109,10 @@ if __name__ == '__main__':
 
     # === Step 1: Convert JSON to full FASTA ===
     print("🔄 Converting JSON to FASTA...")
-    json_to_fasta(json_file, complex_name)
-
+    if mode:
+        json_to_fasta(json_file, complex_name)
+    else:
+        subunit_to_fasta(json_file, complex_name)
     # === Step 2: Split FASTA and run IUPred3 on each chain ===
     print("🔬 Splitting FASTA and running IUPred3...")
     subprocess.run(["bash", split_script, complex_name], check=True)
