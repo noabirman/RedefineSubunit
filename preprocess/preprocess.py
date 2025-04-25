@@ -69,12 +69,11 @@ def split_af3_json_by_chain(input_json_path, output_dir="msa_input"):
 
 if __name__ == '__main__':
     # === Input Arguments ===
-    json_file = os.path.abspath(sys.argv[1])           # Input AF3 JSON (e.g., synapse.json) data_from_Dina/synapse_pre_msa.json
+    json_file = sys.argv[1]            # Input AF3 JSON (e.g., synapse.json) data_from_Dina/synapse_pre_msa.json
     complex_name = os.path.abspath(sys.argv[2])
 
     # === Paths ===
-    split_script = os.path.join(os.getcwd(), "split_script")
-
+    split_script = os.path.join(os.getcwd(), "split_fasta_and_run_iupred_on_folder.sh")
     os.makedirs(complex_name, exist_ok=True)
     split_fasta_dir = os.path.join(complex_name,"input_fastas") # Where per-chain FASTA files go
     split_mapping_file = os.path.join(complex_name,"iupred_split_mapping.json")
