@@ -73,7 +73,7 @@ if __name__ == '__main__':
     complex_name = sys.argv[2]
 
     # === Paths ===
-    split_script = "split_fasta_and_run_iupred_on_folder.sh"
+    split_script = os.path.join(os.getcwd(), "split_script")
 
     os.makedirs(complex_name, exist_ok=True)
     split_fasta_dir = os.path.join(complex_name,"input_fastas") # Where per-chain FASTA files go
