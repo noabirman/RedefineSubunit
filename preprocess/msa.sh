@@ -8,7 +8,7 @@
 #SBATCH --mail-type=END
 #SBATCH --mail-user=tsori.kislev@gmail.com
 
-#SBATCH --exclude=sm-01,sm-16
+#SBATCH --exclude=sm-01,sm-16,sm-02
 
 #SBATCH --output=/cs/labs/dina/tsori/af3_example/slurms_outs/msa/%j.out
 
@@ -83,4 +83,4 @@ python /cs/usr/bshor/sci/installations/af3_variations/deepmind/localalphafold3/a
   --norun_inference \
   --output_dir "$OUTPUT_DIR" \
   --input_dir "$INPUT_DIR"
-python msa_to_pairwise.py "$OUTPUT_DIR" "$MAPPING_JSON" "$SUBUNITS_INFO_JSON"
+python preprocess/msa_to_pairwise.py "$OUTPUT_DIR" "$MAPPING_JSON" "$SUBUNITS_INFO_JSON"
