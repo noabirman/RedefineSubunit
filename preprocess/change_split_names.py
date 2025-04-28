@@ -1,5 +1,6 @@
 import os
 import json
+import sys
 
 def update_json_names(complexes_folder):
     """
@@ -10,11 +11,8 @@ def update_json_names(complexes_folder):
         complexes_folder (str): Path to the 'complexes' folder.
     """
     for root, _, files in os.walk(complexes_folder):
-        print(root)
         if "msa_output" in root:  # Process only msa_output subfolders
-            print(f"Processing folder: {root}")
             for file in files:
-                print(file)
                 if file.endswith(".json"):
                     file_path = os.path.join(root, file)
 
@@ -36,8 +34,11 @@ def update_json_names(complexes_folder):
                         # Rename the file to match the first 'id'
                         new_file_path = os.path.join(root, f"{first_id}.json")
                         os.rename(file_path, new_file_path)
-                        print(f"Updated and renamed: {file_path} -> {new_file_path}")
 
 if __name__ == "__main__":
-    complexes_folder = "complexes"  # Replace with the path to your 'complexes' folder
+    if len(sys.argv) < 2:
+        print("Usage: script.py <COMPLEXES_FOLDER>")
+        sys.exit(1)
+
+    complexes_folder = sys.argv[1]
     update_json_names(complexes_folder)
