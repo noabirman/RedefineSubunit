@@ -78,7 +78,7 @@ def split_af3_json_by_chain(input_json_path, output_dir="msa_input"):
     for protein_entry in af3_data["sequences"]:
         chain_id = protein_entry["protein"]["id"]
         chain_data = {
-            "name": f"{af3_data.get('name', 'AF3')}_{chain_id}",
+            "name": f"{chain_id}",
             "modelSeeds": af3_data.get("modelSeeds", [1]),
             "sequences": [protein_entry],
             "dialect": af3_data.get("dialect", "alphafold3"),
