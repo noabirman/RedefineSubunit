@@ -43,10 +43,10 @@ def create_pairwise_msa(msa_folder: str, mapping_file: str, subunits_info_file: 
         seq_b = deepcopy(seq2)
 
         # Format pair data
-        seq_a['protein']['id'] = "A"
-        seq_b['protein']['id'] = "B"
-        seq_a['protein']['pairedMsa'] = ''
-        seq_b['protein']['pairedMsa'] = ''
+        seq_a['sequences'][0]['protein']['id'] = "A"
+        seq_b['sequences'][0]['protein']['id'] = "B"
+        seq_a['sequences'][0]['protein']['pairedMsa'] = ''
+        seq_b['sequences'][0]['protein']['pairedMsa'] = ''
 
         pair_name = f"{sub1}_{sub2}"
         output_path = os.path.join(output_dir, f"{pair_name}.json")
@@ -68,7 +68,7 @@ if __name__ == '__main__':
         print("Usage: script.py <MSA_FOLDER> [MAPPING_JSON] [SUBUNITS_INFO_JSON]")
         sys.exit(1)
 
-    msa_folder = sys.argv[1]
+    msa_folder = os.path.abspath(sys.argv[1])
     parent_dir = os.path.dirname(msa_folder)
 
     mapping_file = sys.argv[2] if len(sys.argv) > 2 else os.path.join(parent_dir, "chain_id_mapping.json")
