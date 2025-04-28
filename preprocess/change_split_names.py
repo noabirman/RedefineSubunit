@@ -15,8 +15,12 @@ def update_json_names(complexes_folder):
             for file in files:
                 if file.endswith(".json"):
                     file_path = os.path.join(root, file)
-
+                    # Check if the file exists
+                    if not os.path.exists(file_path):
+                        print(f"Warning: File {file_path} does not exist. Skipping.")
+                        continue
                     # Read the JSON file
+                    print(f"Processing file: {file_path}")
                     with open(file_path, "r") as f:
                         data = json.load(f)
 
