@@ -68,6 +68,12 @@ OUTPUT_DIR="$PARENT_DIR/msa_output"
 # Ensure the output directory exists
 mkdir -p "$OUTPUT_DIR"
 
+# Print the paths for debugging
+echo Running MSA on directory: "$INPUT_DIR"
+echo Mapping JSON file: "$MAPPING_JSON"
+echo Subunits info JSON file: "$SUBUNITS_INFO_JSON"
+echo Output directory: "$OUTPUT_DIR"
+
 python /cs/usr/bshor/sci/installations/af3_variations/deepmind/localalphafold3/alphafold3/run_alphafold.py \
   --jackhmmer_binary_path /cs/usr/bshor/sci/installations/af3_variations/deepmind/localalphafold3/hmmer/bin/jackhmmer \
   --db_dir /cs/usr/bshor/sci/installations/af3_variations/deepmind/localalphafold3/databases \
