@@ -17,10 +17,9 @@ def create_pairwise_msa(msa_folder: str, mapping_file: str, subunits_info_file: 
         subunits_info = json.load(f)
 
     # Get list of MSA files
-    msa_files = [f for f in os.listdir(msa_folder) if f.endswith('.json')]
-    subunits = [f.split('.')[0] for f in msa_files]
-
-    # Create output directory
+    msa_files = [os.path.join(root, f) for root, _, files in os.walk(msa_folder) for f in files if f.endswith('.json')]
+    subunits = [seq["protein"]["id"] for f in msa_files for seq in json.load(open(f))["sequences"]]
+    # Create an output directory
     os.makedirs(output_dir, exist_ok=True)
 
     # Generate combinations without self-pairs
@@ -65,13 +64,15 @@ def create_pairwise_msa(msa_folder: str, mapping_file: str, subunits_info_file: 
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 4:
-        print("Usage: script.py <MSA_FOLDER> <MAPPING_JSON> <SUBUNITS_INFO_JSON>")
+    if len(sys.argv) < 2 or len(sys.argv) > 4:
+        print("Usage: script.py <MSA_FOLDER> [MAPPING_JSON] [SUBUNITS_INFO_JSON]")
         sys.exit(1)
 
     msa_folder = sys.argv[1]
-    mapping_file = sys.argv[2]
-    subunits_info_file = sys.argv[3]
+    parent_dir = os.path.dirname(msa_folder)
+
+    mapping_file = sys.argv[2] if len(sys.argv) > 2 else os.path.join(parent_dir, "chain_id_mapping.json")
+    subunits_info_file = sys.argv[3] if len(sys.argv) > 3 else os.path.join(parent_dir, "subunits_info.json")
     output_dir = os.path.join(os.path.dirname(msa_folder), 'msa_pairs')
 
     create_pairwise_msa(msa_folder, mapping_file, subunits_info_file, output_dir)
