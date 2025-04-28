@@ -1,0 +1,18 @@
+{
+  "a_0": {
+    "name": "a_0",
+    "chain_names": [
+      "A"
+    ],
+    "start_res": 1,
+    "sequence": "abcdefghijk"
+  },
+  "b_0": {
+    "name": "b_0",
+    "chain_names": [
+      "B"
+    ],
+    "start_res": 1,
+    "sequence": "mnopqrstuvw"
+  }
+}

@@ -1,0 +1,47 @@
+{
+    "A_1_high": {
+        "name": "A_1_high",
+        "sequence": "FGHIJK",
+        "chain_names": [
+            "A",
+            "B"
+        ],
+        "start_res": 6
+    },
+    "A_2_high": {
+        "name": "A_2_high",
+        "sequence": "PQRS",
+        "chain_names": [
+            "A",
+            "B"
+        ],
+        "start_res": 16
+    },
+    "A_low_1": {
+        "name": "A_low_1",
+        "sequence": "ABCDE",
+        "chain_names": [
+            "A",
+            "B"
+        ],
+        "start_res": 1
+    },
+    "A_low_2": {
+        "name": "A_low_2",
+        "sequence": "LMNO",
+        "chain_names": [
+            "A",
+            "B"
+        ],
+        "start_res": 12
+    },
+    "A_low_3": {
+        "name": "A_low_3",
+        "sequence": "TUVWXYZABCD",
+        "chain_names": [
+            "A",
+            "B"
+        ],
+        "start_res": 20
+    }
+}
