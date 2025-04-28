@@ -11,6 +11,7 @@ def update_json_names(complexes_folder):
     """
     for root, _, files in os.walk(complexes_folder):
         if "msa_output" in root:  # Process only msa_output subfolders
+            print(f"Processing folder: {root}")
             for file in files:
                 print(file)
                 if file.endswith(".json"):
