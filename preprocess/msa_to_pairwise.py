@@ -26,7 +26,7 @@ def create_pairwise_msa(msa_folder: str, mapping_file: str, subunits_info_file: 
     pairs = list(itertools.combinations(subunits, 2))
 
     # Add self-pairs for multi-chain originals
-    for subunit in subunits():
+    for subunit in subunits:
         original_name = mapping.get(subunit)
         if original_name and len(subunits_info.get(original_name, {}).get('chain_names', [])) > 1:
             pairs.append((subunit, subunit))
