@@ -18,7 +18,7 @@ def create_pairwise_msa(msa_folder: str, mapping_file: str, subunits_info_file: 
 
     # Get list of MSA files
     msa_files = [os.path.join(root, f) for root, _, files in os.walk(msa_folder) for f in files if f.endswith('.json')]
-    subunits = [seq["protein"]["id"] for f in msa_files for seq in json.load(open(f))["sequences"]]
+    subunits = {json.load(open(f))["sequences"][0]["protein"]["id"] : f for f in msa_files}
     # Create an output directory
     os.makedirs(output_dir, exist_ok=True)
 
@@ -34,8 +34,7 @@ def create_pairwise_msa(msa_folder: str, mapping_file: str, subunits_info_file: 
     # Create pair files
     for pair in pairs:
         sub1, sub2 = pair
-        with open(os.path.join(msa_folder, f"{sub1}.json")) as f1, \
-                open(os.path.join(msa_folder, f"{sub2}.json")) as f2:
+        with open(subunits[sub1], 'r') as f1, open(subunits[sub2], 'r') as f2:
             seq1 = json.load(f1)
             seq2 = json.load(f2)
 
