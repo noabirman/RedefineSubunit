@@ -10,6 +10,7 @@ def update_json_names(complexes_folder):
         complexes_folder (str): Path to the 'complexes' folder.
     """
     for root, _, files in os.walk(complexes_folder):
+        print(root)
         if "msa_output" in root:  # Process only msa_output subfolders
             print(f"Processing folder: {root}")
             for file in files:
