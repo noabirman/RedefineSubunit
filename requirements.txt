@@ -1,5 +1,5 @@
 networkx~=3.4.2
-matplotlib~=3.10.1
+matplotlib~=3.10.0
 numpy~=1.26.4
-biopython~=1.85
-scikit-learn~=1.5.2
+biopython~=1.84
+scikit-learn~=1.5.1
