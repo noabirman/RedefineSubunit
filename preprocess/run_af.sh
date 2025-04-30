@@ -1,6 +1,13 @@
 #!/bin/bash
 
-#SBATCH --job-name="${1}-af3"
+if [ -z "$1" ]; then
+  echo "Usage: $0 <INPUT_DIR>"
+  exit 1
+fi
+
+INPUT_DIR="$1"
+
+#SBATCH --job-name="${INPUT_DIR}-af3"
 #SBATCH --mem=40G
 #SBATCH --time=72:00:00
 #SBATCH --gres gg:g0:1,vmem:20g
@@ -24,12 +31,6 @@ export PATH="/sci/labs/dina/bshor/projects/af_combdock/tools/conda_install/minic
 . "/sci/labs/dina/bshor/projects/af_combdock/tools/conda_install/miniconda3/etc/profile.d/conda.sh"
 conda activate /cs/usr/bshor/sci/installations/af3_variations/deepmind/localalphafold3/alphafold3-conda
 
-if [ -z "$1" ]; then
-  echo "Usage: $0 <INPUT_DIR>"
-  exit 1
-fi
-
-INPUT_DIR="$1"
 
 # Validate input directory
 if [ ! -d "$INPUT_DIR" ]; then
