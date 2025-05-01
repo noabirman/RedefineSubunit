@@ -11,6 +11,7 @@
 
 #SBATCH --output=/cs/labs/dina/tsori/af3_example/slurms_outs/AF/%j.out
 
+export XLA_FLAGS="--xla_disable_hlo_passes=custom-kernel-fusion-rewriter"
 
 
 # Documentation:
@@ -21,11 +22,6 @@
 #   <INPUT_DIR>: Path to the input directory containing the required files.
 # Output:
 #   The results will be saved in a directory named 'af_pairs' in the same parent directory as the input directory.
-
-
-export XLA_FLAGS="--xla_disable_hlo_passes=custom-kernel-fusion-rewriter"
-
-export FLASH_ATTENTION_IMPLEMENTATION="xla"
 
 export PATH="/sci/labs/dina/bshor/projects/af_combdock/tools/conda_install/miniconda3/bin:$PATH"
 . "/sci/labs/dina/bshor/projects/af_combdock/tools/conda_install/miniconda3/etc/profile.d/conda.sh"
