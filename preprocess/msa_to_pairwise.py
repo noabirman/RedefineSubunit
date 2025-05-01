@@ -39,16 +39,21 @@ def create_pairwise_msa(msa_folder: str, mapping_file: str, subunits_info_file: 
             seq1 = json.load(f1)
             seq2 = json.load(f2)
 
-        seq_a = deepcopy(seq1['sequences'][0])
-        seq_b = deepcopy(seq2['sequences'][0])
-
-        # Format pair data
-        seq_a['protein']['id'] = "A"
-        seq_b['protein']['id'] = "B"
-        seq_a['protein']['pairedMsa'] = ""
-        seq_b['protein']['pairedMsa'] = ""
-        seq_a['protein']['unpairedMsa'] = seq1['sequences'][0]['protein'].get('unpairedMsa', "")
-        seq_b['protein']['unpairedMsa'] = seq2['sequences'][0]['protein'].get('unpairedMsa', "")
+            # Initialize new dictionaries for seq_a and seq_b
+            seq_a = {
+                "protein": {
+                    "id": "A",
+                    "sequence": seq1['sequences'][0]['protein']['sequence'],
+                    "unpairedMsa": seq1['sequences'][0]['protein'].get('unpairedMsa', "")
+                }
+            }
+            seq_b = {
+                "protein": {
+                    "id": "B",
+                    "sequence": seq2['sequences'][0]['protein']['sequence'],
+                    "unpairedMsa": seq2['sequences'][0]['protein'].get('unpairedMsa', "")
+                }
+            }
 
         pair_name = f"{sub1}_{sub2}"
         output_path = os.path.join(output_dir, f"{pair_name}.json")
