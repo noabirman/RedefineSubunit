@@ -39,8 +39,8 @@ def create_pairwise_msa(msa_folder: str, mapping_file: str, subunits_info_file: 
             seq1 = json.load(f1)
             seq2 = json.load(f2)
 
-        seq_a = deepcopy(seq1)
-        seq_b = deepcopy(seq2)
+        seq_a = deepcopy(seq1['sequences'][0])
+        seq_b = deepcopy(seq2['sequences'][0])
 
         # Format pair data
         seq_a['sequences'][0]['protein']['id'] = "A"
