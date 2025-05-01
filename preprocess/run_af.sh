@@ -58,6 +58,5 @@ python /cs/usr/bshor/sci/installations/af3_variations/deepmind/localalphafold3/a
   --hmmsearch_binary_path /cs/usr/bshor/sci/installations/af3_variations/deepmind/localalphafold3/hmmer/bin/hmmsearch \
   --norun_data_pipeline \
   --output_dir "$OUTPUT_DIR" \
-  --input_dir "$INPUT_DIR"\
-  --flash_attention_implementation xla
+  --input_dir "$INPUT_DIR"
 
