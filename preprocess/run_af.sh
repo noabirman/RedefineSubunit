@@ -9,7 +9,7 @@
 #SBATCH --mail-type=END
 #SBATCH --mail-user=tsori.kislev@gmail.com
 
-#SBATCH --output=/cs/labs/dina/tsori/af3_example/slurms_outs/msa/%j.out
+#SBATCH --output=/cs/labs/dina/tsori/af3_example/slurms_outs/AF/%j.out
 
 # Documentation:
 # This script runs the AlphaFold3 pipeline on a specified input directory.
