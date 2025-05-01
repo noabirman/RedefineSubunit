@@ -45,6 +45,8 @@ def create_pairwise_msa(msa_folder: str, mapping_file: str, subunits_info_file: 
                     "id": "A",
                     "sequence": seq1['sequences'][0]['protein']['sequence'],
                     "unpairedMsa": seq1['sequences'][0]['protein'].get('unpairedMsa', "")
+                    "pairedMsa": "",
+                    "templates": []
                 }
             }
             seq_b = {
@@ -52,6 +54,8 @@ def create_pairwise_msa(msa_folder: str, mapping_file: str, subunits_info_file: 
                     "id": "B",
                     "sequence": seq2['sequences'][0]['protein']['sequence'],
                     "unpairedMsa": seq2['sequences'][0]['protein'].get('unpairedMsa', "")
+                    "pairedMsa": "",
+                    "templates": []
                 }
             }
 
