@@ -1,0 +1,17 @@
+{
+  "name": "Job name goes here",
+  "modelSeeds": [1, 2],
+  "sequences": [
+{
+  "protein":
+  {
+    "id": "B",
+    "sequence": "PVLSCGEWQL",
+    "unpairedMsa": "bbb",
+    "pairedMsa": "BBB"
+  }
+}
+  ],
+  "dialect": "alphafold3",
+  "version": 3
+}
