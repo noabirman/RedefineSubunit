@@ -69,7 +69,7 @@ def merge_connected_components(overlap_graph, graphs: List[nx.Graph]):
     for index, component in enumerate( connected_components):
         subunits = [node_dict[member] for member in component]
         # Merge properties
-        merged_name = f"{list(component)[0].split('_')}_high_{index}"  # Use the first node's name as the merged name
+        merged_name = f"{list(component)[0]}_high"  # Use the first node's name as the merged name
         merged_chains = sorted(set(chain for subunit in subunits for chain in subunit.chain_names))  # change
         merged_start = min(subunit.start for subunit in subunits)
         merged_end = max(subunit.end for subunit in subunits)
