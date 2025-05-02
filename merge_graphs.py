@@ -229,7 +229,7 @@ def save_subunits_info(graph: nx.Graph, subunit_name_mapping_path: str, subunits
     sorted_unified_subunits = dict(
         sorted(
             unified_subunits.items(),
-            key=lambda item: (item[1]['name'], item[1]['start_res'])
+            key=lambda item: (item[1]['name'].split('_')[0], item[1]['start_res'])
         )
     )
 
