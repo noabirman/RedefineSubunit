@@ -126,8 +126,14 @@ def save_subunits_info(graph: nx.Graph, subunit_name_mapping_path: str, subunits
         # Get original subunit name from mapping
         original_name = name_mapping[base_name]
 
-        # Get original subunit info
-        subunit_info = subunits_info[original_name]
+        # Find the subunit_info where one of the chain_names matches the original_name
+        subunit_info = next(
+            (info for info in subunits_info.values() if original_name in info['chain_names']),
+            None
+        )
+
+        if subunit_info is None:
+            raise ValueError(f"No subunit found with chain name: {original_name}")
 
         # Get node data (SubunitInfo object)
         node_data = graph.nodes[node]['data']
