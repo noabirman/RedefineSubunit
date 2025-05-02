@@ -3,7 +3,7 @@
 #SBATCH --job-name="af3"
 #SBATCH --mem=40G
 #SBATCH --time=72:00:00
-#SBATCH --gres gg:g0:1,vmem:30g
+#SBATCH --gres gg:g4:1
 #SBATCH --exclude=creek-01,creek-02,firth-02,firth-01
 
 #SBATCH --mail-type=END
