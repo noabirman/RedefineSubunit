@@ -139,7 +139,7 @@ def extract_subunit_info(indexs: List[Tuple[int, int]], token_chain_ids: List[st
                 continue
 
             chain_start, chain_end = chain_positions[0], chain_positions[-1]
-            subunit_name = f"{chain_id}{chain_occ_counter[chain_id] + 1}"  # Unique numbering per chain
+            subunit_name = f"{chain_id}_{chain_occ_counter[chain_id] + 1}"  # Unique numbering per chain
 
             # Increment the occurrence counter for this chain
             chain_occ_counter[chain_id] += 1
