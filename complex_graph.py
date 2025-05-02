@@ -211,7 +211,7 @@ def find_edges(subunits_info: List[SubunitInfo], pae_matrix: np.array, threshold
         pae_rect = pae_matrix[subunit1.start:subunit1.end, subunit2.start:subunit2.end]
         pae_score = np.mean(pae_rect)
         if pae_score < threshold:
-            edges.append((subunit1.name, subunit2.name, float(pae_score)))
+            edges.append((subunit1.name.upper(), subunit2.name.upper(), float(pae_score))) #todo: check .upper
     return edges
 
 
@@ -301,7 +301,7 @@ def graph(structure_path: str, data_path:str, af_version: str)->nx.Graph: # het
         for subunit in subunits_info
     ]
     for subunit in updated_subunits:
-            G.add_node(subunit.name, data=subunit)
+            G.add_node(subunit.name.upper(), data=subunit) #todo: check .upper
     for e in edges: # e is (v1, v2, weight)
         G.add_edge(e[0], e[1], weight=e[2])
     return G
