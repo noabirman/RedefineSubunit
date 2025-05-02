@@ -66,10 +66,10 @@ def merge_connected_components(overlap_graph, graphs: List[nx.Graph]):
     merged_graph = nx.Graph()
     node_mapping = {}
     node_dict = {name: data['data'] for name, data in overlap_graph.nodes(data=True)}
-    for component in connected_components:
+    for index, component in enumerate( connected_components):
         subunits = [node_dict[member] for member in component]
         # Merge properties
-        merged_name = f"{list(component)[0]}_high"  # Use the first node's name as the merged name
+        merged_name = f"{list(component)[0].split('_')[0]}_high_{index + 1}"  # Use the first node's name as the merged name
         merged_chains = sorted(set(chain for subunit in subunits for chain in subunit.chain_names))  # change
         merged_start = min(subunit.start for subunit in subunits)
         merged_end = max(subunit.end for subunit in subunits)
@@ -124,13 +124,17 @@ def save_subunits_info(graph: nx.Graph, subunit_name_mapping_path: str, subunits
         # Extract base name from node name (e.g., "A" from "A1_high")
         base_name = node.split('_')[0]
         # Get original subunit name from mapping
-        original_name = name_mapping[base_name]
-
-        # Find the subunit_info where one of the chain_names matches the original_name
-        subunit_info = next(
-            (info for info in subunits_info.values() if original_name in info['chain_names']),
+        original_chain_name  = name_mapping[base_name]
+        # Find the original_name where subunits_info[key]['chain_names'] contains original_chain_name
+        original_name = next(
+            (key for key, info in subunits_info.items() if original_chain_name in info['chain_names']),
             None
         )
+
+        if original_name is None:
+            raise ValueError(f"No subunit found with chain name: {original_chain_name}")
+        # Find the subunit_info where one of the chain_names matches the original_name
+        subunit_info = subunits_info.get(original_name)
 
         if subunit_info is None:
             raise ValueError(f"No subunit found with chain name: {original_name}")
@@ -142,7 +146,7 @@ def save_subunits_info(graph: nx.Graph, subunit_name_mapping_path: str, subunits
         sequence = node_data.sequence
 
         # Verify sequence matches the original
-        expected_sequence = subunit_info['sequence'][start:end + 1]
+        expected_sequence = subunit_info['sequence'][start-1:end]
         if sequence != expected_sequence:
             raise ValueError(f"Sequence mismatch in node '{node}'. Expected: {expected_sequence}, Found: {sequence}")
 
