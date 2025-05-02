@@ -226,12 +226,19 @@ def save_subunits_info(graph: nx.Graph, subunit_name_mapping_path: str, subunits
                 'start_res': low_start + 1  # Convert to 1-based indexing
             }
 
+    sorted_unified_subunits = dict(
+        sorted(
+            unified_subunits.items(),
+            key=lambda item: (item[1]['name'], item[1]['start_res'])
+        )
+    )
+
     output_folder = os.path.join(os.path.dirname(folder), 'combfold')
     os.makedirs(output_folder, exist_ok=True)
     output_json_path = os.path.join(output_folder, 'subunits_info.json')
 
     with open(output_json_path, 'w') as f:
-        json.dump(unified_subunits, f, indent=4)
+        json.dump(sorted_unified_subunits, f, indent=4)
 # main
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
