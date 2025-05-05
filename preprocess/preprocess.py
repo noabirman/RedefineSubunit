@@ -57,7 +57,7 @@ def subunit_to_fasta(json_file: str, complexname: str):
     with open(f"{complexname}/sequences.fasta", "w") as fasta:
         for subunit in data.values():
             sequence_info = {
-                "id": subunit["chain_names"][0].upper(),
+                "id": subunit["chain_names"][0],
                 "sequence": subunit["sequence"]
             }
             fasta.write(f">{sequence_info['id']}\n{sequence_info['sequence']}\n")

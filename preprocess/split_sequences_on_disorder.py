@@ -19,7 +19,7 @@ import os
 import json
 import sys
 
-from numba.np.arraymath import complex_nanmax
+#from numba.np.arraymath import complex_nanmax
 
 max_len = 1000
 disorder_threshold = 0.5

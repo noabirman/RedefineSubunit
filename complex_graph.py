@@ -211,7 +211,8 @@ def find_edges(subunits_info: List[SubunitInfo], pae_matrix: np.array, threshold
         pae_rect = pae_matrix[subunit1.start:subunit1.end, subunit2.start:subunit2.end]
         pae_score = np.mean(pae_rect)
         if pae_score < threshold:
-            edges.append((subunit1.name.upper(), subunit2.name.upper(), float(pae_score))) #todo: check .upper
+            edges.append((subunit1.name, subunit2.name, float(pae_score)))
+
     return edges
 
 
@@ -258,7 +259,7 @@ def rename_chains_from_file(data_path: str, token_chain_ids: list[str]) -> list[
         raise ValueError(f"Unexpected filename format: {filename}. Expected at least 2 parts.")
 
     # Generate a mapping dynamically (A → first part, B → second, etc.)
-    replacement_dict = {chr(65 + i): part for i, part in enumerate(parts)}
+    replacement_dict = {chr(65 + i): part.upper() for i, part in enumerate(parts)}
 
     # Update token_chain_ids based on mapping
     return [replacement_dict.get(chain, chain) for chain in token_chain_ids]
@@ -301,7 +302,7 @@ def graph(structure_path: str, data_path:str, af_version: str)->nx.Graph: # het
         for subunit in subunits_info
     ]
     for subunit in updated_subunits:
-            G.add_node(subunit.name.upper(), data=subunit) #todo: check .upper
+            G.add_node(subunit.name, data=subunit)
     for e in edges: # e is (v1, v2, weight)
         G.add_edge(e[0], e[1], weight=e[2])
     return G

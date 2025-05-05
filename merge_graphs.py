@@ -138,7 +138,11 @@ def save_subunits_info(graph: nx.Graph, subunit_name_mapping_path: str, subunits
 
         if subunit_info is None:
             raise ValueError(f"No subunit found with chain name: {original_name}")
-
+        # added for debug
+        print("→ original_name chosen:", original_name)
+        print("→ JSON chain_names:", subunit_info['chain_names'])
+        print("→ JSON sequence length:", len(subunit_info['sequence']))
+        print("→ JSON sequence start:", subunit_info['sequence'][:20], "…")
         # Get node data (SubunitInfo object)
         node_data = graph.nodes[node]['data']
         start = node_data.start
@@ -146,9 +150,27 @@ def save_subunits_info(graph: nx.Graph, subunit_name_mapping_path: str, subunits
         sequence = node_data.sequence
 
         # Verify sequence matches the original
-        expected_sequence = subunit_info['sequence'][start-1:end]
+        #expected_sequence = subunit_info['sequence'][start-1:end]
+        # Extract what we think is the “correct” slice
+        full_seq = subunit_info['sequence']
+        # If your SubunitInfo.start/end are *inclusive* 1-based, this is right:
+        expected_sequence = full_seq[start - 1:end]
+        # But if end were already exclusive, you’d want full_seq[start-1:end-1]…
+
         if sequence != expected_sequence:
-            raise ValueError(f"Sequence mismatch in node '{node}'. Expected: {expected_sequence}, Found: {sequence}")
+            print("==== DEBUG SEQUENCE MISMATCH ====")
+            print(f"Node:           {node}")
+            print(f"Start, end:     {start}, {end}")
+            print(f"SubunitInfo.seq:   {sequence!r}  (len={len(sequence)})")
+            print(f"Expected slice:    {expected_sequence!r}  (len={len(expected_sequence)})")
+            print(f"Full sequence len: {len(full_seq)}")
+            print(f"First 10 res:      {full_seq[:10]!r}")
+            print(f"Chain names:       {subunit_info['chain_names']!r}")
+            print(f"Name mapping JSON: {name_mapping}")
+            print(f"Subunits_info keys:{list(subunits_info.keys())[:10]} …")
+            raise ValueError("Stopping here for debug")
+        # if sequence != expected_sequence:
+        #     raise ValueError(f"Sequence mismatch in node '{node}'. Expected: {expected_sequence}, Found: {sequence}")
 
         # Store high segment information
         high_segments_by_subunit[original_name].append({
