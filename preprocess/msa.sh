@@ -11,6 +11,7 @@
 #SBATCH --exclude=sm-01,sm-16,sm-02
 
 #SBATCH --output=/cs/labs/dina/tsori/af3_example/slurms_outs/msa/%j.out
+export XLA_FLAGS="--xla_disable_hlo_passes=custom-kernel-fusion-rewriter"
 
 # Documentation:
 # This script runs the MSA (Multiple Sequence Alignment) process for a given input directory.
