@@ -7,9 +7,9 @@ import networkx as nx
 from complex_graph import graph, SubunitInfo, extract_sequence_with_seqio
 from typing import List
 
-def overlap(v1: SubunitInfo, v2: SubunitInfo) -> bool:
+def overlap(v1: SubunitInfo, v2: SubunitInfo, threshold = 5) -> bool:
     """Check if two SubunitInfo nodes overlap in at least one chain."""
-    return any(chain in v2.chain_names for chain in v1.chain_names) and not (v1.end < v2.start or v2.end < v1.start)
+    return any(chain in v2.chain_names for chain in v1.chain_names) and not (v1.end + threshold < v2.start or v2.end + threshold < v1.start)
 
 def merge_graphs(graphs: List[nx.Graph], folder: str) -> nx.Graph:
     """Merge nodes with overlapping indices in the same chain across multiple graphs."""
