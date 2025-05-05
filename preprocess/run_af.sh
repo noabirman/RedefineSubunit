@@ -11,6 +11,8 @@
 
 #SBATCH --output=/cs/labs/dina/tsori/af3_example/slurms_outs/AF/%j.out
 
+export XLA_FLAGS="--xla_disable_hlo_passes=custom-kernel-fusion-rewriter"
+
 
 # Documentation:
 # This script runs the AlphaFold3 pipeline on a specified input directory.
