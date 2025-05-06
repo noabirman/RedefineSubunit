@@ -108,7 +108,8 @@ def load_chain_names(mapping_path):
     try:
         with open(mapping_path, 'r') as f:
             mapping = json.load(f)
-            return [key.lower() for key in mapping.keys()]    except FileNotFoundError:
+            return [key.lower() for key in mapping.keys()]
+            except FileNotFoundError:
         print(f"❌ Error: Mapping file not found at {mapping_path}")
         return []
     except json.JSONDecodeError:
