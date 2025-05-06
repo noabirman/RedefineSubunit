@@ -101,7 +101,7 @@ def check_missing_pairs(input_dir, chain_names):
 
     # Save to JSON file
     with open(output_file, 'w') as f:
-        json.dump(missing_pairs, f, indent=4)
+        json.dump(missing_pairs, f)
 
     if missing_pairs:
         print(f"\n❌ {len(missing_pairs)} missing pairs saved to {output_file}")
