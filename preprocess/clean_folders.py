@@ -83,6 +83,9 @@ def process_pairs(input_dir, output_dir):
 
 
 def check_missing_pairs(input_dir, chain_names):
+    input_dir = Path(input_dir)
+    folder_name = input_dir.parent.name
+
     # Get existing folder names
     folder_names = {entry.name for entry in input_dir.iterdir() if entry.is_dir()}
 
@@ -96,20 +99,50 @@ def check_missing_pairs(input_dir, chain_names):
             if pair1 not in folder_names and pair2 not in folder_names:
                 missing_pairs.append([chain1, chain2])
 
-    # Create output path in parent directory
-    output_file = Path(input_dir).parent / 'missing_pairs.json'
+    # Save current folder's missing pairs
+    current_output = {
+        "folder_name": folder_name,
+        "missing_count": len(missing_pairs),
+        "missing_pairs": missing_pairs
+    }
 
-    # Save to JSON file
-    with open(output_file, 'w') as f:
-        json.dump(missing_pairs, f)
+    # Path for the global missing pairs file (two levels up)
+    global_output_file = input_dir.parent.parent / 'missing_pairs.json'
+
+    # Load or create the global missing pairs data
+    if global_output_file.exists():
+        with open(global_output_file, 'r') as f:
+            all_missing = json.load(f)
+    else:
+        all_missing = []
+
+    # Update or add the current folder's data
+    found = False
+    for i, entry in enumerate(all_missing):
+        if entry["folder_name"] == folder_name:
+            all_missing[i] = current_output
+            found = True
+            break
+    if not found:
+        all_missing.append(current_output)
+
+    # Save the updated global file
+    with open(global_output_file, 'w') as f:
+        json.dump(all_missing, f, indent=4)
+
+    # Also save individual file in parent directory
+    individual_output_file = input_dir.parent / 'missing_pairs.json'
+    with open(individual_output_file, 'w') as f:
+        json.dump(missing_pairs, f, indent=4)
 
     if missing_pairs:
-        print(f"\n❌ {len(missing_pairs)} missing pairs saved to {output_file}")
+        print(f"\n❌ {len(missing_pairs)} missing pairs saved to:")
+        print(f"   - Individual: {individual_output_file}")
+        print(f"   - Global: {global_output_file}")
     else:
         print("\n✅ All possible pairs exist")
 
     return missing_pairs
-
 def load_chain_names(mapping_path):
     try:
         with open(mapping_path, 'r') as f:
