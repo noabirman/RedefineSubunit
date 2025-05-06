@@ -265,8 +265,8 @@ def save_subunits_info(graph: nx.Graph, subunit_name_mapping_path: str, subunits
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
         folder_path = os.path.abspath(sys.argv[1])
-        original_subunits_path = os.path.abspath(sys.argv[2]) if len(sys.argv) > 2 else os.path.join(os.path.dirname(folder_path), 'subunits_info.json')
-        mapping_path = os.path.abspath(sys.argv[3]) if len(sys.argv) > 3 else os.path.join(os.path.dirname(folder_path), 'chain_id_mapping.json')
+        mapping_path = os.path.abspath(sys.argv[2]) if len(sys.argv) > 2 else os.path.join(os.path.dirname(folder_path), 'chain_id_mapping.json')
+        original_subunits_path = os.path.abspath(sys.argv[3]) if len(sys.argv) > 3 else os.path.join(os.path.dirname(folder_path), 'subunits_info.json')
 
         graphs = create_graphs_from_folder(folder_path)
         merged_graph = merge_graphs(graphs, folder_path)

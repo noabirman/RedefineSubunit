@@ -40,14 +40,23 @@ if [ ! -d "$INPUT_DIR" ]; then
 fi
 
 # Determine output directory
-PARENT_DIR=$(dirname "$INPUT_DIR")
-OUTPUT_DIR="$PARENT_DIR/af_pairs"
+OUTPUT_DIR="$PARENT_DIR/msa_output"
+
+# Ensure the output directory has a unique name
+if [ -d "$OUTPUT_DIR" ]; then
+  i=2
+  while [ -d "${OUTPUT_DIR}_${i}" ]; do
+    ((i++))
+  done
+  OUTPUT_DIR="${OUTPUT_DIR}_${i}"
+fi
+
+# Ensure the output directory exists
+mkdir -p "$OUTPUT_DIR"
 
 echo "Run AF3 on directory: $INPUT_DIR"
 echo "Output directory: $OUTPUT_DIR"
 
-# Ensure the output directory exists
-mkdir -p "$OUTPUT_DIR"
 
 python /cs/usr/bshor/sci/installations/af3_variations/deepmind/localalphafold3/alphafold3/run_alphafold.py \
   --jackhmmer_binary_path /cs/usr/bshor/sci/installations/af3_variations/deepmind/localalphafold3/hmmer/bin/jackhmmer \
@@ -59,4 +68,7 @@ python /cs/usr/bshor/sci/installations/af3_variations/deepmind/localalphafold3/a
   --output_dir "$OUTPUT_DIR" \
   --input_dir "$INPUT_DIR"\
   --flash_attention_implementation xla
+
+# cd /cs/labs/dina/tsori/af3_example/RedefineSubunit/
+# python3 merge_graphs.py "$OUTPUT_DIR" "$MAPPING_JSON" "$SUBUNITS_INFO_JSON"
 

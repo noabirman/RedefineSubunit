@@ -64,6 +64,15 @@ fi
 # Determine output directory
 OUTPUT_DIR="$PARENT_DIR/msa_output"
 
+# Ensure the output directory has a unique name
+if [ -d "$OUTPUT_DIR" ]; then
+  i=2
+  while [ -d "${OUTPUT_DIR}_${i}" ]; do
+    ((i++))
+  done
+  OUTPUT_DIR="${OUTPUT_DIR}_${i}"
+fi
+
 # Ensure the output directory exists
 mkdir -p "$OUTPUT_DIR"
 
@@ -82,4 +91,6 @@ python /cs/usr/bshor/sci/installations/af3_variations/deepmind/localalphafold3/a
   --norun_inference \
   --output_dir "$OUTPUT_DIR" \
   --input_dir "$INPUT_DIR"
-python preprocess/msa_to_pairwise.py "$OUTPUT_DIR" "$MAPPING_JSON" "$SUBUNITS_INFO_JSON"
+
+# cd /cs/labs/dina/tsori/af3_example/RedefineSubunit/
+# python preprocess/msa_to_pairwise.py "$OUTPUT_DIR" "$MAPPING_JSON" "$SUBUNITS_INFO_JSON"
