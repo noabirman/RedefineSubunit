@@ -44,16 +44,17 @@ def remove_duplicates(input_dir, output_dir):
         items.sort(key=lambda x: x[1])
         to_keep = items[-1][0]
         to_move = [item[0] for item in items if item[0] != to_keep]
-        new_name = input_dir / base
-        if to_keep != new_name:
-            print(f"   📝 Renaming: {to_keep.name} → {new_name.name}")
-            to_keep.rename(new_name)
-            to_keep = new_name
+
 
         print(f"   ✅ Keeping: {to_keep.name}")
         for folder in to_move:
             print(f"   🗂️ Moving: {folder.name} → {output_dir}")
             shutil.move(str(folder), output_dir)
+        new_name = input_dir / base
+        if to_keep != new_name:
+            print(f"   📝 Renaming: {to_keep.name} → {new_name.name}")
+            to_keep.rename(new_name)
+            to_keep = new_name
 
     print("\n✅ Done.")
 
