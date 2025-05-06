@@ -5,18 +5,7 @@ import shutil
 from pathlib import Path
 from datetime import datetime
 
-def main(input_dir):
-    input_dir = Path(input_dir).resolve()
-    if not input_dir.is_dir():
-        print(f"❌ Error: {input_dir} is not a directory.")
-        return
-
-    print(f"📂 Input directory: {input_dir}")
-
-    # Output folder: one level above input, named "doubles"
-    output_dir = input_dir.parent / "doubles"
-    output_dir.mkdir(exist_ok=True)
-    print(f"📁 Archive directory: {output_dir}")
+def remove_duplicates(input_dir, output_dir):
 
     # Match folders like a_b or a_b_YYYYMMDD_HHMMSS
     folder_pattern = re.compile(r"^([a-zA-Z]+_[a-zA-Z]+)(?:_(\d{8}_\d{6}))?$")
@@ -55,6 +44,11 @@ def main(input_dir):
         items.sort(key=lambda x: x[1])
         to_keep = items[-1][0]
         to_move = [item[0] for item in items if item[0] != to_keep]
+        new_name = input_dir / base
+        if to_keep != new_name:
+            print(f"   📝 Renaming: {to_keep.name} → {new_name.name}")
+            to_keep.rename(new_name)
+            to_keep = new_name
 
         print(f"   ✅ Keeping: {to_keep.name}")
         for folder in to_move:
@@ -63,8 +57,44 @@ def main(input_dir):
 
     print("\n✅ Done.")
 
+
+def process_pairs(input_dir, output_dir):
+    # Collect folder names
+    folder_names = {entry.name for entry in input_dir.iterdir() if entry.is_dir()}
+
+    # Check for pairs like a_b and b_a
+    processed_pairs = set()
+    for name in folder_names:
+        if name in processed_pairs:
+            continue
+        parts = name.split('_')
+        if len(parts) == 2:
+            reverse_name = f"{parts[1]}_{parts[0]}"
+            if reverse_name in folder_names:
+                # Alphabetically determine which to move
+                to_keep, to_move = sorted([name, reverse_name])
+                print(f"🔄 Found pair: {name} and {reverse_name}")
+                print(f"   ✅ Keeping: {to_keep}")
+                print(f"   🗂️ Moving: {to_move} → {output_dir}")
+                shutil.move(str(input_dir / to_move), output_dir)
+                processed_pairs.add(name)
+                processed_pairs.add(reverse_name)
+
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python clean_folders.py /path/to/input")
         sys.exit(1)
-    main(sys.argv[1])
+    input_path = Path(sys.argv[1]).resolve()
+    if not input_path.is_dir():
+        print(f"❌ Error: {input_path} is not a directory.")
+        sys.exit(1)
+
+    print(f"📂 Input directory: {input_path}")
+    print("Number of folders before: ", len(os.listdir(input_path)))
+    # Output folder: one level above input, named "doubles"
+    output_path = input_path.parent / "doubles"
+    output_path.mkdir(exist_ok=True)
+    print(f"📁 Archive directory: {output_path}")
+    remove_duplicates(input_path, output_path)
+    process_pairs(input_path, output_path)
+    print("Number of folders after: ", len(os.listdir(input_path)))
