@@ -94,15 +94,21 @@ def check_missing_pairs(input_dir, chain_names):
             pair2 = f"{chain2}_{chain1}"
 
             if pair1 not in folder_names and pair2 not in folder_names:
-                missing_pairs.append((chain1, chain2))
+                missing_pairs.append([chain1, chain2])
+
+    # Create output path in parent directory
+    output_file = Path(input_dir).parent / 'missing_pairs.json'
+
+    # Save to JSON file
+    with open(output_file, 'w') as f:
+        json.dump(missing_pairs, f, indent=4)
 
     if missing_pairs:
-        print("\n❌ Missing pairs:")
-        for chain1, chain2 in missing_pairs:
-            print(f"   - {chain1}_{chain2} or {chain2}_{chain1}")
+        print(f"\n❌ {len(missing_pairs)} missing pairs saved to {output_file}")
     else:
         print("\n✅ All possible pairs exist")
 
+    return missing_pairs
 
 def load_chain_names(mapping_path):
     try:
