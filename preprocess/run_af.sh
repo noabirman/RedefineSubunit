@@ -1,6 +1,5 @@
 #!/bin/bash
 
-#SBATCH --job-name="af3"
 #SBATCH --mem=40G
 #SBATCH --time=72:00:00
 #SBATCH --gres gg:g4:1
