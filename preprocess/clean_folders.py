@@ -128,7 +128,7 @@ def check_missing_pairs(input_dir, chain_names):
 
     # Save the updated global file
     with open(global_output_file, 'w') as f:
-        json.dump(all_missing, f,indent=2)
+        json.dump(all_missing, f,indent=1)
 
     # Also save individual file in parent directory
     individual_output_file = input_dir.parent / 'missing_pairs.json'
