@@ -126,9 +126,13 @@ def check_missing_pairs(input_dir, chain_names):
     if not found:
         all_missing.append(current_output)
 
-    # Save the updated global file
+    # Custom JSON formatting
     with open(global_output_file, 'w') as f:
-        json.dump(all_missing, f,indent=1)
+        # Initial formatting with single space indentation
+        json_str = json.dumps(all_missing, indent=1)
+        # Replace newlines between array elements in missing_pairs
+        json_str = re.sub(r'(\[\s+)(\[.*?\])(,\s+)(\[)', r'\1\2,\4', json_str)
+        f.write(json_str)
 
     # Also save individual file in parent directory
     individual_output_file = input_dir.parent / 'missing_pairs.json'
@@ -142,8 +146,7 @@ def check_missing_pairs(input_dir, chain_names):
     else:
         print("\n✅ All possible pairs exist")
 
-    return missing_pairs
-def load_chain_names(mapping_path):
+    return missing_pairsdef load_chain_names(mapping_path):
     try:
         with open(mapping_path, 'r') as f:
             mapping = json.load(f)
