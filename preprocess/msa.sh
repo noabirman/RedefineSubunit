@@ -1,6 +1,5 @@
 #!/bin/bash
 
-#SBATCH --job-name="${1}-msa"
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=40G
 #SBATCH --time=4-00:00:00
