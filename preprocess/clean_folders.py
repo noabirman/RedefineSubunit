@@ -114,7 +114,7 @@ def check_missing_pairs(input_dir, chain_names):
         with open(global_output_file, 'r') as f:
             all_missing = json.load(f)
     else:
-        all_missing = {}
+        all_missing = []
 
     # Update or add the current folder's data
     found = False
