@@ -38,9 +38,9 @@ if [ ! -d "$INPUT_DIR" ]; then
   echo "Error: Input directory '$INPUT_DIR' does not exist."
   exit 1
 fi
-
+PARENT_DIR=$(dirname "$INPUT_DIR")
 # Determine output directory
-OUTPUT_DIR="$PARENT_DIR/msa_output"
+OUTPUT_DIR="$PARENT_DIR/af_pairs"
 
 # Ensure the output directory has a unique name
 if [ -d "$OUTPUT_DIR" ]; then

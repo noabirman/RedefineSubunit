@@ -126,13 +126,9 @@ def check_missing_pairs(input_dir, chain_names):
     if not found:
         all_missing.append(current_output)
 
-    # Custom JSON formatting
+    # Save the updated global file
     with open(global_output_file, 'w') as f:
-        # Initial formatting with single space indentation
-        json_str = json.dumps(all_missing, indent=1)
-        # Replace newlines between array elements in missing_pairs
-        json_str = re.sub(r'(\[\s+)(\[.*?\])(,\s+)(\[)', r'\1\2,\4', json_str)
-        f.write(json_str)
+        json.dump(all_missing, f)
 
     # Also save individual file in parent directory
     individual_output_file = input_dir.parent / 'missing_pairs.json'
@@ -147,6 +143,18 @@ def check_missing_pairs(input_dir, chain_names):
         print("\n✅ All possible pairs exist")
 
     return missing_pairs
+def load_chain_names(mapping_path):
+    try:
+        with open(mapping_path, 'r') as f:
+            mapping = json.load(f)
+            return [key.lower() for key in mapping.keys()]
+    except FileNotFoundError:
+        print(f"❌ Error: Mapping file not found at {mapping_path}")
+        return []
+    except json.JSONDecodeError:
+        print(f"❌ Error: Invalid JSON in mapping file {mapping_path}")
+        return []
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
@@ -183,5 +191,4 @@ if __name__ == "__main__":
         print("\n⚠️ No chain names loaded from mapping file")
 
     print("Number of folders after: ", len(os.listdir(input_path)))
-
 
