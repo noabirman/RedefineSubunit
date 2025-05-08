@@ -91,7 +91,7 @@ def merge_connected_components(overlap_graph, graphs: List[nx.Graph],subunit_nam
             is_last = index == len(components) - 1  # True if this is the last component
             subunits = [node_dict[member] for member in component]
             # Merge properties
-            merged_name = f"{chain_prefix}_high_{index}"  # Use the first node's name as the merged name
+            merged_name = f"{chain_prefix}_high_{index+1}"  # Use the first node's name as the merged name
             merged_chains = sorted(set(chain for subunit in subunits for chain in subunit.chain_names))  # change
             merged_start = min(subunit.start for subunit in subunits)
             if merged_start <= 5:
@@ -238,10 +238,10 @@ def save_subunits_info(graph: nx.Graph, name_mapping: dict, subunits_info: dict,
             'start': start,
             'end': end
         })
-
+        subunit_name = subunit_info['name']
         # Create high segment entry
-        unified_subunits[node] = {
-            'name': node,
+        unified_subunits[subunit_name] = {
+            'name': subunit_name,
             'sequence': sequence,
             'chain_names': subunit_info['chain_names'],
             'start_res': start
@@ -272,7 +272,7 @@ def save_subunits_info(graph: nx.Graph, name_mapping: dict, subunits_info: dict,
                 low_end = current_start - 1
 
                 # Create low segment name
-                low_name = f"{base_name}_low_{low_segment_index}"
+                low_name = f"{subunit_info['name']}_low_{low_segment_index}"
 
                 # Extract sequence for low segment
                 low_sequence = full_sequence[low_start-1:low_end]  # +1 because end is inclusive
