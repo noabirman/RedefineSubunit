@@ -72,6 +72,8 @@ def merge_connected_components(overlap_graph, graphs: List[nx.Graph]):
         merged_name = f"{list(component)[0]}_high"  # Use the first node's name as the merged name
         merged_chains = sorted(set(chain for subunit in subunits for chain in subunit.chain_names))  # change
         merged_start = min(subunit.start for subunit in subunits)
+        if merged_start <= 5:
+            merged_start = 1
         merged_end = max(subunit.end for subunit in subunits)
         merged_sequence = merge_sequence(subunits, merged_start, merged_end)
         merged_subunit = SubunitInfo(name=merged_name, chain_names=merged_chains, start=merged_start, end=merged_end,
@@ -89,16 +91,21 @@ def merge_connected_components(overlap_graph, graphs: List[nx.Graph]):
     return merged_graph
 
 def merge_sequence(subunits, start, end):
-    merged_sequence = [''] * (end + 1 - start)  # inclusion of end position
+    merged_sequence = ['-'] * (end + 1 - start)  # inclusion of end position
     for subunit in subunits:
         for i, char in enumerate(subunit.sequence):
             pos = subunit.start - start + i
-            if merged_sequence[pos] == '':
+            if merged_sequence[pos] == '-':
                 merged_sequence[pos] = char
             elif merged_sequence[pos] != char:
                 raise ValueError(f"Conflict detected at position {pos}: {merged_sequence[pos]} vs {char}")
     merged_sequence = "".join(merged_sequence)
     return merged_sequence
+
+
+def sequences_match(seq1: str, seq2: str) -> bool:
+    return all(a == b or a == '-' or b == '-' for a, b in zip(seq1, seq2)) and len(seq1) == len(seq2)
+
 
 def save_subunits_info(graph: nx.Graph, subunit_name_mapping_path: str, subunits_info_path: str, folder) -> None:
     """
@@ -157,7 +164,8 @@ def save_subunits_info(graph: nx.Graph, subunit_name_mapping_path: str, subunits
         expected_sequence = full_seq[start - 1:end]
         # But if end were already exclusive, you’d want full_seq[start-1:end-1]…
 
-        if sequence != expected_sequence:
+
+        if not sequences_match(sequence, expected_sequence):
             print("==== DEBUG SEQUENCE MISMATCH ====")
             print(f"Node:           {node}")
             print(f"Start, end:     {start}, {end}")
@@ -169,6 +177,8 @@ def save_subunits_info(graph: nx.Graph, subunit_name_mapping_path: str, subunits
             print(f"Name mapping JSON: {name_mapping}")
             print(f"Subunits_info keys:{list(subunits_info.keys())[:10]} …")
             raise ValueError("Stopping here for debug")
+        else:
+            sequence = expected_sequence
         # if sequence != expected_sequence:
         #     raise ValueError(f"Sequence mismatch in node '{node}'. Expected: {expected_sequence}, Found: {sequence}")
 
@@ -184,7 +194,7 @@ def save_subunits_info(graph: nx.Graph, subunit_name_mapping_path: str, subunits
             'name': node,
             'sequence': sequence,
             'chain_names': subunit_info['chain_names'],
-            'start_res': start + 1  # Convert to 1-based indexing
+            'start_res': start
         }
 
     # Process each original subunit to create low segments
@@ -197,7 +207,7 @@ def save_subunits_info(graph: nx.Graph, subunit_name_mapping_path: str, subunits
         segments.sort(key=lambda x: x['start'])
 
         # Track the end of the last processed segment
-        last_end = -1
+        last_end = 0
         low_segment_index = 1
 
         # Get base name from any segment's node name
@@ -222,7 +232,7 @@ def save_subunits_info(graph: nx.Graph, subunit_name_mapping_path: str, subunits
                     'name': low_name,
                     'sequence': low_sequence,
                     'chain_names': subunit_info['chain_names'],
-                    'start_res': low_start + 1  # Convert to 1-based indexing
+                    'start_res': low_start  # Convert to 1-based indexing
                 }
 
                 low_segment_index += 1
@@ -245,7 +255,7 @@ def save_subunits_info(graph: nx.Graph, subunit_name_mapping_path: str, subunits
                 'name': low_name,
                 'sequence': low_sequence,
                 'chain_names': subunit_info['chain_names'],
-                'start_res': low_start + 1  # Convert to 1-based indexing
+                'start_res': low_start # Convert to 1-based indexing
             }
 
     sorted_unified_subunits = dict(

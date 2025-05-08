@@ -22,10 +22,7 @@ class SubunitInfo:
     end: int
     sequence: str
 
-# class Vertice:
-#     name:
-#     chain:
-#
+
 def extract_sequence_with_seqio(structure_path,af_version: int):
     """
     Extracts the sequence from an mmCIF/PDB file using Bio.SeqIO.
@@ -57,59 +54,27 @@ def find_high_confidence_regions(plddt_array, confidence_threshold=40, gap_thres
     Returns:
         list[tuple[int, int]]: A list of tuples, each representing the start and end indices of a high-confidence region.
     """
-    # Find indices where plDDT is above the confidence threshold
     indices = np.where(plddt_array > confidence_threshold)[0]
 
     if len(indices) == 0:
-        return []  # No high-confidence regions
+        return []
 
     regions = []
     start_index = indices[0]
 
     for i in range(1, len(indices)):
         if indices[i] - indices[i - 1] > gap_threshold:
-            # Add the current region when a gap is found
             if indices[i - 1] - start_index >= 5:
                 regions.append((int(start_index), int(indices[i - 1])))
             start_index = indices[i]
 
-    # Append the last region
-    if indices[i - 1] - start_index >= 5:
+    # Handle the last region (fix: use indices[-1])
+    if indices[-1] - start_index >= 5:
         regions.append((int(start_index), int(indices[-1])))
+
     return regions
 
 
-# def extract_subunit_info(indexs: List[Tuple[int, int]], token_chain_ids: List[str], full_seq: str) -> List[SubunitInfo]:
-#     """
-#      Build a list of SubunitInfo
-#
-#      Args:
-#          indexs (List[Tuple[int, int]]): List containing the index of each subunit.
-#          token_chain_ids (List[str]): Indicate the chain ids of each subunit.
-#          full_seq (str): The residues sequence of the current protein.
-#
-#      Returns:
-#          list[SubunitInfo]: A list of SubunitInfo.
-#      """
-#     subunit_infos = []
-#     # todo: change subunit name to be from file
-#     chain_occ_counter = Counter()  # Counter to track occurrences of each chain ID
-#
-#     for start, end in indexs:
-#         # Extract chain IDs in the current node and ensure uniqueness
-#         chains_ids_in_node = list(dict.fromkeys(token_chain_ids[start:end + 1]))  # keep order
-#         #subunit_name = "".join(f"{chain_id}{chain_occ_counter[chain_id] + 1}" for chain_id in chains_ids_in_node)
-#         for chain_id in chains_ids_in_node:  #count occurrences for each chain in cur node
-#             chain_occ_counter[chain_id] += 1
-#         subunit_infos.append(SubunitInfo(
-#             name=subunit_name,
-#             chain_names=chains_ids_in_node,
-#             start=start,
-#             end=end,
-#             sequence=full_seq[start:end + 1]
-#         ))
-#
-#     return subunit_infos
 
 def extract_subunit_info(indexs: List[Tuple[int, int]], token_chain_ids: List[str], full_seq: str) -> List[SubunitInfo]:
     """
@@ -153,6 +118,8 @@ def extract_subunit_info(indexs: List[Tuple[int, int]], token_chain_ids: List[st
             ))
 
     return subunit_infos
+
+
 def atom_plddt_to_res_plddt(structure, atom_plddts:List[float]):
     """
         Convert plddt list in AF3 case to be per residue instead of per atom, calculate the average plddt for each res.
@@ -259,7 +226,11 @@ def rename_chains_from_file(data_path: str, token_chain_ids: list[str]) -> list[
         raise ValueError(f"Unexpected filename format: {filename}. Expected at least 2 parts.")
 
     # Generate a mapping dynamically (A → first part, B → second, etc.)
-    replacement_dict = {chr(65 + i): part.upper() for i, part in enumerate(parts)}
+    # In case of chain with itself (e_e ) change to E1, E2
+    if parts [0] == parts[1]: # chain with itself case
+        replacement_dict = {chr(65 + i): part.upper() + "_"+ str (i+1) for i, part in enumerate(parts)}
+    else: #regular case
+        replacement_dict = {chr(65 + i): part.upper() for i, part in enumerate(parts)}
 
     # Update token_chain_ids based on mapping
     return [replacement_dict.get(chain, chain) for chain in token_chain_ids]
