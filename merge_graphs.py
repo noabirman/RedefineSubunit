@@ -100,7 +100,7 @@ def merge_connected_components(overlap_graph, graphs: List[nx.Graph],subunit_nam
             merged_end = max(subunit.end for subunit in subunits)
             if is_last:
                 _, subunit = find_original_subunit_info(chain_prefix, name_mapping, subunits_info)
-                if merged_end > (subunit["end"] - 5):
+                if merged_end > (len(subunit["sequence"]) - 5):
                     merged_end = subunit["end"]
             merged_sequence = merge_sequence(subunits, merged_start, merged_end)
             merged_subunit = SubunitInfo(name=merged_name, chain_names=merged_chains, start=merged_start, end=merged_end,
