@@ -97,9 +97,10 @@ def merge_connected_components(overlap_graph, graphs: List[nx.Graph],subunit_nam
             if merged_start <= 5:
                 merged_start = 1
             merged_end = max(subunit.end for subunit in subunits)
-            subunit_end = find_original_subunit_info(chain_prefix, name_mapping,subunits_info)["end"]
-            if is_last and merged_end >  subunit_end - 5:
-                merged_end = len(subunits[-1].sequence)
+            if is_last:
+                _, subunit = find_original_subunit_info(chain_prefix, name_mapping, subunits_info)
+                if merged_end > (subunit["end"] - 5):
+                    merged_end = subunit["end"]
             merged_sequence = merge_sequence(subunits, merged_start, merged_end)
             merged_subunit = SubunitInfo(name=merged_name, chain_names=merged_chains, start=merged_start, end=merged_end,
                                          sequence=merged_sequence)
@@ -130,9 +131,9 @@ def merge_sequence(subunits, start, end):
 def sequences_match(seq1: str, seq2: str) -> bool:
     return all(a == b or a == '-' or b == '-' for a, b in zip(seq1, seq2)) and len(seq1) == len(seq2)
 
-def find_original_subunit_info(base_name: str, name_mapping: dict, subunits_info: dict) -> dict:
+def find_original_subunit_info(base_name: str, name_mapping: dict, subunits_info: dict) -> tuple[str, dict]:
     """
-    Find the original subunit name given a base name using chain name mapping.
+    Find the original subunit name and info given a base name using chain name mapping.
 
     Parameters
     ----------
@@ -145,8 +146,8 @@ def find_original_subunit_info(base_name: str, name_mapping: dict, subunits_info
 
     Returns
     -------
-    str
-        The original subunit name
+    tuple[str, dict]
+        Original subunit name and its info dictionary
 
     Raises
     ------
@@ -161,13 +162,12 @@ def find_original_subunit_info(base_name: str, name_mapping: dict, subunits_info
 
     if original_name is None:
         raise ValueError(f"No subunit found with chain name: {original_chain_name}")
+
     subunit_info = subunits_info.get(original_name)
-
     if subunit_info is None:
-        raise ValueError(f"No subunit found with chain name: {original_name}")
+        raise ValueError(f"No subunit info found for: {original_name}")
 
-    return subunit_info
-
+    return original_name, subunit_info
 
 def save_subunits_info(graph: nx.Graph, name_mapping: dict, subunits_info: dict, folder: str) -> None:
     """
@@ -190,17 +190,12 @@ def save_subunits_info(graph: nx.Graph, name_mapping: dict, subunits_info: dict,
     # Group high segments by original subunit
     high_segments_by_subunit = defaultdict(list)
 
-    # Rest of the function remains the same, but without file loading...
-
-    # Group high segments by original subunit
-    high_segments_by_subunit = defaultdict(list)
-
     # Process high segments from graph
     for node in graph.nodes:
         # Extract base name from node name (e.g., "A" from "A1_high")
         base_name = node.split('_')[0]
         # Get original subunit name from mapping
-        subunit_info = find_original_subunit_info(base_name, name_mapping, subunits_info)
+        original_name, subunit_info = find_original_subunit_info(base_name, name_mapping, subunits_info)
         # added for debug
         print("→ JSON chain_names:", subunit_info['chain_names'])
         print("→ JSON sequence length:", len(subunit_info['sequence']))
