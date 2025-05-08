@@ -11,12 +11,12 @@ def overlap(v1: SubunitInfo, v2: SubunitInfo, threshold = 5) -> bool:
     """Check if two SubunitInfo nodes overlap in at least one chain."""
     return any(chain in v2.chain_names for chain in v1.chain_names) and not (v1.end + threshold < v2.start or v2.end + threshold < v1.start)
 
-def merge_graphs(graphs: List[nx.Graph], folder: str) -> nx.Graph:
+def merge_graphs(graphs: List[nx.Graph], name_mapping,subunits_info) -> nx.Graph:
     """Merge nodes with overlapping indices in the same chain across multiple graphs."""
     # Build an overlap graph
     overlap_graph = create_overlap_graph(graphs)
     # Merge nodes in each component
-    merged_graph  = merge_connected_components(overlap_graph, graphs)
+    merged_graph  = merge_connected_components(overlap_graph, graphs,name_mapping,subunits_info)
 
     return merged_graph
 
@@ -97,7 +97,8 @@ def merge_connected_components(overlap_graph, graphs: List[nx.Graph],subunit_nam
             if merged_start <= 5:
                 merged_start = 1
             merged_end = max(subunit.end for subunit in subunits)
-            if is_last and merged_end >= len(subunits[-1].sequence):
+            subunit_end = find_original_subunit_info(chain_prefix, name_mapping,subunits_info)["end"]
+            if is_last and merged_end >  subunit_end - 5:
                 merged_end = len(subunits[-1].sequence)
             merged_sequence = merge_sequence(subunits, merged_start, merged_end)
             merged_subunit = SubunitInfo(name=merged_name, chain_names=merged_chains, start=merged_start, end=merged_end,
@@ -129,7 +130,7 @@ def merge_sequence(subunits, start, end):
 def sequences_match(seq1: str, seq2: str) -> bool:
     return all(a == b or a == '-' or b == '-' for a, b in zip(seq1, seq2)) and len(seq1) == len(seq2)
 
-def find_original_subunit_info(base_name: str, name_mapping: dict, subunits_info: dict) -> str:
+def find_original_subunit_info(base_name: str, name_mapping: dict, subunits_info: dict) -> dict:
     """
     Find the original subunit name given a base name using chain name mapping.
 
@@ -167,21 +168,29 @@ def find_original_subunit_info(base_name: str, name_mapping: dict, subunits_info
 
     return subunit_info
 
-def save_subunits_info(graph: nx.Graph, subunit_name_mapping_path: str, subunits_info_path: str, folder) -> None:
+
+def save_subunits_info(graph: nx.Graph, name_mapping: dict, subunits_info: dict, folder: str) -> None:
     """
     Process graph nodes (high segments) and create a unified JSON with both high and low segments.
-    Node data in graph should be SubunitInfo objects.
+
+    Parameters
+    ----------
+    graph : nx.Graph
+        Graph with SubunitInfo objects as node data
+    name_mapping : dict
+        Mapping of base names to chain names
+    subunits_info : dict
+        Dictionary containing subunit information
+    folder : str
+        Path to output folder
     """
-    # Load subunit name mapping
-    with open(subunit_name_mapping_path, 'r') as f:
-        name_mapping = json.load(f)
-
-    # Load subunits info
-    with open(subunits_info_path, 'r') as f:
-        subunits_info = json.load(f)
-
     # Dictionary to store all segments (high and low)
     unified_subunits = {}
+
+    # Group high segments by original subunit
+    high_segments_by_subunit = defaultdict(list)
+
+    # Rest of the function remains the same, but without file loading...
 
     # Group high segments by original subunit
     high_segments_by_subunit = defaultdict(list)
@@ -324,9 +333,21 @@ if __name__ == "__main__":
         mapping_path = os.path.abspath(sys.argv[2]) if len(sys.argv) > 2 else os.path.join(os.path.dirname(folder_path), 'chain_id_mapping.json')
         original_subunits_path = os.path.abspath(sys.argv[3]) if len(sys.argv) > 3 else os.path.join(os.path.dirname(folder_path), 'subunits_info.json')
 
+        # Load mapping and subunits files
+        try:
+            with open(mapping_path, 'r') as f:
+                name_mapping = json.load(f)
+            with open(original_subunits_path, 'r') as f:
+                subunits_info = json.load(f)
+        except FileNotFoundError as e:
+            print(f"Error: Could not find file - {e}")
+            sys.exit(1)
+        except json.JSONDecodeError as e:
+            print(f"Error: Invalid JSON in file - {e}")
+            sys.exit(1)
+
         graphs = create_graphs_from_folder(folder_path)
-        merged_graph = merge_graphs(graphs, folder_path)
-        save_subunits_info(merged_graph, mapping_path, original_subunits_path, folder_path)
+        merged_graph = merge_graphs(graphs, folder_path,name_mapping,subunits_info)
+        save_subunits_info(merged_graph, name_mapping, subunits_info, folder_path)
     else:
         print("usage: <script> enter folder_name, [subunits_json_path], [mapping_json_path], [output_json_path]")
-        #
