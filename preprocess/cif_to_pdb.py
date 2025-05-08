@@ -30,12 +30,12 @@ def convert_cif_to_pdb(cif_path: str, pdb_path: str) -> None:
 
 def batch_convert_generic(input_dir: str, output_dir: str) -> None:
     """
-    Convert all CIF files in the input directory to PDB format in the output directory.
+    Convert all CIF files in subdirectories under input directory to PDB format.
 
     Parameters
     ----------
     input_dir : str
-        Directory containing CIF files.
+        Directory containing subdirectories with CIF files.
     output_dir : str
         Directory to save converted PDB files.
     """
@@ -43,14 +43,17 @@ def batch_convert_generic(input_dir: str, output_dir: str) -> None:
         os.makedirs(output_dir)
         print(f"Created output directory '{output_dir}'.")
 
-    for root, dirs, files in os.walk(input_dir):
-        for file in files:
-            if file.endswith('.cif'):
-                cif_path = os.path.join(root, file)
-                pdb_filename = os.path.splitext(file)[0] + '.pdb'
-                pdb_path = os.path.join(output_dir, pdb_filename)
-                convert_cif_to_pdb(cif_path, pdb_path)
-
+    # Get all subdirectories (one level only)
+    for subdir in os.listdir(input_dir):
+        subdir_path = os.path.join(input_dir, subdir)
+        if os.path.isdir(subdir_path):
+            # Look for .cif files in this subdirectory
+            for file in os.listdir(subdir_path):
+                if file.endswith('.cif'):
+                    cif_path = os.path.join(subdir_path, file)
+                    pdb_filename = os.path.splitext(file)[0] + '.pdb'
+                    pdb_path = os.path.join(output_dir, pdb_filename)
+                    convert_cif_to_pdb(cif_path, pdb_path)
 def batch_convert_specific(input_dir: str, output_dir: str) -> None:
     """
     Convert specific CIF files within subdirectories of the input directory to PDB format.
@@ -82,25 +85,13 @@ def batch_convert_specific(input_dir: str, output_dir: str) -> None:
 def main():
     # Verify we have enough arguments
     if len(sys.argv) < 3:
-        print("Usage: python cif_to_pdb.py <input_dir> <output_dir> [batch|single]")
+        print("Usage: python cif_to_pdb.py <input_dir> <output_dir> ")
         sys.exit(1)
 
     input_dir = sys.argv[1]
     output_dir = sys.argv[2]
     command = sys.argv[3] if len(sys.argv) > 3 else None
-
-    if not os.path.isdir(input_dir):
-        print(f"Input directory '{input_dir}' does not exist.")
-        sys.exit(1)
-
-    if command == 'single':
-        # Implementation for single conversion needs to be defined
-        print("Single conversion not implemented in this example.")
-        sys.exit(1)
-    elif command == 'batch':
-        batch_convert_generic(input_dir, output_dir)
-    else:
-        batch_convert_specific(input_dir, output_dir)
+    batch_convert_generic(input_dir, output_dir)
 
 if __name__ == '__main__':
     main()
