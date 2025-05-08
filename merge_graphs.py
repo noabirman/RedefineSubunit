@@ -61,8 +61,7 @@ def create_overlap_graph(graphs):
 
     return overlap_graph
 
-def \
-        merge_connected_components(overlap_graph, graphs: List[nx.Graph]):
+def merge_connected_components(overlap_graph, graphs: List[nx.Graph]):
     connected_components = list(nx.connected_components(overlap_graph))
     merged_graph = nx.Graph()
     node_mapping = {}
@@ -226,7 +225,7 @@ def save_subunits_info(graph: nx.Graph, subunit_name_mapping_path: str, subunits
                 low_name = f"{base_name}_low_{low_segment_index}"
 
                 # Extract sequence for low segment
-                low_sequence = full_sequence[low_start:low_end + 1]  # +1 because end is inclusive
+                low_sequence = full_sequence[low_start-1:low_end]  # +1 because end is inclusive
 
                 # Create low segment entry
                 unified_subunits[low_name] = {
@@ -249,7 +248,7 @@ def save_subunits_info(graph: nx.Graph, subunit_name_mapping_path: str, subunits
             low_name = f"{base_name}_low_{low_segment_index}"
 
             # Extract sequence for low segment
-            low_sequence = full_sequence[low_start:low_end + 1]  # +1 because end is inclusive
+            low_sequence = full_sequence[low_start-1:low_end]  # +1 because end is inclusive
 
             # Create low segment entry
             unified_subunits[low_name] = {
