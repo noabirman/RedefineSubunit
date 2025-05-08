@@ -343,7 +343,7 @@ if __name__ == "__main__":
             sys.exit(1)
 
         graphs = create_graphs_from_folder(folder_path)
-        merged_graph = merge_graphs(graphs, folder_path,name_mapping,subunits_info)
+        merged_graph = merge_graphs(graphs,name_mapping,subunits_info)
         save_subunits_info(merged_graph, name_mapping, subunits_info, folder_path)
     else:
         print("usage: <script> enter folder_name, [subunits_json_path], [mapping_json_path], [output_json_path]")
