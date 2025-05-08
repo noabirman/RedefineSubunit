@@ -61,28 +61,52 @@ def create_overlap_graph(graphs):
 
     return overlap_graph
 
-def merge_connected_components(overlap_graph, graphs: List[nx.Graph]):
+def merge_connected_components(overlap_graph, graphs: List[nx.Graph],subunit_name_mapping_path: str, subunits_info_path: str):
     connected_components = list(nx.connected_components(overlap_graph))
     merged_graph = nx.Graph()
     node_mapping = {}
     node_dict = {name: data['data'] for name, data in overlap_graph.nodes(data=True)}
-    for index, component in enumerate(connected_components):
-        subunits = [node_dict[member] for member in component]
-        # Merge properties
-        merged_name = f"{list(component)[0]}_high"  # Use the first node's name as the merged name
-        merged_chains = sorted(set(chain for subunit in subunits for chain in subunit.chain_names))  # change
-        merged_start = min(subunit.start for subunit in subunits)
-        if merged_start <= 5:
-            merged_start = 1
-        merged_end = max(subunit.end for subunit in subunits)
-        merged_sequence = merge_sequence(subunits, merged_start, merged_end)
-        merged_subunit = SubunitInfo(name=merged_name, chain_names=merged_chains, start=merged_start, end=merged_end,
-                                     sequence=merged_sequence)
-        # Add merged node to the merged graph
-        merged_graph.add_node(merged_name, data=merged_subunit)
-        # Map original nodes to merged node name
-        for name in component:
-            node_mapping[name] = merged_name
+
+    # Group components by chain prefix
+    chain_components = defaultdict(list)
+    for component in connected_components:
+        first_node = next(iter(component))
+        chain_prefix = first_node.split('_')[0]
+
+        # Verify all nodes have same prefix
+        if not all(node.split('_')[0] == chain_prefix for node in component):
+            raise ValueError(f"Component contains nodes with different chain prefixes: {component}")
+
+        chain_components[chain_prefix].append(component)
+
+    # Sort components within each chain by start position
+    for chain_prefix in chain_components:
+        chain_components[chain_prefix].sort(
+            key=lambda comp: min(node_dict[member].start for member in comp)
+        )
+
+    # Process each chain's sorted components
+    for chain_prefix, components in chain_components.items():
+        for index, component in enumerate(components):
+            is_last = index == len(components) - 1  # True if this is the last component
+            subunits = [node_dict[member] for member in component]
+            # Merge properties
+            merged_name = f"{chain_prefix}_high_{index}"  # Use the first node's name as the merged name
+            merged_chains = sorted(set(chain for subunit in subunits for chain in subunit.chain_names))  # change
+            merged_start = min(subunit.start for subunit in subunits)
+            if merged_start <= 5:
+                merged_start = 1
+            merged_end = max(subunit.end for subunit in subunits)
+            if is_last and merged_end >= len(subunits[-1].sequence):
+                merged_end = len(subunits[-1].sequence)
+            merged_sequence = merge_sequence(subunits, merged_start, merged_end)
+            merged_subunit = SubunitInfo(name=merged_name, chain_names=merged_chains, start=merged_start, end=merged_end,
+                                         sequence=merged_sequence)
+            # Add merged node to the merged graph
+            merged_graph.add_node(merged_name, data=merged_subunit)
+            # Map original nodes to merged node name
+            for name in component:
+                node_mapping[name] = merged_name
     for idx, G in enumerate(graphs):
         for u, v in G.edges():
             merged_u = node_mapping[f"{u}_{idx}"]
@@ -102,10 +126,46 @@ def merge_sequence(subunits, start, end):
     merged_sequence = "".join(merged_sequence)
     return merged_sequence
 
-
 def sequences_match(seq1: str, seq2: str) -> bool:
     return all(a == b or a == '-' or b == '-' for a, b in zip(seq1, seq2)) and len(seq1) == len(seq2)
 
+def find_original_subunit_info(base_name: str, name_mapping: dict, subunits_info: dict) -> str:
+    """
+    Find the original subunit name given a base name using chain name mapping.
+
+    Parameters
+    ----------
+    base_name : str
+        The base name to look up (e.g., "A" from "A_high_1")
+    name_mapping : dict
+        Mapping of base names to chain names
+    subunits_info : dict
+        Dictionary containing subunit information with chain names
+
+    Returns
+    -------
+    str
+        The original subunit name
+
+    Raises
+    ------
+    ValueError
+        If no subunit is found with the mapped chain name
+    """
+    original_chain_name = name_mapping[base_name]
+    original_name = next(
+        (key for key, info in subunits_info.items() if original_chain_name in info['chain_names']),
+        None
+    )
+
+    if original_name is None:
+        raise ValueError(f"No subunit found with chain name: {original_chain_name}")
+    subunit_info = subunits_info.get(original_name)
+
+    if subunit_info is None:
+        raise ValueError(f"No subunit found with chain name: {original_name}")
+
+    return subunit_info
 
 def save_subunits_info(graph: nx.Graph, subunit_name_mapping_path: str, subunits_info_path: str, folder) -> None:
     """
@@ -131,22 +191,8 @@ def save_subunits_info(graph: nx.Graph, subunit_name_mapping_path: str, subunits
         # Extract base name from node name (e.g., "A" from "A1_high")
         base_name = node.split('_')[0]
         # Get original subunit name from mapping
-        original_chain_name  = name_mapping[base_name]
-        # Find the original_name where subunits_info[key]['chain_names'] contains original_chain_name
-        original_name = next(
-            (key for key, info in subunits_info.items() if original_chain_name in info['chain_names']),
-            None
-        )
-
-        if original_name is None:
-            raise ValueError(f"No subunit found with chain name: {original_chain_name}")
-        # Find the subunit_info where one of the chain_names matches the original_name
-        subunit_info = subunits_info.get(original_name)
-
-        if subunit_info is None:
-            raise ValueError(f"No subunit found with chain name: {original_name}")
+        subunit_info = find_original_subunit_info(base_name, name_mapping, subunits_info)
         # added for debug
-        print("→ original_name chosen:", original_name)
         print("→ JSON chain_names:", subunit_info['chain_names'])
         print("→ JSON sequence length:", len(subunit_info['sequence']))
         print("→ JSON sequence start:", subunit_info['sequence'][:20], "…")
