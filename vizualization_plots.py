@@ -6,6 +6,10 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 from matplotlib.colors import BoundaryNorm, ListedColormap
 from matplotlib.patches import Patch
+from collections import defaultdict
+import matplotlib.cm as cm
+import matplotlib.colors as mcolors
+
 def plot_pae_plddt(pae_as_arr: np.array, plddt_array, nodes, edges, plot_name: str): #todo: add edge width due weight
     # Define AlphaFold plDDT color scheme
     plddt_cmap = ListedColormap(['#FF7D45', '#FFDB13', '#65CBF3', '#0053D6'])  # Orange, Yellow, Cyan, Blue
@@ -333,3 +337,70 @@ def show_graph(graph: nx.Graph, folder_path:str):
     plt.show() #gg
     show_graph_with_spacing(graph, folder_path,"reg_")
     show_graph_with_spacing(graph_filtered, folder_path, "filtered")
+
+
+def group_nodes_by_chain_name(G: nx.Graph, nodes_data):
+    # Group nodes by chain name
+    chain_groups = defaultdict(list)
+    for node, attrs in nodes_data.items():
+        chain = attrs['data'].chain_names[0]  # assuming one chain per subunit
+        start = attrs['data'].start
+        chain_groups[chain].append((node, start))
+
+    # Sort each group by start position
+    for chain in chain_groups:
+        chain_groups[chain] = sorted(chain_groups[chain], key=lambda x: x[1])
+    return chain_groups
+
+
+def plot_graph_by_chain(G: nx.Graph):
+    #chain_groups = group_nodes_by_chain_name(G, nodes_data)
+
+    # === Group nodes by chain and sort by start position ===
+    chain_groups = defaultdict(list)
+    for node in G.nodes(data=True):
+        chain = node[1]['data'].chain_names[0]
+        start = node[1]['data'].start
+        chain_groups[chain].append((node[0], start))
+
+    # Sort nodes within each chain by start position
+    for chain in chain_groups:
+        chain_groups[chain] = sorted(chain_groups[chain], key=lambda x: x[1])
+
+    # Assign positions to each node
+    pos = {}
+    x_spacing = 5
+    y_spacing = 5
+    x = 0
+    for i, (chain, nodes) in enumerate(chain_groups.items()):
+        y = 0
+        for node_id, _ in nodes:
+            pos[node_id] = (x, y)
+            y -= y_spacing
+        x += x_spacing
+
+    # === Assign colors to each chain ===
+    chains = sorted(chain_groups.keys())
+    color_map = cm.get_cmap('tab10', len(chains))
+    chain_to_color = {chain: mcolors.to_hex(color_map(i)) for i, chain in enumerate(chains)}
+
+    node_colors = []
+    for node in G.nodes():
+        chain = G.nodes[node]['data'].chain_names[0]
+        node_colors.append(chain_to_color[chain])
+
+    # === Draw the graph ===
+    plt.figure(figsize=(12, 8), constrained_layout=True)
+    nx.draw(
+        G, pos, with_labels=True, node_size=600,
+        font_size=8, node_color=node_colors, edgecolors='black'
+    )
+
+    # === Legend ===
+    legend_handles = [Patch(color=color, label=chain) for chain, color in chain_to_color.items()]
+    plt.legend(handles=legend_handles, title='Chains', bbox_to_anchor=(1.05, 1), loc='upper left')
+
+    plt.title("Subunits arranged and colored by chain")
+    plt.axis("off")
+    #plt.tight_layout()
+    plt.savefig("G_by_chain.png")

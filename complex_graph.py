@@ -8,10 +8,11 @@ from typing import List, Tuple
 from Bio.PDB import MMCIFParser
 import Bio.SeqUtils
 import Bio.PDB, Bio.PDB.Residue
-from Bio import SeqIO
+from Bio import SeqIO, BiopythonParserWarning
 import dataclasses
 import networkx as nx
 from pathlib import Path
+import warnings
 
 SubunitName = str
 @dataclasses.dataclass
@@ -23,22 +24,45 @@ class SubunitInfo:
     sequence: str
 
 
-def extract_sequence_with_seqio(structure_path,af_version: int):
+# def extract_sequence_with_seqio(structure_path,af_version: int):
+#     """
+#     Extracts the sequence from an mmCIF/PDB file using Bio.SeqIO.
+#
+#     Args:
+#         structure_path (str): Path to the mmCIF/PDB file.
+#         af_version if 2 then PDB and if 3 cif
+#
+#     Returns:
+#         str: The amino acid sequence as a single-letter code string.
+#     """
+#     format = {'2':"pdb-atom", '3':"cif-atom"}
+#     sequences = []
+#     for record in SeqIO.parse(structure_path, format[af_version]):
+#         sequences.append(str(record.seq))
+#         print(record.id)
+#     return ''.join(sequences)
+
+def extract_sequence_with_seqio(structure_path, af_version: int):
     """
     Extracts the sequence from an mmCIF/PDB file using Bio.SeqIO.
 
     Args:
         structure_path (str): Path to the mmCIF/PDB file.
-        af_version if 2 then PDB and if 3 cif
+        af_version (int): If 2, parse as PDB; if 3, parse as CIF (AlphaFold v3).
 
     Returns:
         str: The amino acid sequence as a single-letter code string.
     """
-    format = {'2':"pdb-atom", '3':"cif-atom"}
+    format_map = {'2': "pdb-atom", '3': "cif-atom"}
+    format = format_map.get(af_version)
+
     sequences = []
-    for record in SeqIO.parse(structure_path, format[af_version]):
-        sequences.append(str(record.seq))
-        print(record.id)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", BiopythonParserWarning)
+        for record in SeqIO.parse(structure_path, format):
+            sequences.append(str(record.seq))
+            #print(record.id or "No ID")
+
     return ''.join(sequences)
 
 
@@ -176,6 +200,8 @@ def find_edges(subunits_info: List[SubunitInfo], pae_matrix: np.array, threshold
     edges = []
     for subunit1, subunit2 in itertools.combinations(subunits_info, 2):
         pae_rect = pae_matrix[subunit1.start:subunit1.end, subunit2.start:subunit2.end]
+        if pae_rect.size == 0: #todo:not sure if best practice (M is start=132 end =132 so the rect comes out empty)
+            continue
         pae_score = np.mean(pae_rect)
         if pae_score < threshold:
             edges.append((subunit1.name, subunit2.name, float(pae_score)))

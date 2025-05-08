@@ -6,6 +6,7 @@ from collections import defaultdict
 import networkx as nx
 from complex_graph import graph, SubunitInfo, extract_sequence_with_seqio
 from typing import List
+from vizualization_plots import plot_graph_by_chain
 
 def overlap(v1: SubunitInfo, v2: SubunitInfo, threshold = 5) -> bool:
     """Check if two SubunitInfo nodes overlap in at least one chain."""
