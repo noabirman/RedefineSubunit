@@ -61,7 +61,8 @@ def create_overlap_graph(graphs):
 
     return overlap_graph
 
-def merge_connected_components(overlap_graph, graphs: List[nx.Graph]):
+def \
+        merge_connected_components(overlap_graph, graphs: List[nx.Graph]):
     connected_components = list(nx.connected_components(overlap_graph))
     merged_graph = nx.Graph()
     node_mapping = {}

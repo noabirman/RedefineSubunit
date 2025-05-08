@@ -82,25 +82,13 @@ def batch_convert_specific(input_dir: str, output_dir: str) -> None:
 def main():
     # Verify we have enough arguments
     if len(sys.argv) < 3:
-        print("Usage: python cif_to_pdb.py <input_dir> <output_dir> [batch|single]")
+        print("Usage: python cif_to_pdb.py <input_dir> <output_dir> ")
         sys.exit(1)
 
     input_dir = sys.argv[1]
     output_dir = sys.argv[2]
     command = sys.argv[3] if len(sys.argv) > 3 else None
-
-    if not os.path.isdir(input_dir):
-        print(f"Input directory '{input_dir}' does not exist.")
-        sys.exit(1)
-
-    if command == 'single':
-        # Implementation for single conversion needs to be defined
-        print("Single conversion not implemented in this example.")
-        sys.exit(1)
-    elif command == 'batch':
-        batch_convert_generic(input_dir, output_dir)
-    else:
-        batch_convert_specific(input_dir, output_dir)
+    batch_convert_generic(input_dir, output_dir)
 
 if __name__ == '__main__':
     main()

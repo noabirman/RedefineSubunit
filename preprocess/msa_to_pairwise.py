@@ -24,6 +24,7 @@ def create_pairwise_msa(msa_folder: str, mapping_file: str, subunits_info_file: 
     # Generate combinations without self-pairs
     pairs = list(itertools.combinations(subunits, 2))
 
+
     # Add self-pairs for multi-chain originals
     for subunit in subunits:
         # Get original subunit name from mapping
