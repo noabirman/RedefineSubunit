@@ -101,7 +101,7 @@ def merge_connected_components(overlap_graph, graphs: List[nx.Graph],subunit_nam
             if is_last:
                 _, subunit = find_original_subunit_info(chain_prefix, name_mapping, subunits_info)
                 if merged_end > (len(subunit["sequence"]) - 5):
-                    merged_end = subunit["end"]
+                    merged_end = len(subunit["sequence"])
             merged_sequence = merge_sequence(subunits, merged_start, merged_end)
             merged_subunit = SubunitInfo(name=merged_name, chain_names=merged_chains, start=merged_start, end=merged_end,
                                          sequence=merged_sequence)
@@ -239,10 +239,11 @@ def save_subunits_info(graph: nx.Graph, name_mapping: dict, subunits_info: dict,
             'start': start,
             'end': end
         })
-        subunit_name = subunit_info['name']
+        node_index = len(high_segments_by_subunit[original_name])
+        high_name = f"{subunit_info['name']}_high_{node_index}"
         # Create high segment entry
-        unified_subunits[subunit_name] = {
-            'name': subunit_name,
+        unified_subunits[high_name] = {
+            'name': high_name,
             'sequence': sequence,
             'chain_names': subunit_info['chain_names'],
             'start_res': start
