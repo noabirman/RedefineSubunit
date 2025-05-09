@@ -7,7 +7,8 @@
 #SBATCH --mail-type=END
 #SBATCH --mail-user=tsori.kislev@gmail.com
 
-#SBATCH --output=/cs/labs/dina/tsori/af3_example/slurms_outs/cf/%j.out
+#SBATCH --output=/cs/labs/dina/tsori/af3_example/slurms_outs/CF/%j.out
+#SBATCH --error=/cs/labs/dina/tsori/af3_example/slurms_outs/CF/err/%j.out
 
 # Check for required arguments
 if [ "$#" -lt 1 ]; then
@@ -37,11 +38,14 @@ if [ ! -f "$SUBUNITS_INFO_JSON" ]; then
   echo "Error: Subunits info JSON file '$SUBUNITS_INFO_JSON' does not exist."
   exit 1
 fi
+# Ensure the results directory exists
+RESULTS_DIR="$COMPLEX_DIR/combfold/results"
+mkdir -p "$RESULTS_DIR"
 
 # Activate the virtual environment
 cd /cs/labs/dina/tsori/af3_example
 source RedefineSubunit/my_venv/bin/activate
 
-# Run the Python script
-RESULTS_DIR="$COMPLEX_DIR/combfold/results"
+echo "Running CombFold on $COMPLEX_DIR:"
+
 python3 CombFold/scripts/run_on_pdbs.py "$SUBUNITS_INFO_JSON" "$MODELS_DIR" "$RESULTS_DIR"

@@ -9,6 +9,8 @@
 #SBATCH --mail-user=tsori.kislev@gmail.com
 
 #SBATCH --output=/cs/labs/dina/tsori/af3_example/slurms_outs/AF/%j.out
+#SBATCH --error=/cs/labs/dina/tsori/af3_example/slurms_outs/AF/err/%j.out
+
 
 export XLA_FLAGS="--xla_disable_hlo_passes=custom-kernel-fusion-rewriter"
 
