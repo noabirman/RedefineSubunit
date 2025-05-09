@@ -16,6 +16,17 @@ if [ "$#" -lt 1 ]; then
   exit 1
 fi
 
+# Documentation:
+# This script runs the CombFold pipeline on a specified complex directory.
+# Usage:
+#   ./run_cf.sh <COMPLEX_DIR> [MODELS_DIR] [SUBUNITS_INFO_JSON]
+# Arguments:
+#   <COMPLEX_DIR>: Path to the complex directory containing input files.
+#   [MODELS_DIR]: (Optional) Path to the models directory. Defaults to <COMPLEX_DIR>/combfold/models.
+#   [SUBUNITS_INFO_JSON]: (Optional) Path to the subunits info JSON file. Defaults to <COMPLEX_DIR>/subunits_info.json.
+# Output:
+#   Results will be saved in <COMPLEX_DIR>/combfold/results.
+
 # Get input arguments
 COMPLEX_DIR="$1"
 MODELS_DIR="${2:-$COMPLEX_DIR/combfold/models}"  # Default to COMPLEX_DIR/combfold/models if not provided
