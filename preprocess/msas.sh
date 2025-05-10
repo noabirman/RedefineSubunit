@@ -30,7 +30,7 @@ export PATH="/sci/labs/dina/bshor/projects/af_combdock/tools/conda_install/minic
 . "/sci/labs/dina/bshor/projects/af_combdock/tools/conda_install/miniconda3/etc/profile.d/conda.sh"
 conda activate /cs/usr/bshor/sci/installations/af3_variations/deepmind/localalphafold3/alphafold3-conda
 
-INPUT = "$1"
+INPUT="$1"
 # Determine parent directory and set default paths
 PARENT_DIR=$(dirname "$INPUT")
 OUTPUT_DIR="${PARENT_DIR}/msa_output"
