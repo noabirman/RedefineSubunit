@@ -35,13 +35,14 @@ $INPUT = "$1"
 PARENT_DIR=$(dirname "$INPUT")
 $OUTPUT_DIR="${PARENT_DIR}/msa_output"
 
+# Print the paths for debugging
+echo Running MSA on : "$INPUT"
+echo Output directory: "$OUTPUT_DIR"
 
 # Ensure the output directory exists
 mkdir -p "$OUTPUT_DIR"
 
-# Print the paths for debugging
-echo Running MSA on : "$INPUT"
-echo Output directory: "$OUTPUT_DIR"
+
 
 python /cs/usr/bshor/sci/installations/af3_variations/deepmind/localalphafold3/alphafold3/run_alphafold.py \
   --jackhmmer_binary_path /cs/usr/bshor/sci/installations/af3_variations/deepmind/localalphafold3/hmmer/bin/jackhmmer \
