@@ -33,6 +33,7 @@ conda activate /cs/usr/bshor/sci/installations/af3_variations/deepmind/localalph
 $INPUT = "$1"
 # Determine parent directory and set default paths
 PARENT_DIR=$(dirname "$INPUT")
+$OUTPUT_DIR="${PARENT_DIR}/msa_output"
 
 
 # Ensure the output directory exists

@@ -91,7 +91,7 @@ python /cs/usr/bshor/sci/installations/af3_variations/deepmind/localalphafold3/a
   --hmmsearch_binary_path /cs/usr/bshor/sci/installations/af3_variations/deepmind/localalphafold3/hmmer/bin/hmmsearch \
   --norun_inference \
   --output_dir "$OUTPUT_DIR" \
-  --json_path "$INPUT_DIR"
+  --input_dir "$INPUT_DIR"
 
 # cd /cs/labs/dina/tsori/af3_example/RedefineSubunit/
 # python preprocess/msa_to_pairwise.py "$OUTPUT_DIR" "$MAPPING_JSON" "$SUBUNITS_INFO_JSON"
