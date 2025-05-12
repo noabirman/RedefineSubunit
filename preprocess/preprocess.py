@@ -137,7 +137,7 @@ if __name__ == '__main__':
     print("🔠 Renaming chain IDs...")
 
     # Rename chain IDs and save mapping
-    rename_protein_ids(af3_json, af3_json_renamed, mapping_file_path)
+    rename_protein_ids(af3_json, af3_json_renamed, mapping_file_path, split_mapping_file)
 
     # === Step 5: Split the renamed json into per chain===
     split_af3_json_by_chain(af3_json_renamed, msa_inputs_path)

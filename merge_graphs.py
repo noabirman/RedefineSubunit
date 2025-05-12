@@ -273,9 +273,10 @@ def save_subunits_info(graph: nx.Graph, name_mapping: dict, subunits_info: dict,
         print("→ JSON sequence length:", len(subunit_info['sequence']))
         print("→ JSON sequence start:", subunit_info['sequence'][:20], "…")
         # Get node data (SubunitInfo object)
+        iupred_shift = name_mapping[base_name]['start']-1
         node_data = graph.nodes[node]['data']
-        start = node_data.start
-        end = node_data.end  # Remember: this is inclusive
+        start = node_data.start + iupred_shift
+        end = node_data.end + iupred_shift
         sequence = node_data.sequence
 
         # Verify sequence matches the original
