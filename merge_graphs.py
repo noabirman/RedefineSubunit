@@ -3,8 +3,6 @@ import os
 import sys
 from collections import defaultdict
 import difflib
-
-
 import networkx as nx
 from complex_graph import graph, SubunitInfo, extract_sequence_with_seqio
 from typing import List
@@ -68,7 +66,6 @@ def check_subunit_sequence_reconstruction(original_path, new_path):
                 f"  Reconstructed: {reconstructed_seq}"
                 f"  Diff:\n{diff}"
             )
-
 
 def overlap(v1: SubunitInfo, v2: SubunitInfo, threshold = 5) -> bool:
     """Check if two SubunitInfo nodes overlap in at least one chain."""
@@ -199,7 +196,6 @@ def merge_sequence(subunits, start, end):
     merged_sequence = "".join(merged_sequence)
     return merged_sequence
 
-
 def sequences_match(seq1: str, seq2: str) -> bool:
     return all(a == b or a == '-' or b == '-' for a, b in zip(seq1, seq2)) and len(seq1) == len(seq2)
 
@@ -226,7 +222,7 @@ def find_original_subunit_info(base_name: str, name_mapping: dict, subunits_info
     ValueError
         If no subunit is found with the mapped chain name
     """
-    original_chain_name = name_mapping[base_name]
+    original_chain_name = name_mapping[base_name]['chain_id']
     original_name = next(
         (key for key, info in subunits_info.items() if original_chain_name in info['chain_names']),
         None
@@ -273,9 +269,10 @@ def save_subunits_info(graph: nx.Graph, name_mapping: dict, subunits_info: dict,
         print("→ JSON sequence length:", len(subunit_info['sequence']))
         print("→ JSON sequence start:", subunit_info['sequence'][:20], "…")
         # Get node data (SubunitInfo object)
+        iupred_shift = name_mapping[base_name]['start']-1
         node_data = graph.nodes[node]['data']
-        start = node_data.start
-        end = node_data.end  # Remember: this is inclusive
+        start = node_data.start + iupred_shift
+        end = node_data.end + iupred_shift
         sequence = node_data.sequence
 
         # Verify sequence matches the original
@@ -397,7 +394,7 @@ def save_subunits_info(graph: nx.Graph, name_mapping: dict, subunits_info: dict,
 
     with open(output_json_path, 'w') as f:
         json.dump(sorted_unified_subunits, f, indent=4)
-# main
+
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
         folder_path = os.path.abspath(sys.argv[1])
