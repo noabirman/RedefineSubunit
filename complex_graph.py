@@ -135,7 +135,7 @@ def extract_subunit_info(indexs: List[Tuple[int, int]], token_chain_ids: List[st
 
             subunit_infos.append(SubunitInfo(
                 name=subunit_name,
-                chain_names=[chain_id],  # Only one chain per subunit
+                chain_names=[chain_id.split('_')[0]],  # Only one chain per subunit
                 start=chain_start,
                 end=chain_end,
                 sequence=full_seq[chain_start:chain_end + 1]

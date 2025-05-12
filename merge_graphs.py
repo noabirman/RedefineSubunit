@@ -2,11 +2,73 @@ import json
 import os
 import sys
 from collections import defaultdict
+import difflib
+
 
 import networkx as nx
 from complex_graph import graph, SubunitInfo, extract_sequence_with_seqio
 from typing import List
 from vizualization_plots import plot_graph_by_chain
+
+def check_subunit_sequence_reconstruction(original_path, new_path):
+    import json
+
+    def load(path):
+        with open(path) as f:
+            return json.load(f)
+
+    original_data = load(original_path)
+    new_data = load(new_path)
+
+    for orig_id, orig_info in original_data.items():
+        matching_subs = [
+            (k, v) for k, v in new_data.items()
+            if k.startswith(orig_id + "_")
+        ]
+
+        if not matching_subs:
+            raise ValueError(f"[Missing] No matching sub-subunits for original subunit '{orig_id}'.")
+
+        # Sort sub-subunits by start_res
+        matching_subs.sort(key=lambda kv: kv[1]["start_res"])
+
+        expected_start = orig_info["start_res"]
+        expected_chains = set(orig_info["chain_names"])
+
+        reconstructed_seq = ""
+
+        for k, v in matching_subs:
+            start = v["start_res"]
+            seq = v["sequence"]
+            end = start + len(seq) - 1
+
+            if start != expected_start:
+                raise ValueError(
+                    f"[Gap/Overlap] Subunit '{k}' expected to start at residue {expected_start}, but starts at {start}."
+                )
+
+            if start == 1 and (not seq or seq[0] != "M"):
+                raise ValueError(
+                    f"[BadStart] Subunit '{k}' starts at residue 1 but first amino acid is not 'M': '{seq[:10]}'"
+                )
+
+            if set(v["chain_names"]) != expected_chains:
+                raise ValueError(
+                    f"[Chain mismatch] Subunit '{k}' has chains {v['chain_names']}, expected {orig_info['chain_names']}."
+                )
+
+            reconstructed_seq += seq
+            expected_start = end + 1
+
+        if reconstructed_seq != orig_info["sequence"]:
+            diff = '\n'.join(difflib.ndiff(orig_info["sequence"], reconstructed_seq))
+            raise ValueError(
+                f"[Mismatch] Reconstructed sequence for '{orig_id}' does not match original.\n"
+                f"  Original     : {orig_info['sequence']}\n"
+                f"  Reconstructed: {reconstructed_seq}"
+                f"  Diff:\n{diff}"
+            )
+
 
 def overlap(v1: SubunitInfo, v2: SubunitInfo, threshold = 5) -> bool:
     """Check if two SubunitInfo nodes overlap in at least one chain."""
@@ -299,19 +361,22 @@ def save_subunits_info(graph: nx.Graph, name_mapping: dict, subunits_info: dict,
                 low_segment_index += 1
 
             last_end = segment['end']
+            print(f"Updated last_end to {last_end} after segment {segment}")
 
         # Check for gap after last high segment
-        if last_end < total_length - 1:
+        print(f"last_end: {last_end}, total_length: {total_length}")
+        if last_end < total_length: #todo: was if last_end < total_length - 1: before
             low_start = last_end + 1
-            low_end = total_length - 1
+            low_end = total_length
 
             # Create low segment name
-            low_name = f"{base_name}_low_{low_segment_index}"
+            low_name = f"{subunit_info['name']}_low_{low_segment_index}"
 
             # Extract sequence for low segment
             low_sequence = full_sequence[low_start-1:low_end]  # +1 because end is inclusive
 
             # Create low segment entry
+            print(f"Creating low segment: {low_name} ({low_start}-{low_end})")
             unified_subunits[low_name] = {
                 'name': low_name,
                 'sequence': low_sequence,
@@ -355,5 +420,6 @@ if __name__ == "__main__":
         graphs = create_graphs_from_folder(folder_path)
         merged_graph = merge_graphs(graphs,name_mapping,subunits_info)
         save_subunits_info(merged_graph, name_mapping, subunits_info, folder_path)
+        check_subunit_sequence_reconstruction(original_subunits_path, os.path.join(os.path.dirname(folder_path),"combfold/subunits_info.json"))
     else:
         print("usage: <script> enter folder_name, [subunits_json_path], [mapping_json_path], [output_json_path]")
