@@ -161,7 +161,7 @@ def merge_connected_components(overlap_graph, graphs: List[nx.Graph],subunit_nam
                 merged_start = 1
             merged_end = max(subunit.end for subunit in subunits)
             if is_last:
-                _, subunit = find_original_subunit_info(chain_prefix, name_mapping, subunits_info)
+                _, subunit = find_original_subunit_info(chain_prefix, name_mapping, subunits_info, merged_start, merged_end)
                 if merged_end > (len(subunit["sequence"]) - 5):
                     merged_end = len(subunit["sequence"])
             merged_sequence = merge_sequence(subunits, merged_start, merged_end)
@@ -203,7 +203,7 @@ def merge_sequence(subunits, start, end):
 def sequences_match(seq1: str, seq2: str) -> bool:
     return all(a == b or a == '-' or b == '-' for a, b in zip(seq1, seq2)) and len(seq1) == len(seq2)
 
-def find_original_subunit_info(base_name: str, name_mapping: dict, subunits_info: dict) -> tuple[str, dict]:
+def find_original_subunit_info(base_name: str, name_mapping: dict, subunits_info: dict, start, end) -> tuple[str, dict]:
     """
     Find the original subunit name and info given a base name using chain name mapping.
 
@@ -226,20 +226,20 @@ def find_original_subunit_info(base_name: str, name_mapping: dict, subunits_info
     ValueError
         If no subunit is found with the mapped chain name
     """
-    original_chain_name = name_mapping[base_name]
-    original_name = next(
-        (key for key, info in subunits_info.items() if original_chain_name in info['chain_names']),
+    original_chain_name = name_mapping[base_name]['chain_id']
+    original_subunit_name = next(
+        (key for key, info in subunits_info.items() if (original_chain_name in info['chain_names'] and info['start_res'] <= start and info['start_res'] + len(info['sequence']) - 1 >= end)),
         None
     )
 
-    if original_name is None:
+    if original_subunit_name is None:
         raise ValueError(f"No subunit found with chain name: {original_chain_name}")
 
-    subunit_info = subunits_info.get(original_name)
+    subunit_info = subunits_info.get(original_subunit_name)
     if subunit_info is None:
-        raise ValueError(f"No subunit info found for: {original_name}")
+        raise ValueError(f"No subunit info found for: {original_subunit_name}")
 
-    return original_name, subunit_info
+    return original_subunit_name, subunit_info
 
 def save_subunits_info(graph: nx.Graph, name_mapping: dict, subunits_info: dict, folder: str) -> None:
     """
@@ -267,14 +267,15 @@ def save_subunits_info(graph: nx.Graph, name_mapping: dict, subunits_info: dict,
         # Extract base name from node name (e.g., "A" from "A1_high")
         base_name = node.split('_')[0]
         # Get original subunit name from mapping
-        original_name, subunit_info = find_original_subunit_info(base_name, name_mapping, subunits_info)
+        node_data = graph.nodes[node]['data']
+
+        original_name, subunit_info = find_original_subunit_info(base_name, name_mapping, subunits_info, node_data.start, node_data.end)
         # added for debug
         print("→ JSON chain_names:", subunit_info['chain_names'])
         print("→ JSON sequence length:", len(subunit_info['sequence']))
         print("→ JSON sequence start:", subunit_info['sequence'][:20], "…")
         # Get node data (SubunitInfo object)
         iupred_shift = name_mapping[base_name]['start']-1
-        node_data = graph.nodes[node]['data']
         start = node_data.start + iupred_shift
         end = node_data.end + iupred_shift
         sequence = node_data.sequence
@@ -295,10 +296,7 @@ def save_subunits_info(graph: nx.Graph, name_mapping: dict, subunits_info: dict,
             print(f"SubunitInfo.seq:   {sequence!r}  (len={len(sequence)})")
             print(f"Expected slice:    {expected_sequence!r}  (len={len(expected_sequence)})")
             print(f"Full sequence len: {len(full_seq)}")
-            print(f"First 10 res:      {full_seq[:10]!r}")
             print(f"Chain names:       {subunit_info['chain_names']!r}")
-            print(f"Name mapping JSON: {name_mapping}")
-            print(f"Subunits_info keys:{list(subunits_info.keys())[:10]} …")
             raise ValueError("Stopping here for debug")
         else:
             sequence = expected_sequence

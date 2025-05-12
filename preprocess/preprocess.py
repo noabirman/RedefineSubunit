@@ -153,7 +153,7 @@ if __name__ == '__main__':
     if mode:
         json_to_fasta(json_file, complex_name)
     else:
-        merge_duplicate_chain_sequences(json_file)
+        # merge_duplicate_chain_sequences(json_file)
         subunit_to_fasta(json_file, complex_name)
     # === Step 2: Split FASTA and run IUPred3 on each chain ===
     print("🔬 Splitting FASTA and running IUPred3...")
