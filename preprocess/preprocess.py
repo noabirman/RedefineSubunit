@@ -91,6 +91,40 @@ def split_af3_json_by_chain(input_json_path, output_dir="msa_input"):
 
         print(f"✅ Saved {output_path}")
 
+import json
+from collections import defaultdict
+
+def merge_duplicate_chain_sequences(json_path):
+    # Load subunits JSON
+    with open(json_path, "r") as f:
+        subunits = json.load(f)
+
+    # Group subunits by chain name
+    chain_to_subunits = defaultdict(list)
+    for subunit_name, info in subunits.items():
+        for chain in info["chain_names"]:
+            chain_to_subunits[chain].append((subunit_name, info))
+
+    merged_subunits = {}
+
+    # Merge by chain, keep the name of the first subunit
+    for chain_name, entries in chain_to_subunits.items():
+        sorted_entries = sorted(entries, key=lambda x: x[1]["start_res"])
+        first_name, first_info = sorted_entries[0]
+        full_sequence = "".join(info["sequence"] for _, info in sorted_entries)
+
+        merged_subunits[first_name] = {
+            "name": first_info["name"],
+            "chain_names": [chain_name],
+            "start_res": first_info["start_res"],
+            "sequence": full_sequence
+        }
+
+    # Save merged subunits back to the same JSON file
+    with open(json_path, "w") as f:
+        json.dump(merged_subunits, f, indent=4)
+
+    print(f"Merged subunits saved to {json_path}")
 
 if __name__ == '__main__':
     # === Input Arguments ===
@@ -119,6 +153,7 @@ if __name__ == '__main__':
     if mode:
         json_to_fasta(json_file, complex_name)
     else:
+        merge_duplicate_chain_sequences(json_file)
         subunit_to_fasta(json_file, complex_name)
     # === Step 2: Split FASTA and run IUPred3 on each chain ===
     print("🔬 Splitting FASTA and running IUPred3...")
