@@ -94,20 +94,28 @@ if __name__ == '__main__':
         if len(seq) <= max_len:
             new_id = f"{prot_id}_1"
             fragments.append((new_id, seq))
-            fragment_map[prot_id] = [new_id]
+            fragment_map[prot_id] = [{
+                "id": new_id,
+                "start": 1,
+                "end": len(seq)
+            }]
             continue
 
         # Find cut points
         cuts = find_cut_points(scores, max_len, disorder_threshold)
         prev = 0
-        frag_ids = []
+        frag_info = []
         for i, cut in enumerate(cuts + [len(seq)]):
             frag_seq = seq[prev:cut]
-            new_id = f"{prot_id}_{i+1}"
+            new_id = f"{prot_id}_{i + 1}"
             fragments.append((new_id, frag_seq))
-            frag_ids.append(new_id)
+            frag_info.append({
+                "id": new_id,
+                "start": prev + 1,
+                "end": cut
+            })
             prev = cut
-        fragment_map[prot_id] = frag_ids
+        fragment_map[prot_id] = frag_info
 
     # === Write Output ===
     with open(output_fasta, "w") as f:
@@ -133,6 +141,5 @@ if __name__ == '__main__':
 
     with open(os.path.join(complex_name,"af3_input.json"), "w") as f:
         json.dump(af3_json, f, indent=2)
-
     print("✅ AlphaFold 3 input JSON saved to af3_input.json")
 
