@@ -243,13 +243,13 @@ def show_graph_with_spacing(graph: nx.Graph, folder_path: str, name:str):
     plt.savefig(save_path, bbox_inches='tight')
     plt.show()
 
-def show_circle(graph: nx.Graph, folder_path:str, name:str):
+def show_circle(graph: nx.Graph, folder_path:str):
     from matplotlib.path import Path
     from matplotlib.patches import PathPatch
 
-    # Sample graph creation for demonstration
-    graph = nx.Graph()
-    graph.add_edges_from([('A', 'B'), ('B', 'C'), ('C', 'A'), ('A', 'D'), ('B', 'D'), ('C', 'D')])
+    # # Sample graph creation for demonstration
+    # graph = nx.Graph()
+    # graph.add_edges_from([('A', 'B'), ('B', 'C'), ('C', 'A'), ('A', 'D'), ('B', 'D'), ('C', 'D')])
 
     plt.figure(figsize=(12, 12))
 
@@ -300,7 +300,7 @@ def show_circle(graph: nx.Graph, folder_path:str, name:str):
 
     # Hide axes
     plt.axis('off')
-    plt.savefig(os.path.join(folder_path,f"curved_{name}.png"))
+    plt.savefig(os.path.join(folder_path,f"curved_graph.png"))
 
 def show_graph(graph: nx.Graph, folder_path:str):
     """Print the nodes and edges of a graph."""

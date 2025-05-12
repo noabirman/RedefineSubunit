@@ -8,7 +8,7 @@ import difflib
 import networkx as nx
 from complex_graph import graph, SubunitInfo, extract_sequence_with_seqio
 from typing import List
-from vizualization_plots import plot_graph_by_chain
+from vizualization_plots import show_circle
 
 def check_subunit_sequence_reconstruction(original_path, new_path):
     import json
@@ -397,7 +397,11 @@ def save_subunits_info(graph: nx.Graph, name_mapping: dict, subunits_info: dict,
 
     with open(output_json_path, 'w') as f:
         json.dump(sorted_unified_subunits, f, indent=4)
-# main
+
+def rename_graph_nodes (graph_to_rename, name_mapping):
+    mapping_dict = {name:name_mapping['chain_id'] for name in name_mapping}
+    graph_to_rename = nx.relabel_nodes(graph_to_rename, mapping_dict)
+    return graph_to_rename
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
         folder_path = os.path.abspath(sys.argv[1])
@@ -421,5 +425,7 @@ if __name__ == "__main__":
         merged_graph = merge_graphs(graphs,name_mapping,subunits_info)
         save_subunits_info(merged_graph, name_mapping, subunits_info, folder_path)
         check_subunit_sequence_reconstruction(original_subunits_path, os.path.join(os.path.dirname(folder_path),"combfold/subunits_info.json"))
+        final_graph = rename_graph_nodes(merged_graph, name_mapping)
+        show_circle(final_graph, folder_path)
     else:
         print("usage: <script> enter folder_name, [subunits_json_path], [mapping_json_path], [output_json_path]")
