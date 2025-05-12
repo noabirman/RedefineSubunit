@@ -227,18 +227,29 @@ def find_original_subunit_info(base_name: str, name_mapping: dict, subunits_info
         If no subunit is found with the mapped chain name
     """
     original_chain_name = name_mapping[base_name]['chain_id']
-    original_subunit_name = next(
-        (key for key, info in subunits_info.items() if (original_chain_name in info['chain_names'] and info['start_res'] <= start and info['start_res'] + len(info['sequence']) - 1 >= end)),
-        None
-    )
+    matching_subunits = {
+        key: info for key, info in subunits_info.items()
+        if original_chain_name in info['chain_names']
+    }
 
-    if original_subunit_name is None:
+    if not matching_subunits:
         raise ValueError(f"No subunit found with chain name: {original_chain_name}")
 
-    subunit_info = subunits_info.get(original_subunit_name)
-    if subunit_info is None:
-        raise ValueError(f"No subunit info found for: {original_subunit_name}")
+    if len(matching_subunits) == 1:
+        # If only one match, return it directly
+        original_subunit_name = next(iter(matching_subunits))
+    else:
+        # If multiple matches, filter by start/end position
+        original_subunit_name = next(
+            (key for key, info in matching_subunits.items()
+             if info['start_res'] <= start and info['start_res'] + len(info['sequence']) - 1 >= end),
+            None
+        )
 
+    if original_subunit_name is None:
+        raise ValueError(f"No subunit found matching position criteria for chain: {original_chain_name}")
+
+    subunit_info = subunits_info[original_subunit_name]
     return original_subunit_name, subunit_info
 
 def save_subunits_info(graph: nx.Graph, name_mapping: dict, subunits_info: dict, folder: str) -> None:
