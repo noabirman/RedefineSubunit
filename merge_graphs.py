@@ -105,6 +105,8 @@ def merge_connected_components(overlap_graph, graphs: List[nx.Graph],subunit_nam
             merged_sequence = merge_sequence(subunits, merged_start, merged_end)
             merged_subunit = SubunitInfo(name=merged_name, chain_names=merged_chains, start=merged_start, end=merged_end,
                                          sequence=merged_sequence)
+            print(f"→ Merged node: {merged_name}, chains={merged_chains}, start={merged_start}, end={merged_end}, seq_len={len(merged_sequence)}")
+
             # Add merged node to the merged graph
             merged_graph.add_node(merged_name, data=merged_subunit)
             # Map original nodes to merged node name
@@ -119,15 +121,22 @@ def merge_connected_components(overlap_graph, graphs: List[nx.Graph],subunit_nam
 
 def merge_sequence(subunits, start, end):
     merged_sequence = ['-'] * (end + 1 - start)  # inclusion of end position
+    print(f"→ Merging sequence from {start} to {end}")
     for subunit in subunits:
+        print(f"  ↳ Subunit: {subunit.name}, start={subunit.start}, end={subunit.end}, seq_len={len(subunit.sequence)}")
         for i, char in enumerate(subunit.sequence):
             pos = subunit.start - start + i
+            if pos < 0 or pos >= len(merged_sequence):
+                raise IndexError(
+                    f"Index out of bounds while merging: pos={pos}, start={start}, subunit.start={subunit.start}, i={i}, merged_len={len(merged_sequence)}")
             if merged_sequence[pos] == '-':
                 merged_sequence[pos] = char
             elif merged_sequence[pos] != char:
+                print(f"⚠ Conflict at pos={pos + start}: existing={merged_sequence[pos]} vs new={char}")
                 raise ValueError(f"Conflict detected at position {pos}: {merged_sequence[pos]} vs {char}")
     merged_sequence = "".join(merged_sequence)
     return merged_sequence
+
 
 def sequences_match(seq1: str, seq2: str) -> bool:
     return all(a == b or a == '-' or b == '-' for a, b in zip(seq1, seq2)) and len(seq1) == len(seq2)
