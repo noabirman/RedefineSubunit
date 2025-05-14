@@ -69,7 +69,6 @@ def check_subunit_sequence_reconstruction(original_path, new_path):
                 f"  Diff:\n{diff}"
             )
 
-
 def overlap(v1: SubunitInfo, v2: SubunitInfo, threshold = 5) -> bool:
     """Check if two SubunitInfo nodes overlap in at least one chain."""
     return any(chain in v2.chain_names for chain in v1.chain_names) and not (v1.end + threshold < v2.start or v2.end + threshold < v1.start)
@@ -199,7 +198,6 @@ def merge_sequence(subunits, start, end):
     merged_sequence = "".join(merged_sequence)
     return merged_sequence
 
-
 def sequences_match(seq1: str, seq2: str) -> bool:
     return all(a == b or a == '-' or b == '-' for a, b in zip(seq1, seq2)) and len(seq1) == len(seq2)
 
@@ -240,11 +238,7 @@ def find_original_subunit_info(base_name: str, name_mapping: dict, subunits_info
         original_subunit_name = next(iter(matching_subunits))
     else:
         # If multiple matches, filter by start/end position
-        original_subunit_name = next(
-            (key for key, info in matching_subunits.items()
-             if info['start_res'] <= start and info['start_res'] + len(info['sequence']) - 1 >= end),
-            None
-        )
+        raise ValueError(f"Multiple subunits found with chain name: {original_chain_name}")
 
     if original_subunit_name is None:
         raise ValueError(f"No subunit found matching position criteria for chain: {original_chain_name}")
