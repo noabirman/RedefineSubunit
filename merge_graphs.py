@@ -430,6 +430,6 @@ if __name__ == "__main__":
         save_subunits_info(merged_graph, name_mapping, subunits_info, folder_path)
         check_subunit_sequence_reconstruction(original_subunits_path, os.path.join(os.path.dirname(folder_path),"combfold/subunits_info.json"))
         final_graph = rename_graph_nodes(merged_graph, name_mapping)
-        show_circle(final_graph, folder_path)
+        show_circle(final_graph, os.path.dirname(folder_path))
     else:
         print("usage: <script> enter folder_name, [subunits_json_path], [mapping_json_path], [output_json_path]")
