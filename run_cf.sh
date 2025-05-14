@@ -30,7 +30,7 @@ fi
 # Get input arguments
 COMPLEX_DIR="$1"
 MODELS_DIR="${2:-$COMPLEX_DIR/combfold/models}"  # Default to COMPLEX_DIR/combfold/models if not provided
-SUBUNITS_INFO_JSON="${3:-$COMPLEX_DIR/subunits_info.json}"  # Default to COMPLEX_DIR/subunits_info.json if not provided
+SUBUNITS_INFO_JSON="${3:-$COMPLEX_DIR/combfold/subunits_info.json}"  # Default to COMPLEX_DIR/subunits_info.json if not provided
 
 # Validate COMPLEX_DIR
 if [ ! -d "$COMPLEX_DIR" ]; then
