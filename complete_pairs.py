@@ -1,95 +1,83 @@
 import os
-import shutil
 import json
-import sys
 
 def normalize_pair(pair):
-    return tuple(sorted(pair))
+    return tuple(sorted(part.lower() for part in pair))
 
-def main(input_directory):
-    msa_pairs_dir = os.path.join(input_directory, 'msa_pairs')
-    af_pairs_dir = os.path.join(input_directory, 'af_pairs')
-    json_file = os.path.join(input_directory, 'missing_pairs.json')
-    
-    if not os.path.exists(msa_pairs_dir) or not os.path.exists(af_pairs_dir) or not os.path.exists(json_file):
-        print("Error: One or more required paths do not exist.")
-        return
-    
-    # Read the JSON file
-    with open(json_file, 'r') as f:
-        missing_pairs = [normalize_pair(pair) for pair in json.load(f)]
-    
-    # Collect pairs from directories
+def find_missing_pairs(msa_pairs_dir, af_pairs_dir):
+    # Collect pairs from MSA directory
     msa_pairs = {normalize_pair(dir_name.split('_')) for dir_name in os.listdir(msa_pairs_dir)}
-    af_pairs = {normalize_pair(dir_name.split('_')) for dir_name in os.listdir(af_pairs_dir)}
-    
+
+    # Collect pairs from AF JSON files
+    af_pairs = set()
+    for af_file in os.listdir(af_pairs_dir):
+        if af_file.endswith('.json'):
+            pair = normalize_pair(af_file.replace('.json', '').split('_'))
+            af_pairs.add(pair)
+
     # Find the missing pairs
-    real_missing_pairs = msa_pairs - af_pairs
-    
-    # Validation step
-    if set(missing_pairs) != real_missing_pairs:
-        print("Error: The pairs in the JSON do not match the actual missing pairs.")
-        
-        in_json_not_real = set(missing_pairs) - real_missing_pairs
-        in_real_not_json = real_missing_pairs - set(missing_pairs)
+    missing_pairs = list(msa_pairs - af_pairs)
+    return missing_pairs
 
-        if in_json_not_real:
-            print("\nPairs in JSON but not actually missing:")
-            for pair in sorted(in_json_not_real):
-                print(pair)
-        
-        if in_real_not_json:
-            print("\nPairs actually missing but not listed in JSON:")
-            for pair in sorted(in_real_not_json):
-                print(pair)
+def find_shared_chains(subunits_info_path):
+    with open(subunits_info_path, 'r') as f:
+        subunits_info = json.load(f)
 
-        return
-    
-    # Create the output directory
-    output_dir = os.path.join(input_directory, 'missing_msa_pairs')
-    os.makedirs(output_dir, exist_ok=True)
+    shared_chains = {}
+    subunit_names = list(subunits_info.keys())
+    for i, name1 in enumerate(subunit_names):
+        for name2 in subunit_names[i + 1:]:
+            common_chains = set(chain.lower() for chain in subunits_info[name1]['chain_names']).intersection(
+                chain.lower() for chain in subunits_info[name2]['chain_names']
+            )
+            if common_chains:
+                shared_chains[(name1, name2)] = list(common_chains)
 
-    # Copy the missing pairs
-    for pair in missing_pairs:
-        dir_name = f"{pair[0]}_{pair[1]}"
-        src_path = os.path.join(msa_pairs_dir, dir_name) if dir_name in os.listdir(msa_pairs_dir) else os.path.join(msa_pairs_dir, f"{pair[1]}_{pair[0]}")
-        dst_path = os.path.join(output_dir, dir_name)
-        shutil.copytree(src_path, dst_path)
-    
-    print(f"\nCopied {len(missing_pairs)} pairs to {output_dir}")
-    
-    # Read the JSON file
-    with open(json_file, 'r') as f:
-        missing_pairs = [normalize_pair(pair) for pair in json.load(f)]
-    
-    # Collect pairs from directories
-    msa_pairs = {normalize_pair(dir_name.split('_')) for dir_name in os.listdir(msa_pairs_dir)}
-    af_pairs = {normalize_pair(dir_name.split('_')) for dir_name in os.listdir(af_pairs_dir)}
-    
-    # Find the missing pairs
-    real_missing_pairs = msa_pairs - af_pairs
-    
-    # Validation step
-    if set(missing_pairs) != real_missing_pairs:
-        print("Error: The pairs in the JSON do not match the actual missing pairs.")
-        return
-    
-    # Create the output directory
-    output_dir = os.path.join(input_directory, 'missing_msa_pairs')
-    os.makedirs(output_dir, exist_ok=True)
+    return shared_chains
 
-    # Copy the missing pairs
-    for pair in missing_pairs:
-        dir_name = f"{pair[0]}_{pair[1]}"
-        src_path = os.path.join(msa_pairs_dir, dir_name) if dir_name in os.listdir(msa_pairs_dir) else os.path.join(msa_pairs_dir, f"{pair[1]}_{pair[0]}")
-        dst_path = os.path.join(output_dir, dir_name)
-        shutil.copytree(src_path, dst_path)
-    
-    print(f"Copied {len(missing_pairs)} pairs to {output_dir}")
+def main(dir_path):
+    output = {}
+    for sub_dir in os.listdir(dir_path):
+        sub_dir_path = os.path.join(dir_path, sub_dir)
+        if not os.path.isdir(sub_dir_path):
+            continue
+
+        print(f"Processing subdirectory: {sub_dir}")
+        msa_pairs_dir = os.path.join(sub_dir_path, 'msa_pairs')
+        af_pairs_dir = os.path.join(sub_dir_path, 'af_pairs')
+        subunits_info_path = os.path.join(sub_dir_path, 'subunits_info.json')
+
+        if not (os.path.exists(msa_pairs_dir) and os.path.exists(af_pairs_dir) and os.path.exists(subunits_info_path)):
+            print(f"Skipping {sub_dir}: Required files or directories are missing.")
+            continue
+
+        # Find missing pairs
+        missing_pairs = find_missing_pairs(msa_pairs_dir, af_pairs_dir)
+
+        # Find shared chains
+        shared_chains = find_shared_chains(subunits_info_path)
+
+        # Store results
+        output[sub_dir] = {
+            "missing_pairs": missing_pairs,
+            "shared_chains": shared_chains
+        }
+
+        # Print results
+        print(f"Subdirectory: {sub_dir}")
+        print(f"  Missing pairs: {missing_pairs}")
+        print(f"  Shared chains: {shared_chains}")
+
+    # Write output to JSON file
+    output_file = os.path.join(dir_path, 'summary.json')
+    with open(output_file, 'w') as f:
+        json.dump(output, f, indent=4)
+
+    print(f"\nSummary written to {output_file}")
 
 if __name__ == "__main__":
+    import sys
     if len(sys.argv) != 2:
-        print("Usage: python sync_missing_pairs.py <input_directory>")
+        print("Usage: python script.py <dir_path>")
     else:
         main(sys.argv[1])
-
