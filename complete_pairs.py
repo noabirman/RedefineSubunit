@@ -31,10 +31,11 @@ def find_shared_chains(subunits_info_path):
                 chain.lower() for chain in subunits_info[name2]['chain_names']
             )
             if common_chains:
-                shared_chains[(name1, name2)] = list(common_chains)
+                # Use a string key instead of a tuple
+                key = f"{name1},{name2}"
+                shared_chains[key] = list(common_chains)
 
     return shared_chains
-
 def main(dir_path):
     output = {}
     for sub_dir in os.listdir(dir_path):
