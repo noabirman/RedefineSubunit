@@ -35,6 +35,9 @@ def find_shared_chains(subunits_info_path):
 
 def main(dir_path):
     output = {}
+    subdirs_with_missing_pairs = []
+    subdirs_with_shared_chains = []
+
     for sub_dir in os.listdir(dir_path):
         sub_dir_path = os.path.join(dir_path, sub_dir)
         if not os.path.isdir(sub_dir_path):
@@ -51,9 +54,13 @@ def main(dir_path):
 
         # Find missing pairs
         missing_pairs = find_missing_pairs(msa_pairs_dir, af_pairs_dir)
+        if missing_pairs:
+            subdirs_with_missing_pairs.append(sub_dir)
 
         # Find shared chains
         shared_chains = find_shared_chains(subunits_info_path)
+        if shared_chains:
+            subdirs_with_shared_chains.append(sub_dir)
 
         # Store results
         output[sub_dir] = {
@@ -66,16 +73,16 @@ def main(dir_path):
         print(f"  Missing pairs: {missing_pairs}")
         print(f"  Shared chains: {shared_chains}")
 
+    # Sort the output dictionary by subdirectory names
+    sorted_output = dict(sorted(output.items()))
+
+    # Add lists of subdirectories with missing pairs and shared chains
+    sorted_output["subdirs_with_missing_pairs"] = subdirs_with_missing_pairs
+    sorted_output["subdirs_with_shared_chains"] = subdirs_with_shared_chains
+
     # Write output to JSON file
     output_file = os.path.join(dir_path, 'summary.json')
     with open(output_file, 'w') as f:
-        json.dump(output, f, indent=4)
+        json.dump(sorted_output, f, indent=4)
 
     print(f"\nSummary written to {output_file}")
-
-if __name__ == "__main__":
-    import sys
-    if len(sys.argv) != 2:
-        print("Usage: python script.py <dir_path>")
-    else:
-        main(sys.argv[1])
