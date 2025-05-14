@@ -23,8 +23,8 @@ def find_shared_chains(subunits_info_path):
     subunit_names = list(subunits_info.keys())
     for i, name1 in enumerate(subunit_names):
         for name2 in subunit_names[i + 1:]:
-            common_chains = set(chain.lower() for chain in subunits_info[name1]['chain_names']).intersection(
-                chain.lower() for chain in subunits_info[name2]['chain_names']
+            common_chains = set(chain for chain in subunits_info[name1]['chain_names']).intersection(
+                chain for chain in subunits_info[name2]['chain_names']
             )
             if common_chains:
                 # Use a string key instead of a tuple
