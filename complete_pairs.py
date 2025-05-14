@@ -5,15 +5,11 @@ def normalize_pair(pair):
     return tuple(sorted(part.lower() for part in pair))
 
 def find_missing_pairs(msa_pairs_dir, af_pairs_dir):
-    # Collect pairs from MSA directory
-    msa_pairs = {normalize_pair(dir_name.split('_')) for dir_name in os.listdir(msa_pairs_dir)}
+    # Collect pairs from MSA files
+    msa_pairs = {normalize_pair(file_name.replace('.json', '').split('_')) for file_name in os.listdir(msa_pairs_dir) if file_name.endswith('.json')}
 
-    # Collect pairs from AF JSON files
-    af_pairs = set()
-    for af_file in os.listdir(af_pairs_dir):
-        if af_file.endswith('.json'):
-            pair = normalize_pair(af_file.replace('.json', '').split('_'))
-            af_pairs.add(pair)
+    # Collect pairs from AF directories
+    af_pairs = {normalize_pair(dir_name.split('_')) for dir_name in os.listdir(af_pairs_dir) if os.path.isdir(os.path.join(af_pairs_dir, dir_name))}
 
     # Find the missing pairs
     missing_pairs = list(msa_pairs - af_pairs)
@@ -36,6 +32,7 @@ def find_shared_chains(subunits_info_path):
                 shared_chains[key] = list(common_chains)
 
     return shared_chains
+
 def main(dir_path):
     output = {}
     for sub_dir in os.listdir(dir_path):
@@ -56,29 +53,4 @@ def main(dir_path):
         missing_pairs = find_missing_pairs(msa_pairs_dir, af_pairs_dir)
 
         # Find shared chains
-        shared_chains = find_shared_chains(subunits_info_path)
-
-        # Store results
-        output[sub_dir] = {
-            "missing_pairs": missing_pairs,
-            "shared_chains": shared_chains
-        }
-
-        # Print results
-        print(f"Subdirectory: {sub_dir}")
-        print(f"  Missing pairs: {missing_pairs}")
-        print(f"  Shared chains: {shared_chains}")
-
-    # Write output to JSON file
-    output_file = os.path.join(dir_path, 'summary.json')
-    with open(output_file, 'w') as f:
-        json.dump(output, f, indent=4)
-
-    print(f"\nSummary written to {output_file}")
-
-if __name__ == "__main__":
-    import sys
-    if len(sys.argv) != 2:
-        print("Usage: python script.py <dir_path>")
-    else:
-        main(sys.argv[1])
+        shared_chains = find_s
