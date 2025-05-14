@@ -403,7 +403,7 @@ def save_subunits_info(graph: nx.Graph, name_mapping: dict, subunits_info: dict,
         json.dump(sorted_unified_subunits, f, indent=4)
 
 def rename_graph_nodes (graph_to_rename, name_mapping):
-    mapping_dict = {name:name_mapping['chain_id'] for name in name_mapping}
+    mapping_dict = {name:name_mapping[name]['chain_id'] for name in name_mapping}
     graph_to_rename = nx.relabel_nodes(graph_to_rename, mapping_dict)
     return graph_to_rename
 if __name__ == "__main__":
