@@ -243,10 +243,6 @@ def show_graph_with_spacing(graph: nx.Graph, folder_path: str, name:str):
     plt.savefig(save_path, bbox_inches='tight')
     plt.show()
 
-import os
-import matplotlib.pyplot as plt
-import networkx as nx
-
 def show_circle(graph: nx.Graph, folder_path: str):
     """
     Displays a graph in a circular layout with straight edges.
@@ -275,7 +271,7 @@ def show_circle(graph: nx.Graph, folder_path: str):
 
     # Save the plot
     plt.savefig(os.path.join(folder_path, "curved_graph.png"))
-    plt.show()
+
 def show_graph(graph: nx.Graph, folder_path:str):
     """Print the nodes and edges of a graph."""
     print(f"total number of Nodes: {graph.number_of_nodes()}")
