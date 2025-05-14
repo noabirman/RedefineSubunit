@@ -243,14 +243,18 @@ def show_graph_with_spacing(graph: nx.Graph, folder_path: str, name:str):
     plt.savefig(save_path, bbox_inches='tight')
     plt.show()
 
-def show_circle(graph: nx.Graph, folder_path:str):
-    from matplotlib.path import Path
-    from matplotlib.patches import PathPatch
+import os
+import matplotlib.pyplot as plt
+import networkx as nx
 
-    # # Sample graph creation for demonstration
-    # graph = nx.Graph()
-    # graph.add_edges_from([('A', 'B'), ('B', 'C'), ('C', 'A'), ('A', 'D'), ('B', 'D'), ('C', 'D')])
+def show_circle(graph: nx.Graph, folder_path: str):
+    """
+    Displays a graph in a circular layout with straight edges.
 
+    Args:
+        graph (nx.Graph): The graph to display.
+        folder_path (str): Path to save the output image.
+    """
     plt.figure(figsize=(12, 12))
 
     # Sort nodes alphabetically
@@ -259,49 +263,19 @@ def show_circle(graph: nx.Graph, folder_path:str):
     # Generate positions for the nodes in circular layout
     pos = nx.circular_layout(sorted_nodes)
 
-    # Draw nodes
+    # Draw nodes and labels
     nx.draw_networkx_nodes(graph, pos, node_color='lightblue', node_size=300)
     nx.draw_networkx_labels(graph, pos, font_size=5)
 
-    # Function to compute the control points for a cubic Bezier curve
-    def compute_control_points(p1, p2, curve_factor):
-        midpoint = (p1 + p2) / 2
-        dir_v = p2 - p1
-        perp_v = np.array([dir_v[1], -dir_v[0]])
-        perp_v /= np.linalg.norm(perp_v)
-        contrl1 = midpoint - curve_factor * perp_v
-        contrl2 = midpoint + curve_factor * perp_v
-        return contrl1, contrl2
-
-    # Draw edges with dynamic curvature
-    for edge in graph.edges():
-        p1 = np.array(pos[edge[0]])
-        p2 = np.array(pos[edge[1]])
-
-        # Distance between nodes
-        distance = np.linalg.norm(p1 - p2)
-
-        # Curve factor: closer nodes = more curve
-        max_dist = 2.0  # Max distance for unit circle nodes
-        normalized_dist = distance / max_dist
-        curve_factor = 0.5 * (1 - normalized_dist)
-
-        # Compute control points for cubic Bezier curve
-        contrl1, contrl2 = compute_control_points(p1, p2, curve_factor)
-
-        # Create Bezier path
-        verts = [p1, contrl1, contrl2, p2]
-        codes = [Path.MOVETO, Path.CURVE4, Path.CURVE4, Path.CURVE4]
-        path = Path(verts, codes)
-
-        # Add path to plot
-        patch = PathPatch(path, edgecolor='gray', fill=False)
-        plt.gca().add_patch(patch)
+    # Draw straight edges
+    nx.draw_networkx_edges(graph, pos, edge_color='gray')
 
     # Hide axes
     plt.axis('off')
-    plt.savefig(os.path.join(folder_path,f"curved_graph.png"))
 
+    # Save the plot
+    plt.savefig(os.path.join(folder_path, "curved_graph.png"))
+    plt.show()
 def show_graph(graph: nx.Graph, folder_path:str):
     """Print the nodes and edges of a graph."""
     print(f"total number of Nodes: {graph.number_of_nodes()}")
