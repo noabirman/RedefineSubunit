@@ -53,4 +53,29 @@ def main(dir_path):
         missing_pairs = find_missing_pairs(msa_pairs_dir, af_pairs_dir)
 
         # Find shared chains
-        shared_chains = find_s
+        shared_chains = find_shared_chains(subunits_info_path)
+
+        # Store results
+        output[sub_dir] = {
+            "missing_pairs": missing_pairs,
+            "shared_chains": shared_chains
+        }
+
+        # Print results
+        print(f"Subdirectory: {sub_dir}")
+        print(f"  Missing pairs: {missing_pairs}")
+        print(f"  Shared chains: {shared_chains}")
+
+    # Write output to JSON file
+    output_file = os.path.join(dir_path, 'summary.json')
+    with open(output_file, 'w') as f:
+        json.dump(output, f, indent=4)
+
+    print(f"\nSummary written to {output_file}")
+
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) != 2:
+        print("Usage: python script.py <dir_path>")
+    else:
+        main(sys.argv[1])
