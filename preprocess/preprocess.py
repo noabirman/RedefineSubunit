@@ -128,36 +128,56 @@ def merge_duplicate_chain_sequences(json_path):
 
 if __name__ == '__main__':
     # === Input Arguments ===
-    json_file = sys.argv[1]            # Input JSON file (AF3 or subunits)
-    complex_name = os.path.abspath(sys.argv[2])
-    mode = sys.argv[3] if len(sys.argv) > 3 else None  # Optional argument
+    if len(sys.argv) < 2 or len(sys.argv) > 4:
+        print("Usage: python preprocess.py <dir_path> [json_path] [mode]")
+        sys.exit(1)
+
+    # Parse arguments
+    dir_path = os.path.abspath(sys.argv[1])
+    json_path = os.path.join(dir_path, 'subunits_info.json') if len(sys.argv) == 2 else os.path.abspath(sys.argv[2])
+    mode = sys.argv[3] if len(sys.argv) == 4 else None
+
+    # Validate paths
+    if not os.path.isdir(dir_path):
+        print(f"Error: '{dir_path}' is not a valid directory.")
+        sys.exit(1)
+
+    if not os.path.isfile(json_path):
+        print(f"Error: '{json_path}' does not exist or is not a valid file.")
+        sys.exit(1)
+
+    # Print the parsed arguments
+    print(f"Directory Path: {dir_path}")
+    print(f"JSON Path: {json_path}")
+    if mode:
+        print(f"Mode: {mode}")
 
     # === Paths ===
     script_dir = os.path.dirname(os.path.abspath(__file__))
     split_script = os.path.join(script_dir, "split_fasta_and_run_iupred_on_folder.sh")
-    os.makedirs(complex_name, exist_ok=True)
-    split_fasta_dir = os.path.join(complex_name,"input_fastas") # Where per-chain FASTA files go
-    split_mapping_file = os.path.join(complex_name,"iupred_split_mapping.json")
-    split_fasta_out = os.path.join(complex_name,"iupred_split_sequences.fasta")
-    iupred_outputs_path = os.path.join(complex_name,"iupred_outputs")
-    fasta_path = os.path.join(complex_name,"sequences.fasta")
-    af3_json = os.path.join(complex_name,"af3_input.json")
-    af3_json_renamed = os.path.join(complex_name,"af3_input_renamed.json")
-    mapping_file_path = os.path.join(complex_name,"chain_id_mapping.json")
-    msa_inputs_path = os.path.join(complex_name,"msa_inputs")
+    os.makedirs(dir_path, exist_ok=True)
+    split_fasta_dir = os.path.join(dir_path, "input_fastas") # Where per-chain FASTA files go
+    split_mapping_file = os.path.join(dir_path, "iupred_split_mapping.json")
+    split_fasta_out = os.path.join(dir_path, "iupred_split_sequences.fasta")
+    iupred_outputs_path = os.path.join(dir_path, "iupred_outputs")
+    fasta_path = os.path.join(dir_path, "sequences.fasta")
+    af3_json = os.path.join(dir_path, "af3_input.json")
+    af3_json_renamed = os.path.join(dir_path, "af3_input_renamed.json")
+    mapping_file_path = os.path.join(dir_path, "chain_id_mapping.json")
+    msa_inputs_path = os.path.join(dir_path, "msa_inputs")
 
     # Print preprocessing message
-    print(f"⚙️ Preprocessing \"{complex_name}\"...")
+    print(f"⚙️ Preprocessing \"{dir_path}\"...")
     # === Step 1: Convert JSON to full FASTA ===
     print("🔄 Converting JSON to FASTA...")
     if mode:
-        json_to_fasta(json_file, complex_name)
+        json_to_fasta(json_path, dir_path)
     else:
         # merge_duplicate_chain_sequences(json_file)
-        subunit_to_fasta(json_file, complex_name)
+        subunit_to_fasta(json_path, dir_path)
     # === Step 2: Split FASTA and run IUPred3 on each chain ===
     print("🔬 Splitting FASTA and running IUPred3...")
-    subprocess.run(["bash", split_script, complex_name], check=True)
+    subprocess.run(["bash", split_script, dir_path], check=True)
 
     # === Step 3: Split long sequences based on IUPred3 disorder ===
     print("✂️  Splitting long sequences at disordered regions...")
@@ -165,7 +185,7 @@ if __name__ == '__main__':
         "python3",os.path.join(script_dir, "split_sequences_on_disorder.py"),
         iupred_outputs_path,
         fasta_path,
-        complex_name
+        dir_path
     ], check=True)
 
     # === Step 4: Rename chain IDs and save mapping ===
