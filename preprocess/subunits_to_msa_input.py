@@ -70,8 +70,11 @@ def convert_subunits_to_msa_input(input_file, output_dir):
         json.dump(msa_input, f, indent=4)
 
 if __name__ == '__main__':
-    if len(sys.argv) != 3:
-        print("Usage: script <input_file> <output_dir>")
+    if len(sys.argv) < 2 or len(sys.argv) > 3:
+        print("Usage: script <dir_path> [input_file]")
         sys.exit(1)
-    input_file, output_dir = sys.argv[1], sys.argv[2]
-    convert_subunits_to_msa_input(input_file, output_dir)
+
+    dir_path = os.path.abspath(sys.argv[1])
+    input_file = os.path.join(dir_path, 'subunits_info.json') if len(sys.argv) == 2 else os.path.abspath(sys.argv[2])
+
+    convert_subunits_to_msa_input(input_file, dir_path)
