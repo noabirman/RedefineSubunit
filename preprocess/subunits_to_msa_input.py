@@ -1,57 +1,75 @@
 import os
 import json
 import string
-import itertools
-import sys
 
-def rename_subunit_chains(input_file, output_dir, mapping_file_path):
+def rename_subunits_and_create_msa_input(input_file, dir_path):
     """
-    Renames chain names in a subunits_info JSON file with short alphabetical labels
-    (e.g., A, B, ..., Z, AA, AB, ..., ZZ) and saves each subunit as a separate JSON file.
+    Renames subunits in a subunits_info JSON file to A, B, C, etc., creates a mapping file,
+    and saves renamed subunits as individual msa_input JSON files in a new folder called msa_inputs.
 
     Args:
         input_file (str): Path to the input subunits_info JSON file.
-        output_dir (str): Directory where the individual JSON files will be saved.
-        mapping_file_path (str): Path where the reverse mapping JSON will be saved.
+        dir_path (str): Directory where the msa_inputs folder and mapping file will be created.
     """
-    def generate_labels():
-        """Generator that yields unique uppercase alphabetical labels."""
-        alphabet = string.ascii_uppercase
-        for letter in alphabet:
-            yield letter
-        for pair in itertools.product(alphabet, repeat=2):
-            yield ''.join(pair)
-
     # Load the input JSON file
     with open(input_file, 'r') as f:
         subunits_data = json.load(f)
 
-    os.makedirs(output_dir, exist_ok=True)
-    label_generator = generate_labels()
-    chain_map = {}
+    # Create the msa_inputs directory
+    msa_inputs_dir = os.path.join(dir_path, "msa_inputs")
+    os.makedirs(msa_inputs_dir, exist_ok=True)
 
-    # Rename chain names and save each subunit as a separate file
+    # Initialize variables
+    mapping = {}
+    label_generator = iter(string.ascii_uppercase)  # Generate labels A, B, C, ...
+
+    # Process each subunit
     for subunit_name, subunit_info in subunits_data.items():
-        new_chain_names = []
-        for chain_name in subunit_info["chain_names"]:
-            if chain_name not in chain_map:
-                chain_map[chain_name] = next(label_generator)
-            new_chain_names.append(chain_map[chain_name])
-        subunit_info["chain_names"] = new_chain_names
+        # Generate the new label
+        new_label = next(label_generator)
 
-        # Save the individual subunit JSON file
-        output_file = os.path.join(output_dir, f"{subunit_name}.json")
+        # Calculate the end residue
+        start_res = subunit_info["start_res"]
+        sequence_length = len(subunit_info["sequence"])
+        end_res = start_res + sequence_length - 1
+
+        # Update the mapping
+        mapping[new_label] = {
+            "chain_id": subunit_info["chain_names"][0],
+            "start": start_res,
+            "end": end_res
+        }
+
+        # Create the msa_input JSON structure
+        msa_input = {
+            "name": new_label,
+            "modelSeeds": [1],
+            "sequences": [
+                {
+                    "protein": {
+                        "id": new_label,
+                        "sequence": subunit_info["sequence"]
+                    }
+                }
+            ],
+            "dialect": "alphafold3",
+            "version": 1
+        }
+
+        # Save the msa_input JSON file
+        output_file = os.path.join(msa_inputs_dir, f"{new_label}.json")
         with open(output_file, 'w') as f:
-            json.dump(subunit_info, f, indent=4)
+            json.dump(msa_input, f, indent=4)
         print(f"✅ Saved {output_file}")
 
     # Save the mapping file
+    mapping_file_path = os.path.join(dir_path, "chain_id_mapping.json")
     with open(mapping_file_path, 'w') as f:
-        json.dump(chain_map, f, indent=4)
-
-    print(f"✅ Chain mapping saved to {mapping_file_path}")
+        json.dump(mapping, f, indent=4)
+    print(f"✅ Mapping file saved to {mapping_file_path}")
 
 if __name__ == '__main__':
+    import sys
     if len(sys.argv) < 2 or len(sys.argv) > 3:
         print("Usage: script <dir_path> [input_file]")
         sys.exit(1)
@@ -62,4 +80,4 @@ if __name__ == '__main__':
     print(f"Directory path: {dir_path}")
     print(f"Input file: {input_file}")
 
-    rename_subunit_chains(input_file, dir_path, os.path.join(dir_path, 'chain_id_mapping.json'))
+    rename_subunits_and_create_msa_input(input_file, dir_path)
