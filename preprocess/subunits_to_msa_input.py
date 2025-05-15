@@ -49,3 +49,17 @@ def rename_subunit_chains(input_file, output_dir, mapping_file_path):
         json.dump(chain_map, f, indent=4)
 
     print(f"✅ Chain mapping saved to {mapping_file_path}")
+
+    if __name__ == '__main__':
+        if len(sys.argv) < 2 or len(sys.argv) > 3:
+            print("Usage: script <dir_path> [input_file]")
+            sys.exit(1)
+
+        dir_path = os.path.abspath(sys.argv[1])
+        input_file = os.path.join(dir_path, 'subunits_info.json') if len(sys.argv) == 2 else os.path.abspath(
+            sys.argv[2])
+
+        print(f"Directory path: {dir_path}")
+        print(f"Input file: {input_file}")
+
+        rename_subunit_chains(input_file, dir_path, os.path.join(dir_path, 'chain_id_mapping.json'))
