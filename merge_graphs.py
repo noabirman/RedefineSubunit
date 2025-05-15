@@ -406,6 +406,7 @@ def rename_graph_nodes (graph_to_rename, name_mapping):
     mapping_dict = {name:name_mapping[name]['chain_id'] for name in name_mapping}
     graph_to_rename = nx.relabel_nodes(graph_to_rename, mapping_dict)
     return graph_to_rename
+
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
         folder_path = os.path.abspath(sys.argv[1])
