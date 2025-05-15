@@ -1,11 +1,13 @@
 import os
 import json
 import string
+import itertools
 
 def rename_subunits_and_create_msa_input(input_file, dir_path):
     """
-    Renames subunits in a subunits_info JSON file to A, B, C, etc., creates a mapping file,
-    and saves renamed subunits as individual msa_input JSON files in a new folder called msa_inputs.
+    Renames subunits in a subunits_info JSON file to A, B, C, ..., Z, AA, AB, etc.,
+    creates a mapping file, and saves renamed subunits as individual msa_input JSON files
+    in a new folder called msa_inputs.
 
     Args:
         input_file (str): Path to the input subunits_info JSON file.
@@ -21,7 +23,16 @@ def rename_subunits_and_create_msa_input(input_file, dir_path):
 
     # Initialize variables
     mapping = {}
-    label_generator = iter(string.ascii_uppercase)  # Generate labels A, B, C, ...
+
+    # Generate labels A, B, ..., Z, AA, AB, ...
+    def generate_labels():
+        alphabet = string.ascii_uppercase
+        for letter in alphabet:
+            yield letter
+        for pair in itertools.product(alphabet, repeat=2):
+            yield ''.join(pair)
+
+    label_generator = generate_labels()
 
     # Process each subunit
     for subunit_name, subunit_info in subunits_data.items():
