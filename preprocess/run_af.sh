@@ -45,13 +45,13 @@ PARENT_DIR=$(dirname "$INPUT_DIR")
 OUTPUT_DIR="$PARENT_DIR/af_pairs"
 
 # Ensure the output directory has a unique name
-if [ -d "$OUTPUT_DIR" ]; then
-  i=2
-  while [ -d "${OUTPUT_DIR}_${i}" ]; do
-    ((i++))
-  done
-  OUTPUT_DIR="${OUTPUT_DIR}_${i}"
-fi
+#if [ -d "$OUTPUT_DIR" ]; then
+ # i=2
+  #while [ -d "${OUTPUT_DIR}_${i}" ]; do
+   # ((i++))
+  #done
+  #OUTPUT_DIR="${OUTPUT_DIR}_${i}"
+#fi
 
 # Ensure the output directory exists
 mkdir -p "$OUTPUT_DIR"

@@ -129,7 +129,7 @@ def merge_duplicate_chain_sequences(json_path):
 if __name__ == '__main__':
     # === Input Arguments ===
     if len(sys.argv) < 2 or len(sys.argv) > 4:
-        print("Usage: python preprocess.py <dir_path> [json_path] [mode]")
+        print("Usage: python3 preprocess.py <dir_path> [json_path] [mode]")
         sys.exit(1)
 
     # Parse arguments
@@ -173,7 +173,7 @@ if __name__ == '__main__':
     if mode:
         json_to_fasta(json_path, dir_path)
     else:
-        # merge_duplicate_chain_sequences(json_file)
+        merge_duplicate_chain_sequences(json_path)
         subunit_to_fasta(json_path, dir_path)
     # === Step 2: Split FASTA and run IUPred3 on each chain ===
     print("🔬 Splitting FASTA and running IUPred3...")
