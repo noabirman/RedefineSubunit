@@ -45,7 +45,7 @@ PARENT_DIR=$(dirname "$INPUT_DIR")
 OUTPUT_DIR="$PARENT_DIR/msa_output"
 
 # Check for missing MSA results
-MISSING_DIR="$PARENT_DIR/tmp_missing_af_input"
+MISSING_DIR="$PARENT_DIR/tmp_missing_msa_input"
 
 mkdir -p "$OUTPUT_DIR"
 
@@ -63,10 +63,16 @@ for infile in "$INPUT_DIR"/*.json; do
   chain=${chain,,}
 
   if [[ -d "$OUTPUT_DIR/$chain" ]] && compgen -G "$OUTPUT_DIR/$chain/*.json" > /dev/null; then
+    echo skipping "$infile"
     continue
   fi
 
-  cp "$infile" "$MISSING_DIR/"
+  cp "$infile" "$MISSING_DIR/" || {
+    echo "✗ Failed to copy $infile. Skipping."
+    continue
+  echo copied: "$infile"
+}
+
   ((count++))
 done
 
@@ -86,6 +92,9 @@ python /cs/usr/bshor/sci/installations/af3_variations/deepmind/localalphafold3/a
   --norun_inference \
   --output_dir "$OUTPUT_DIR" \
   --input_dir "$MISSING_DIR"
+ 
+ 
+ rm -rf "$MISSING_DIR"
 
 # cd /cs/labs/dina/tsori/af3_example/RedefineSubunit/
 # python preprocess/msa_to_pairwise.py "$OUTPUT_DIR" "$MAPPING_JSON" "$SUBUNITS_INFO_JSON"
