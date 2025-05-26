@@ -100,12 +100,12 @@ def find_high_confidence_regions(plddt_array, confidence_threshold=40, gap_thres
 
 
 
-def extract_subunit_info(indexs: List[Tuple[int, int]], token_chain_ids: List[str], full_seq: str) -> List[SubunitInfo]:
+def extract_subunit_info(indices: List[Tuple[int, int]], token_chain_ids: List[str], full_seq: str) -> List[SubunitInfo]:
     """
     Build a list of SubunitInfo ensuring different chains are treated as separate subunits.
 
     Args:
-        indexs (List[Tuple[int, int]]): List containing the index of each subunit.
+        indices (List[Tuple[int, int]]): List containing the index of each subunit.
         token_chain_ids (List[str]): Indicate the chain IDs of each subunit.
         full_seq (str): The residue sequence of the current protein.
 
@@ -115,7 +115,7 @@ def extract_subunit_info(indexs: List[Tuple[int, int]], token_chain_ids: List[st
     subunit_infos = []
     chain_occ_counter = Counter()  # Track occurrences for each chain separately
 
-    for start, end in indexs:
+    for start, end in indices:
         # Find unique chain IDs in the segment (preserving order)
         chains_ids_in_node = list(dict.fromkeys(token_chain_ids[start:end + 1]))
 
@@ -286,11 +286,13 @@ def graph(structure_path: str, data_path:str, af_version: str)->nx.Graph: # het
         token_chain_ids = get_chain_ids_per_residue(structure)
     full_seq = extract_sequence_with_seqio(structure_path,
                                            af_version)
-    groups_indexs = find_high_confidence_regions(plddt_array, confidence_threshold=40)
+    groups_indices = find_high_confidence_regions(plddt_array, confidence_threshold=40)
+
+    #todo: check if start & end belong to the same chain
 
     token_chain_ids_updated = rename_chains_from_file(data_path, token_chain_ids)
 
-    subunits_info = extract_subunit_info(groups_indexs, token_chain_ids_updated, full_seq)
+    subunits_info = extract_subunit_info(groups_indices, token_chain_ids_updated, full_seq)
     G = nx.Graph()
     edges = find_edges(subunits_info, pae_as_arr, threshold=15)
     # index per chain instead of per full seq (by doing token_res_ids[subunit.start])

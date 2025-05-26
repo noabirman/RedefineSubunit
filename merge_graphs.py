@@ -3,8 +3,6 @@ import os
 import sys
 from collections import defaultdict
 import difflib
-
-
 import networkx as nx
 from complex_graph import graph, SubunitInfo, extract_sequence_with_seqio
 from typing import List
