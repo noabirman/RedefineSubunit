@@ -2,7 +2,6 @@ import json
 import itertools
 import os
 import sys
-from copy import deepcopy
 
 
 def create_pairwise_msa(msa_folder: str, mapping_file: str, subunits_info_file: str, output_dir: str) -> None:
@@ -28,7 +27,7 @@ def create_pairwise_msa(msa_folder: str, mapping_file: str, subunits_info_file: 
     # Add self-pairs for multi-chain originals
     for subunit in subunits:
         # Get original subunit name from mapping
-        original_chain_name = mapping[subunit]
+        original_chain_name = mapping[subunit]['chain_id']
         # Find the original_name where subunits_info[key]['chain_names'] contains original_chain_name
         original_name = next(
             (key for key, info in subunits_info.items() if original_chain_name in info['chain_names']),
