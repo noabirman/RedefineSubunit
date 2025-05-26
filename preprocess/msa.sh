@@ -47,20 +47,7 @@ fi
 
 # Determine parent directory and set default paths
 PARENT_DIR=$(dirname "$INPUT_DIR")
-MAPPING_JSON="${2:-$PARENT_DIR/chain_id_mapping.json}"
-SUBUNITS_INFO_JSON="${3:-$PARENT_DIR/subunits_info.json}"
 
-# Validate mapping JSON file
-if [ ! -f "$MAPPING_JSON" ]; then
-  echo "Error: Mapping JSON file '$MAPPING_JSON' does not exist."
-  exit 1
-fi
-
-# Validate subunits info JSON file
-if [ ! -f "$SUBUNITS_INFO_JSON" ]; then
-  echo "Error: Subunits info JSON file '$SUBUNITS_INFO_JSON' does not exist."
-  exit 1
-fi
 
 # Determine output directory
 OUTPUT_DIR="$PARENT_DIR/msa_output"
@@ -79,8 +66,7 @@ mkdir -p "$OUTPUT_DIR"
 
 # Print the paths for debugging
 echo Running MSA on directory: "$INPUT_DIR"
-echo Mapping JSON file: "$MAPPING_JSON"
-echo Subunits info JSON file: "$SUBUNITS_INFO_JSON"
+
 echo Output directory: "$OUTPUT_DIR"
 
 python /cs/usr/bshor/sci/installations/af3_variations/deepmind/localalphafold3/alphafold3/run_alphafold.py \

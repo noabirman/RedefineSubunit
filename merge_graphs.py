@@ -181,7 +181,7 @@ def merge_connected_components(overlap_graph, graphs: List[nx.Graph],subunit_nam
     return merged_graph
 
 def merge_sequence(subunits, start, end):
-    merged_sequence = ['-'] * (end + 2 - start)  # inclusion of end position
+    merged_sequence = ['-'] * (end + 1 - start)  # inclusion of end position
     print(f"→ Merging sequence from {start} to {end}")
     for subunit in subunits:
         print(f"  ↳ Subunit: {subunit.name}, start={subunit.start}, end={subunit.end}, seq_len={len(subunit.sequence)}")

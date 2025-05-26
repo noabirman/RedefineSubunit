@@ -8,7 +8,9 @@
 #SBATCH --mail-user=tsori.kislev@gmail.com
 
 #SBATCH --output=/cs/labs/dina/tsori/af3_example/slurms_outs/CF/%j.out
-#SBATCH --error=/cs/labs/dina/tsori/af3_example/slurms_outs/CF/err/%j.out
+
+set -e  # Exit immediately if any command fails
+
 
 # Check for required arguments
 if [ "$#" -lt 1 ]; then
@@ -29,18 +31,12 @@ fi
 
 # Get input arguments
 COMPLEX_DIR="$1"
-MODELS_DIR="${2:-$COMPLEX_DIR/combfold/models}"  # Default to COMPLEX_DIR/combfold/models if not provided
+MODELS_DIR="${2:-$COMPLEX_DIR/combfold/models}"  # Default to COMPLEX_DIR/combfold/ if not provided
 SUBUNITS_INFO_JSON="${3:-$COMPLEX_DIR/combfold/subunits_info.json}"  # Default to COMPLEX_DIR/subunits_info.json if not provided
 
 # Validate COMPLEX_DIR
 if [ ! -d "$COMPLEX_DIR" ]; then
   echo "Error: Complex directory '$COMPLEX_DIR' does not exist."
-  exit 1
-fi
-
-# Validate MODELS_DIR
-if [ ! -d "$MODELS_DIR" ]; then
-  echo "Error: Models directory '$MODELS_DIR' does not exist."
   exit 1
 fi
 
@@ -57,6 +53,20 @@ mkdir -p "$RESULTS_DIR"
 cd /cs/labs/dina/tsori/af3_example
 source RedefineSubunit/my_venv/bin/activate
 
-echo "Running CombFold on $COMPLEX_DIR:"
+echo "running cif_to_pdb.py.."
+echo
+echo -------------------------------------------------------------------------------------
+echo
 
+python3 RedefineSubunit/cif_to_pdb.py "$COMPLEX_DIR"
+
+echo "Running CombFold on $COMPLEX_DIR:"
+echo
+echo -------------------------------------------------------------------------------------
+echo
 python3 CombFold/scripts/run_on_pdbs.py "$SUBUNITS_INFO_JSON" "$MODELS_DIR" "$RESULTS_DIR"
+
+echo
+
+echo  "output log path: $RESULTS_DIR/_unified_representation/assembly_output/output.log"
+
