@@ -433,4 +433,4 @@ if __name__ == "__main__":
         final_graph = rename_graph_nodes(merged_graph, name_mapping)
         show_circle(final_graph, os.path.dirname(folder_path))
     else:
-        print("usage: <script> enter folder_name, [subunits_json_path], [mapping_json_path], [output_json_path]")
+        print("usage: <script> enter af_pairs_folder_path, [subunits_json_path], [mapping_json_path], [output_json_path]")
