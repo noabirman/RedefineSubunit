@@ -66,7 +66,7 @@ def extract_sequence_with_seqio(structure_path, af_version: int):
     return ''.join(sequences)
 
 
-def find_high_confidence_regions(plddt_array, confidence_threshold=40, gap_threshold=3):
+def find_high_confidence_regions(plddt_array, confidence_threshold=40, gap_threshold=3, chain_ids):
     """
     Finds ranges of high-confidence regions in a plDDT array while preserving the order.
 
@@ -97,7 +97,6 @@ def find_high_confidence_regions(plddt_array, confidence_threshold=40, gap_thres
         regions.append((int(start_index), int(indices[-1])))
 
     return regions
-
 
 
 def extract_subunit_info(indices: List[Tuple[int, int]], token_chain_ids: List[str], full_seq: str) -> List[SubunitInfo]:
@@ -230,6 +229,7 @@ def get_chain_ids_per_residue(structure):
 
     return chain_ids
 
+
 def rename_chains_from_file(data_path: str, token_chain_ids: list[str]) -> list[str]:
     """Renames chain identifiers based on filename components.
 
@@ -286,11 +286,13 @@ def graph(structure_path: str, data_path:str, af_version: str)->nx.Graph: # het
         token_chain_ids = get_chain_ids_per_residue(structure)
     full_seq = extract_sequence_with_seqio(structure_path,
                                            af_version)
-    groups_indices = find_high_confidence_regions(plddt_array, confidence_threshold=40)
+    token_chain_ids_updated = rename_chains_from_file(data_path, token_chain_ids)
+
+    groups_indices = find_high_confidence_regions(plddt_array, confidence_threshold=40,token_chain_ids_updated)
 
     #todo: check if start & end belong to the same chain
 
-    token_chain_ids_updated = rename_chains_from_file(data_path, token_chain_ids)
+
 
     subunits_info = extract_subunit_info(groups_indices, token_chain_ids_updated, full_seq)
     G = nx.Graph()
@@ -305,6 +307,7 @@ def graph(structure_path: str, data_path:str, af_version: str)->nx.Graph: # het
     for e in edges: # e is (v1, v2, weight)
         G.add_edge(e[0], e[1], weight=e[2])
     return G
+
 
 if __name__ == '__main__':
     if len(sys.argv) == 4:
