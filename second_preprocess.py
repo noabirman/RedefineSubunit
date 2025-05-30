@@ -20,7 +20,7 @@ def rename_subunits_and_create_msa_input(input_file, dir_path, min_length=7):
 
     # Create msa_inputs and msa_output directories
     msa_inputs_dir = os.path.join(dir_path, "msa_inputs")
-    msa_outputs_dir = os.path.join(os.path.dirname(dir_path), "msa_output")
+    msa_outputs_dir = os.path.join(dir_path, "msa_output")
     os.makedirs(msa_inputs_dir, exist_ok=True)
     os.makedirs(msa_outputs_dir, exist_ok=True)
 
@@ -71,7 +71,8 @@ def rename_subunits_and_create_msa_input(input_file, dir_path, min_length=7):
                 "dialect": "alphafold3",
                 "version": 1
             }
-            output_file = os.path.join(msa_outputs_dir, f"{new_label}.json")
+            lower_label = new_label.lower()
+            output_file = os.path.join(lower_label, f"{lower_label}_data.json")
             with open(output_file, 'w') as f:
                 json.dump(msa_output, f, indent=4)
             print(f"⚠️ Short sequence. Saved msa_output: {output_file}")
