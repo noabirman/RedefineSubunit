@@ -4,7 +4,7 @@ import string
 import itertools
 import sys
 
-def rename_subunits_and_create_msa_input(input_file, dir_path, min_length=7):
+def rename_subunits_and_create_msa_input(input_file, dir_path, min_length):
     """
     Renames subunits from a subunits_info JSON file, creates msa_input files for subunits
     with sequence length >= min_length, msa_output files for shorter ones, and saves a mapping file.
@@ -113,7 +113,7 @@ if __name__ == '__main__':
 
     combfold_dir_path = os.path.abspath(sys.argv[1])
     input_file = os.path.join(combfold_dir_path, 'subunits_info.json') if len(sys.argv) < 3 else os.path.abspath(sys.argv[2])
-    min_length = int(sys.argv[3]) if len(sys.argv) == 4 else 7
+    min_length = int(sys.argv[3]) if len(sys.argv) == 4 else 9
 
     print(f"📂 Directory path: {combfold_dir_path}")
     print(f"📄 Input file: {input_file}")
