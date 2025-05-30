@@ -10,7 +10,6 @@
 #SBATCH --exclude=sm-01,sm-16,sm-02,sm-03,sm-04,sm-08
 
 #SBATCH --output=/cs/labs/dina/tsori/af3_example/slurms_outs/msa/%j.out
-#SBATCH --error=/cs/labs/dina/tsori/af3_example/slurms_outs/msa/err/%j.out
 
 #export XLA_FLAGS="--xla_disable_hlo_passes=custom-kernel-fusion-rewriter"
 
