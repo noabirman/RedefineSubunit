@@ -66,38 +66,43 @@ def extract_sequence_with_seqio(structure_path, af_version: int):
     return ''.join(sequences)
 
 
-def find_high_confidence_regions(plddt_array, confidence_threshold=40, gap_threshold=3, chain_ids):
+def find_high_confidence_regions(plddt_array, chain_ids, confidence_threshold=40, gap_threshold=3):
     """
-    Finds ranges of high-confidence regions in a plDDT array while preserving the order.
+    Finds ranges of high-confidence regions in a plDDT array while preserving the order
+    and ensuring regions are within the same chain.
 
     Args:
         plddt_array (np.ndarray): Array containing plDDT values for each residue.
+        chain_ids (list[str]): List of chain IDs corresponding to each residue.
         confidence_threshold (float): Minimum confidence value to include a residue.
         gap_threshold (int): Maximum allowed gap between indices in the same region.
 
     Returns:
-        list[tuple[int, int]]: A list of tuples, each representing the start and end indices of a high-confidence region.
+        list[tuple[int, int]]: A list of tuples, each representing the start and end 
+                               indices of a high-confidence region.
     """
-    indices = np.where(plddt_array > confidence_threshold)[0]
-
-    if len(indices) == 0:
-        return []
-
     regions = []
-    start_index = indices[0]
+    unique_chains = set(chain_ids)
 
-    for i in range(1, len(indices)):
-        if indices[i] - indices[i - 1] > gap_threshold:
-            if indices[i - 1] - start_index >= 5:
-                regions.append((int(start_index), int(indices[i - 1])))
-            start_index = indices[i]
+    for chain in unique_chains:
+        indices = [i for i, (score, c) in enumerate(zip(plddt_array, chain_ids)) if score > confidence_threshold and c == chain]
 
-    # Handle the last region (fix: use indices[-1])
-    if indices[-1] - start_index >= 5:
-        regions.append((int(start_index), int(indices[-1])))
+        if not indices:
+            continue
+
+        start_index = indices[0]
+
+        for i in range(1, len(indices)):
+            if indices[i] - indices[i - 1] > gap_threshold:
+                if indices[i - 1] - start_index >= 5:
+                    regions.append((start_index, indices[i - 1]))
+                start_index = indices[i]
+
+        # Handle the last region
+        if indices[-1] - start_index >= 5:
+            regions.append((start_index, indices[-1]))
 
     return regions
-
 
 def extract_subunit_info(indices: List[Tuple[int, int]], token_chain_ids: List[str], full_seq: str) -> List[SubunitInfo]:
     """
@@ -288,7 +293,7 @@ def graph(structure_path: str, data_path:str, af_version: str)->nx.Graph: # het
                                            af_version)
     token_chain_ids_updated = rename_chains_from_file(data_path, token_chain_ids)
 
-    groups_indices = find_high_confidence_regions(plddt_array, confidence_threshold=40,token_chain_ids_updated)
+    groups_indices = find_high_confidence_regions(plddt_array,token_chain_ids_updated)
 
     #todo: check if start & end belong to the same chain
 
