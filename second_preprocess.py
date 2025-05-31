@@ -113,7 +113,7 @@ if __name__ == '__main__':
 
     combfold_dir_path = os.path.abspath(sys.argv[1])
     input_file = os.path.join(combfold_dir_path, 'subunits_info.json') if len(sys.argv) < 3 else os.path.abspath(sys.argv[2])
-    min_length = int(sys.argv[3]) if len(sys.argv) == 4 else 9
+    min_length = int(sys.argv[3]) if len(sys.argv) == 4 else 10
 
     print(f"📂 Directory path: {combfold_dir_path}")
     print(f"📄 Input file: {input_file}")
