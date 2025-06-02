@@ -47,6 +47,8 @@ if [ ! -f "$SUBUNITS_INFO_JSON" ]; then
 fi
 # Ensure the results directory exists
 RESULTS_DIR="$COMPLEX_DIR/combfold/results"
+
+rm -rf "$RESULTS_DIR"
 mkdir -p "$RESULTS_DIR"
 
 # Activate the virtual environment
