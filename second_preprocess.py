@@ -108,12 +108,12 @@ def rename_subunits_and_create_msa_input(input_file, dir_path, min_length):
 
 if __name__ == '__main__':
     if len(sys.argv) < 2 or len(sys.argv) > 4:
-        print("Usage: script <combfold_dir_path> [input_file] [min_length]")
+        print("Usage: script <combfold_dir_path> [min_length] [input_file]")
         sys.exit(1)
 
     combfold_dir_path = os.path.abspath(sys.argv[1])
-    input_file = os.path.join(combfold_dir_path, 'subunits_info.json') if len(sys.argv) < 3 else os.path.abspath(sys.argv[2])
-    min_length = int(sys.argv[3]) if len(sys.argv) == 4 else 10
+    input_file = os.path.join(combfold_dir_path, 'subunits_info.json') if len(sys.argv) < 4 else os.path.abspath(sys.argv[3])
+    min_length = int(sys.argv[2]) if len(sys.argv) == 3 else 10
 
     print(f"📂 Directory path: {combfold_dir_path}")
     print(f"📄 Input file: {input_file}")

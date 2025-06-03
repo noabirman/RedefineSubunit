@@ -14,7 +14,7 @@ set -e  # Exit immediately if any command fails
 
 # Check for required arguments
 if [ "$#" -lt 1 ]; then
-  echo "Usage: $0 <COMPLEX_DIR> [MODELS_DIR] [SUBUNITS_INFO_JSON]"
+  echo "Usage: $0 <COMPLEX_DIR> [SUBUNITS_INFO_JSON] [MODELS_DIR]"
   exit 1
 fi
 
@@ -31,8 +31,8 @@ fi
 
 # Get input arguments
 COMPLEX_DIR="$1"
-MODELS_DIR="${2:-$COMPLEX_DIR/combfold/models}"  # Default to COMPLEX_DIR/combfold/ if not provided
-SUBUNITS_INFO_JSON="${3:-$COMPLEX_DIR/combfold/subunits_info.json}"  # Default to COMPLEX_DIR/subunits_info.json if not provided
+SUBUNITS_INFO_JSON="${2:-$COMPLEX_DIR/combfold/subunits_info.json}"  # Default to COMPLEX_DIR/subunits_info.json if not provided
+MODELS_DIR="${3:-$COMPLEX_DIR/combfold/models}"  # Default to COMPLEX_DIR/combfold/ if not provided
 
 # Validate COMPLEX_DIR
 if [ ! -d "$COMPLEX_DIR" ]; then
