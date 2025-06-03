@@ -51,10 +51,6 @@ if [ ! -d "$COMPLEX_DIR" ]; then
   echo "Error: Complex directory '$COMPLEX_DIR' does not exist."
   exit 1
 fi
-if [ ! -d "$MODELS_DIR" ]; then
-  echo "Error: Models directory '$MODELS_DIR' does not exist."
-  exit 1
-fi
 if [ ! -f "$SUBUNITS_INFO_JSON" ]; then
   echo "Error: Subunits info JSON file '$SUBUNITS_INFO_JSON' does not exist."
   exit 1
@@ -79,7 +75,7 @@ echo
 
 python3 RedefineSubunit/cif_to_pdb.py "$CIF_INPUT"
 
-echo "Running CombFold on $COMPLEX_DIR:"
+echo "Running CombFold $MODE on $COMPLEX_DIR:"
 echo
 echo -------------------------------------------------------------------------------------
 echo
