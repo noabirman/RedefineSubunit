@@ -4,7 +4,7 @@ import string
 import itertools
 import sys
 
-def rename_subunits_and_create_msa_input(input_file, dir_path, min_length=7):
+def rename_subunits_and_create_msa_input(input_file, dir_path, min_length):
     """
     Renames subunits from a subunits_info JSON file, creates msa_input files for subunits
     with sequence length >= min_length, msa_output files for shorter ones, and saves a mapping file.
@@ -20,7 +20,7 @@ def rename_subunits_and_create_msa_input(input_file, dir_path, min_length=7):
 
     # Create msa_inputs and msa_output directories
     msa_inputs_dir = os.path.join(dir_path, "msa_inputs")
-    msa_outputs_dir = os.path.join(os.path.dirname(dir_path), "msa_output")
+    msa_outputs_dir = os.path.join(dir_path, "msa_output")
     os.makedirs(msa_inputs_dir, exist_ok=True)
     os.makedirs(msa_outputs_dir, exist_ok=True)
 
@@ -71,7 +71,10 @@ def rename_subunits_and_create_msa_input(input_file, dir_path, min_length=7):
                 "dialect": "alphafold3",
                 "version": 1
             }
-            output_file = os.path.join(msa_outputs_dir, f"{new_label}.json")
+            label_lower = new_label.lower()
+            output_subdir = os.path.join(msa_outputs_dir, label_lower)
+            os.makedirs(output_subdir, exist_ok=True)
+            output_file = os.path.join(output_subdir, f"{label_lower}_data.json")
             with open(output_file, 'w') as f:
                 json.dump(msa_output, f, indent=4)
             print(f"⚠️ Short sequence. Saved msa_output: {output_file}")
@@ -105,12 +108,12 @@ def rename_subunits_and_create_msa_input(input_file, dir_path, min_length=7):
 
 if __name__ == '__main__':
     if len(sys.argv) < 2 or len(sys.argv) > 4:
-        print("Usage: script <combfold_dir_path> [input_file] [min_length]")
+        print("Usage: script <combfold_dir_path> [min_length] [input_file]")
         sys.exit(1)
 
     combfold_dir_path = os.path.abspath(sys.argv[1])
-    input_file = os.path.join(combfold_dir_path, 'subunits_info.json') if len(sys.argv) < 3 else os.path.abspath(sys.argv[2])
-    min_length = int(sys.argv[3]) if len(sys.argv) == 4 else 7
+    input_file = os.path.join(combfold_dir_path, 'subunits_info.json') if len(sys.argv) < 4 else os.path.abspath(sys.argv[3])
+    min_length = int(sys.argv[2]) if len(sys.argv) == 3 else 10
 
     print(f"📂 Directory path: {combfold_dir_path}")
     print(f"📄 Input file: {input_file}")
