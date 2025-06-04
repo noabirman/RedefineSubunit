@@ -37,7 +37,7 @@ if [ "$MODE" = "trivial" ]; then
 elif [ "$MODE" = "high" ]; then
   SUBUNITS_INFO_JSON="$COMPLEX_DIR/combfold/subunits_info.json"
   MODELS_DIR="$COMPLEX_DIR/combfold/models"
-  RESULTS_DIR="$COMPLEX_DIR/combfold/results"
+  RESULTS_DIR="$COMPLEX_DIR/combfold/results_high"
   CIF_INPUT="$COMPLEX_DIR/combfold"
 else
   SUBUNITS_INFO_JSON="$COMPLEX_DIR/combfold/subunits_info.json"
