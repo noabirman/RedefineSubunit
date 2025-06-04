@@ -1,0 +1,648 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="edfa4e67-f0ed-43e6-a38c-fd2160380395" name="Changes" comment="sub_msa" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Jupyter Notebook" />
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="main" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RESET_MODE" value="HARD" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;tsori-ki&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/noabirman/RedefineSubunit&quot;,
+    &quot;accountId&quot;: &quot;f72ab3c0-f3db-4b87-b929-6930631decd7&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 4
+}</component>
+  <component name="ProjectId" id="2q48VwiCjm80vw8T9526ARTVNf1" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python tests.Python tests in test.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python.complex_graph.executor&quot;: &quot;Run&quot;,
+    &quot;Python.merge_graphs (2).executor&quot;: &quot;Debug&quot;,
+    &quot;Python.merge_graphs.executor&quot;: &quot;Run&quot;,
+    &quot;Python.msa_to_pairwise.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.subunits_to_msa_input.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SHELLCHECK.PATH&quot;: &quot;C:\\Users\\tsori\\AppData\\Roaming\\JetBrains\\PyCharm2025.1\\plugins\\Shell Script\\shellcheck.exe&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/tsori/Documents/project/RedefineSubunit&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RunManager" selected="Python.subunits_to_msa_input">
+    <configuration name="merge_graphs" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="RedefineSubunit" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/merge_graphs.py" />
+      <option name="PARAMETERS" value="C:\Users\tsori\Documents\project\New_folder\af_pairs" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="subunits_to_msa_input" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="RedefineSubunit" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/preprocess" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/preprocess/subunits_to_msa_input.py" />
+      <option name="PARAMETERS" value="C:\Users\tsori\Documents\project C:\Users\tsori\Documents\project\msa_to_pairs2\subunits_info\7ARC.json" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.subunits_to_msa_input" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-f27c65a3e318-JavaScript-PY-251.23774.444" />
+        <option value="bundled-python-sdk-890ed5b35930-d9c5bdb153f4-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-251.23774.444" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="edfa4e67-f0ed-43e6-a38c-fd2160380395" name="Changes" comment="" />
+      <created>1733910515071</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1733910515071</updated>
+      <workItem from="1733910516441" duration="656000" />
+      <workItem from="1737383074548" duration="3967000" />
+      <workItem from="1738231702740" duration="7209000" />
+      <workItem from="1738240398606" duration="2364000" />
+      <workItem from="1739799483005" duration="942000" />
+      <workItem from="1739963217518" duration="9770000" />
+      <workItem from="1741166353137" duration="3568000" />
+      <workItem from="1742808877102" duration="10901000" />
+      <workItem from="1742893974298" duration="663000" />
+      <workItem from="1743430469539" duration="876000" />
+      <workItem from="1743432156724" duration="775000" />
+      <workItem from="1744024935459" duration="20838000" />
+      <workItem from="1744091360676" duration="767000" />
+      <workItem from="1744095296269" duration="23000" />
+      <workItem from="1744276894830" duration="8218000" />
+      <workItem from="1744787457521" duration="54000" />
+      <workItem from="1745240423537" duration="17868000" />
+      <workItem from="1745321555933" duration="139000" />
+      <workItem from="1745481345996" duration="6153000" />
+      <workItem from="1745498287051" duration="174000" />
+      <workItem from="1745498501868" duration="8852000" />
+      <workItem from="1745595824178" duration="2457000" />
+      <workItem from="1745789840698" duration="3781000" />
+      <workItem from="1745839993208" duration="12289000" />
+      <workItem from="1745857198534" duration="30000" />
+      <workItem from="1746125551035" duration="7158000" />
+      <workItem from="1746178372144" duration="7666000" />
+      <workItem from="1746450723970" duration="7736000" />
+      <workItem from="1746513244658" duration="79000" />
+      <workItem from="1746518551139" duration="7488000" />
+      <workItem from="1746650929563" duration="14184000" />
+      <workItem from="1747042650813" duration="6424000" />
+      <workItem from="1747211748097" duration="1682000" />
+      <workItem from="1747214766657" duration="7705000" />
+      <workItem from="1747311943158" duration="4529000" />
+      <workItem from="1749052851861" duration="707000" />
+    </task>
+    <task id="LOCAL-00059" summary="rename">
+      <option name="closed" value="true" />
+      <created>1746523291464</created>
+      <option name="number" value="00059" />
+      <option name="presentableId" value="LOCAL-00059" />
+      <option name="project" value="LOCAL" />
+      <updated>1746523291464</updated>
+    </task>
+    <task id="LOCAL-00060" summary="check missing">
+      <option name="closed" value="true" />
+      <created>1746524301116</created>
+      <option name="number" value="00060" />
+      <option name="presentableId" value="LOCAL-00060" />
+      <option name="project" value="LOCAL" />
+      <updated>1746524301116</updated>
+    </task>
+    <task id="LOCAL-00061" summary="check missing - names">
+      <option name="closed" value="true" />
+      <created>1746524458325</created>
+      <option name="number" value="00061" />
+      <option name="presentableId" value="LOCAL-00061" />
+      <option name="project" value="LOCAL" />
+      <updated>1746524458325</updated>
+    </task>
+    <task id="LOCAL-00062" summary="check missing - names">
+      <option name="closed" value="true" />
+      <created>1746524495172</created>
+      <option name="number" value="00062" />
+      <option name="presentableId" value="LOCAL-00062" />
+      <option name="project" value="LOCAL" />
+      <updated>1746524495172</updated>
+    </task>
+    <task id="LOCAL-00063" summary="check missing - names">
+      <option name="closed" value="true" />
+      <created>1746524549768</created>
+      <option name="number" value="00063" />
+      <option name="presentableId" value="LOCAL-00063" />
+      <option name="project" value="LOCAL" />
+      <updated>1746524549768</updated>
+    </task>
+    <task id="LOCAL-00064" summary="check missing - save">
+      <option name="closed" value="true" />
+      <created>1746524897922</created>
+      <option name="number" value="00064" />
+      <option name="presentableId" value="LOCAL-00064" />
+      <option name="project" value="LOCAL" />
+      <updated>1746524897922</updated>
+    </task>
+    <task id="LOCAL-00065" summary="indent">
+      <option name="closed" value="true" />
+      <created>1746525023693</created>
+      <option name="number" value="00065" />
+      <option name="presentableId" value="LOCAL-00065" />
+      <option name="project" value="LOCAL" />
+      <updated>1746525023693</updated>
+    </task>
+    <task id="LOCAL-00066" summary="indent">
+      <option name="closed" value="true" />
+      <created>1746525380482</created>
+      <option name="number" value="00066" />
+      <option name="presentableId" value="LOCAL-00066" />
+      <option name="project" value="LOCAL" />
+      <updated>1746525380482</updated>
+    </task>
+    <task id="LOCAL-00067" summary="indent">
+      <option name="closed" value="true" />
+      <created>1746525443174</created>
+      <option name="number" value="00067" />
+      <option name="presentableId" value="LOCAL-00067" />
+      <option name="project" value="LOCAL" />
+      <updated>1746525443174</updated>
+    </task>
+    <task id="LOCAL-00068" summary="indent">
+      <option name="closed" value="true" />
+      <created>1746525560770</created>
+      <option name="number" value="00068" />
+      <option name="presentableId" value="LOCAL-00068" />
+      <option name="project" value="LOCAL" />
+      <updated>1746525560770</updated>
+    </task>
+    <task id="LOCAL-00069" summary="indent">
+      <option name="closed" value="true" />
+      <created>1746525602556</created>
+      <option name="number" value="00069" />
+      <option name="presentableId" value="LOCAL-00069" />
+      <option name="project" value="LOCAL" />
+      <updated>1746525602556</updated>
+    </task>
+    <task id="LOCAL-00070" summary="indent">
+      <option name="closed" value="true" />
+      <created>1746525805991</created>
+      <option name="number" value="00070" />
+      <option name="presentableId" value="LOCAL-00070" />
+      <option name="project" value="LOCAL" />
+      <updated>1746525805991</updated>
+    </task>
+    <task id="LOCAL-00071" summary="indent">
+      <option name="closed" value="true" />
+      <created>1746525856443</created>
+      <option name="number" value="00071" />
+      <option name="presentableId" value="LOCAL-00071" />
+      <option name="project" value="LOCAL" />
+      <updated>1746525856443</updated>
+    </task>
+    <task id="LOCAL-00072" summary="indent">
+      <option name="closed" value="true" />
+      <created>1746651333048</created>
+      <option name="number" value="00072" />
+      <option name="presentableId" value="LOCAL-00072" />
+      <option name="project" value="LOCAL" />
+      <updated>1746651333064</updated>
+    </task>
+    <task id="LOCAL-00073" summary="back">
+      <option name="closed" value="true" />
+      <created>1746651583706</created>
+      <option name="number" value="00073" />
+      <option name="presentableId" value="LOCAL-00073" />
+      <option name="project" value="LOCAL" />
+      <updated>1746651583706</updated>
+    </task>
+    <task id="LOCAL-00074" summary="sm03">
+      <option name="closed" value="true" />
+      <created>1746652717258</created>
+      <option name="number" value="00074" />
+      <option name="presentableId" value="LOCAL-00074" />
+      <option name="project" value="LOCAL" />
+      <updated>1746652717258</updated>
+    </task>
+    <task id="LOCAL-00075" summary="sm*">
+      <option name="closed" value="true" />
+      <created>1746652826598</created>
+      <option name="number" value="00075" />
+      <option name="presentableId" value="LOCAL-00075" />
+      <option name="project" value="LOCAL" />
+      <updated>1746652826598</updated>
+    </task>
+    <task id="LOCAL-00076" summary="sm-04">
+      <option name="closed" value="true" />
+      <created>1746652879993</created>
+      <option name="number" value="00076" />
+      <option name="presentableId" value="LOCAL-00076" />
+      <option name="project" value="LOCAL" />
+      <updated>1746652880009</updated>
+    </task>
+    <task id="LOCAL-00077" summary="sm-04">
+      <option name="closed" value="true" />
+      <created>1746653000369</created>
+      <option name="number" value="00077" />
+      <option name="presentableId" value="LOCAL-00077" />
+      <option name="project" value="LOCAL" />
+      <updated>1746653000369</updated>
+    </task>
+    <task id="LOCAL-00078" summary="sm-08">
+      <option name="closed" value="true" />
+      <created>1746653203636</created>
+      <option name="number" value="00078" />
+      <option name="presentableId" value="LOCAL-00078" />
+      <option name="project" value="LOCAL" />
+      <updated>1746653203636</updated>
+    </task>
+    <task id="LOCAL-00079" summary="pdb">
+      <option name="closed" value="true" />
+      <created>1746704051948</created>
+      <option name="number" value="00079" />
+      <option name="presentableId" value="LOCAL-00079" />
+      <option name="project" value="LOCAL" />
+      <updated>1746704051948</updated>
+    </task>
+    <task id="LOCAL-00080" summary="change iteration, before change main">
+      <option name="closed" value="true" />
+      <created>1746713984959</created>
+      <option name="number" value="00080" />
+      <option name="presentableId" value="LOCAL-00080" />
+      <option name="project" value="LOCAL" />
+      <updated>1746713984959</updated>
+    </task>
+    <task id="LOCAL-00081" summary="change main">
+      <option name="closed" value="true" />
+      <created>1746715084631</created>
+      <option name="number" value="00081" />
+      <option name="presentableId" value="LOCAL-00081" />
+      <option name="project" value="LOCAL" />
+      <updated>1746715084631</updated>
+    </task>
+    <task id="LOCAL-00082" summary="merged_end">
+      <option name="closed" value="true" />
+      <created>1746715544652</created>
+      <option name="number" value="00082" />
+      <option name="presentableId" value="LOCAL-00082" />
+      <option name="project" value="LOCAL" />
+      <updated>1746715544652</updated>
+    </task>
+    <task id="LOCAL-00083" summary="subunits names">
+      <option name="closed" value="true" />
+      <created>1746715899717</created>
+      <option name="number" value="00083" />
+      <option name="presentableId" value="LOCAL-00083" />
+      <option name="project" value="LOCAL" />
+      <updated>1746715899717</updated>
+    </task>
+    <task id="LOCAL-00084" summary="subunits names">
+      <option name="closed" value="true" />
+      <created>1746716420730</created>
+      <option name="number" value="00084" />
+      <option name="presentableId" value="LOCAL-00084" />
+      <option name="project" value="LOCAL" />
+      <updated>1746716420730</updated>
+    </task>
+    <task id="LOCAL-00085" summary="show circle">
+      <option name="closed" value="true" />
+      <created>1747062596711</created>
+      <option name="number" value="00085" />
+      <option name="presentableId" value="LOCAL-00085" />
+      <option name="project" value="LOCAL" />
+      <updated>1747062596711</updated>
+    </task>
+    <task id="LOCAL-00086" summary="doubles??">
+      <option name="closed" value="true" />
+      <created>1747069001853</created>
+      <option name="number" value="00086" />
+      <option name="presentableId" value="LOCAL-00086" />
+      <option name="project" value="LOCAL" />
+      <updated>1747069001853</updated>
+    </task>
+    <task id="LOCAL-00087" summary="assume not double">
+      <option name="closed" value="true" />
+      <created>1747212709760</created>
+      <option name="number" value="00087" />
+      <option name="presentableId" value="LOCAL-00087" />
+      <option name="project" value="LOCAL" />
+      <updated>1747212709767</updated>
+    </task>
+    <task id="LOCAL-00088" summary="check">
+      <option name="closed" value="true" />
+      <created>1747215864385</created>
+      <option name="number" value="00088" />
+      <option name="presentableId" value="LOCAL-00088" />
+      <option name="project" value="LOCAL" />
+      <updated>1747215864385</updated>
+    </task>
+    <task id="LOCAL-00089" summary="check">
+      <option name="closed" value="true" />
+      <created>1747216107733</created>
+      <option name="number" value="00089" />
+      <option name="presentableId" value="LOCAL-00089" />
+      <option name="project" value="LOCAL" />
+      <updated>1747216107733</updated>
+    </task>
+    <task id="LOCAL-00090" summary="check">
+      <option name="closed" value="true" />
+      <created>1747216611055</created>
+      <option name="number" value="00090" />
+      <option name="presentableId" value="LOCAL-00090" />
+      <option name="project" value="LOCAL" />
+      <updated>1747216611055</updated>
+    </task>
+    <task id="LOCAL-00091" summary="check">
+      <option name="closed" value="true" />
+      <created>1747216711573</created>
+      <option name="number" value="00091" />
+      <option name="presentableId" value="LOCAL-00091" />
+      <option name="project" value="LOCAL" />
+      <updated>1747216711573</updated>
+    </task>
+    <task id="LOCAL-00092" summary="check">
+      <option name="closed" value="true" />
+      <created>1747216845372</created>
+      <option name="number" value="00092" />
+      <option name="presentableId" value="LOCAL-00092" />
+      <option name="project" value="LOCAL" />
+      <updated>1747216845372</updated>
+    </task>
+    <task id="LOCAL-00093" summary="preprocces usage">
+      <option name="closed" value="true" />
+      <created>1747222969661</created>
+      <option name="number" value="00093" />
+      <option name="presentableId" value="LOCAL-00093" />
+      <option name="project" value="LOCAL" />
+      <updated>1747222969661</updated>
+    </task>
+    <task id="LOCAL-00094" summary="relabel">
+      <option name="closed" value="true" />
+      <created>1747223127721</created>
+      <option name="number" value="00094" />
+      <option name="presentableId" value="LOCAL-00094" />
+      <option name="project" value="LOCAL" />
+      <updated>1747223127721</updated>
+    </task>
+    <task id="LOCAL-00095" summary="circle">
+      <option name="closed" value="true" />
+      <created>1747223555955</created>
+      <option name="number" value="00095" />
+      <option name="presentableId" value="LOCAL-00095" />
+      <option name="project" value="LOCAL" />
+      <updated>1747223555955</updated>
+    </task>
+    <task id="LOCAL-00096" summary="circle">
+      <option name="closed" value="true" />
+      <created>1747224090031</created>
+      <option name="number" value="00096" />
+      <option name="presentableId" value="LOCAL-00096" />
+      <option name="project" value="LOCAL" />
+      <updated>1747224090031</updated>
+    </task>
+    <task id="LOCAL-00097" summary="circle">
+      <option name="closed" value="true" />
+      <created>1747224336414</created>
+      <option name="number" value="00097" />
+      <option name="presentableId" value="LOCAL-00097" />
+      <option name="project" value="LOCAL" />
+      <updated>1747224336414</updated>
+    </task>
+    <task id="LOCAL-00098" summary="graph path">
+      <option name="closed" value="true" />
+      <created>1747224545424</created>
+      <option name="number" value="00098" />
+      <option name="presentableId" value="LOCAL-00098" />
+      <option name="project" value="LOCAL" />
+      <updated>1747224545424</updated>
+    </task>
+    <task id="LOCAL-00099" summary="cif">
+      <option name="closed" value="true" />
+      <created>1747224971882</created>
+      <option name="number" value="00099" />
+      <option name="presentableId" value="LOCAL-00099" />
+      <option name="project" value="LOCAL" />
+      <updated>1747224971882</updated>
+    </task>
+    <task id="LOCAL-00100" summary="subunits">
+      <option name="closed" value="true" />
+      <created>1747312237745</created>
+      <option name="number" value="00100" />
+      <option name="presentableId" value="LOCAL-00100" />
+      <option name="project" value="LOCAL" />
+      <updated>1747312237745</updated>
+    </task>
+    <task id="LOCAL-00101" summary="subunits">
+      <option name="closed" value="true" />
+      <created>1747312522658</created>
+      <option name="number" value="00101" />
+      <option name="presentableId" value="LOCAL-00101" />
+      <option name="project" value="LOCAL" />
+      <updated>1747312522658</updated>
+    </task>
+    <task id="LOCAL-00102" summary="sub_msa">
+      <option name="closed" value="true" />
+      <created>1747313978967</created>
+      <option name="number" value="00102" />
+      <option name="presentableId" value="LOCAL-00102" />
+      <option name="project" value="LOCAL" />
+      <updated>1747313978967</updated>
+    </task>
+    <task id="LOCAL-00103" summary="sub_msa">
+      <option name="closed" value="true" />
+      <created>1747314085955</created>
+      <option name="number" value="00103" />
+      <option name="presentableId" value="LOCAL-00103" />
+      <option name="project" value="LOCAL" />
+      <updated>1747314085955</updated>
+    </task>
+    <task id="LOCAL-00104" summary="sub_msa">
+      <option name="closed" value="true" />
+      <created>1747314269913</created>
+      <option name="number" value="00104" />
+      <option name="presentableId" value="LOCAL-00104" />
+      <option name="project" value="LOCAL" />
+      <updated>1747314269913</updated>
+    </task>
+    <task id="LOCAL-00105" summary="sub_msa">
+      <option name="closed" value="true" />
+      <created>1747315435019</created>
+      <option name="number" value="00105" />
+      <option name="presentableId" value="LOCAL-00105" />
+      <option name="project" value="LOCAL" />
+      <updated>1747315435019</updated>
+    </task>
+    <task id="LOCAL-00106" summary="sub_msa">
+      <option name="closed" value="true" />
+      <created>1747315614370</created>
+      <option name="number" value="00106" />
+      <option name="presentableId" value="LOCAL-00106" />
+      <option name="project" value="LOCAL" />
+      <updated>1747315614370</updated>
+    </task>
+    <task id="LOCAL-00107" summary="sub_msa">
+      <option name="closed" value="true" />
+      <created>1749052884727</created>
+      <option name="number" value="00107" />
+      <option name="presentableId" value="LOCAL-00107" />
+      <option name="project" value="LOCAL" />
+      <updated>1749052884729</updated>
+    </task>
+    <option name="localTasksCounter" value="108" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="HEAD" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="check missing" />
+    <MESSAGE value="check missing - names" />
+    <MESSAGE value="check missing - save" />
+    <MESSAGE value="indent" />
+    <MESSAGE value="back" />
+    <MESSAGE value="sm03" />
+    <MESSAGE value="sm*" />
+    <MESSAGE value="sm-04" />
+    <MESSAGE value="sm-08" />
+    <MESSAGE value="pdb" />
+    <MESSAGE value="change iteration, before change main" />
+    <MESSAGE value="change main" />
+    <MESSAGE value="merged_end" />
+    <MESSAGE value="subunits names" />
+    <MESSAGE value="show circle" />
+    <MESSAGE value="doubles??" />
+    <MESSAGE value="assume not double" />
+    <MESSAGE value="check" />
+    <MESSAGE value="preprocces usage" />
+    <MESSAGE value="relabel" />
+    <MESSAGE value="circle" />
+    <MESSAGE value="graph path" />
+    <MESSAGE value="cif" />
+    <MESSAGE value="subunits" />
+    <MESSAGE value="sub_msa" />
+    <option name="LAST_COMMIT_MESSAGE" value="sub_msa" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/merge_graphs_py$merge_graphs.coverage" NAME="merge_graphs Coverage Results" MODIFIED="1745489008884" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/RedefineSubunit$complex_graph.coverage" NAME="complex_graph Coverage Results" MODIFIED="1738246089547" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/merge_graphs_py$merge_graphs__2_.coverage" NAME="merge_graphs (2) Coverage Results" MODIFIED="1744032751475" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/merge_graphs_py$test.coverage" NAME="test Coverage Results" MODIFIED="1745489017976" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/RedefineSubunit$subunits_to_msa_input.coverage" NAME="subunits_to_msa_input Coverage Results" MODIFIED="1747312929024" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/preprocess" />
+    <SUITE FILE_PATH="coverage/RedefineSubunit$msa_to_pairwise.coverage" NAME="msa_to_pairwise Coverage Results" MODIFIED="1746178770054" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/preprocess" />
+    <SUITE FILE_PATH="coverage/merge_graphs_py$.coverage" NAME=" Coverage Results" MODIFIED="1745483152596" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/RedefineSubunit$merge_graphs.coverage" NAME="merge_graphs Coverage Results" MODIFIED="1746183452197" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+  </component>
+</project>

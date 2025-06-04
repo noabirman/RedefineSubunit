@@ -36,13 +36,16 @@ def batch_convert_generic(input_dir: str, output_dir: str) -> None:
     print(f"Done converting {files_converted} CIF files.")
 
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        print("Usage: python cif_to_pdb.py <input_parent_dir>")
+    if len(sys.argv) not in [2, 3]:
+        print("Usage: python cif_to_pdb.py <input_parent_dir> [output_dir]")
         sys.exit(1)
 
     parent_dir = os.path.abspath(sys.argv[1])
     input_dir = os.path.join(parent_dir, 'af_pairs')
-    output_dir = os.path.join(parent_dir, 'models')
+    if len(sys.argv) == 3:
+        output_dir = os.path.abspath(sys.argv[2])
+    else:
+        output_dir = os.path.join(parent_dir, 'models')
 
     print("Converting CIF files to PDB files...")
     print(f"Input directory: {input_dir}")

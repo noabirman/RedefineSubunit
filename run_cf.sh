@@ -37,7 +37,8 @@ else
 fi
   MODELS_DIR="$COMPLEX_DIR/models"
   RESULTS_DIR="$COMPLEX_DIR/results"
-  CIF_INPUT="$COMPLEX_DIR/combfold_trivial"
+  CIF_INPUT="$COMPLEX_DIR"
+  CIF_OUTPUT="$COMPLEX_DIR/combfold_trivial"
 elif [ "$MODE" = "high" ]; then
   SUBUNITS_INFO_JSON="$COMPLEX_DIR/combfold/subunits_info.json"
   MODELS_DIR="$COMPLEX_DIR/combfold/models"
@@ -77,7 +78,11 @@ echo
 echo -------------------------------------------------------------------------------------
 echo
 
-python3 RedefineSubunit/cif_to_pdb.py "$CIF_INPUT"
+if [ "$MODE" = "trivial" ]; then
+  python3 RedefineSubunit/cif_to_pdb.py "$CIF_INPUT" "$CIF_OUTPUT"
+else
+  python3 RedefineSubunit/cif_to_pdb.py "$CIF_INPUT"
+fi
 
 echo "Running CombFold $MODE on $COMPLEX_DIR:"
 echo
