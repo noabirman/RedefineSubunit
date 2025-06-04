@@ -1,5 +1,6 @@
 import os
 import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from CombFold.scripts.libs.prepare_complex import create_complexes
 
 if __name__ == "__main__":
