@@ -29,7 +29,8 @@ fi
 COMPLEX_DIR="$1"
 MODE="${2:-default}"
 
-if [ -f "$COMPLEX_DIR/iupred_subunits_info.json" ]; then
+if [ "$MODE" = "trivial" ]; then
+  if [ -f "$COMPLEX_DIR/iupred_subunits_info.json" ]; then
   SUBUNITS_INFO_JSON="$COMPLEX_DIR/iupred_subunits_info.json"
 else
   SUBUNITS_INFO_JSON="$COMPLEX_DIR/subunits_info.json"
