@@ -34,9 +34,8 @@ if [ "$MODE" = "trivial" ]; then
   SUBUNITS_INFO_JSON="$COMPLEX_DIR/iupred_subunits_info.json"
   echo "Using iupred_subunits_info.json for trivial mode."
   elif [ -f "$COMPLEX_DIR/subunits_info.json" ]; then
-else
   SUBUNITS_INFO_JSON="$COMPLEX_DIR/subunits_info.json"
-fi
+  fi
   MODELS_DIR="$COMPLEX_DIR/combfold_trivial/models"
   RESULTS_DIR="$COMPLEX_DIR/combfold_trivial/results"
   CIF_INPUT="$COMPLEX_DIR"
