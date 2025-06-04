@@ -29,8 +29,8 @@ if __name__ == "__main__":
     assembled_file = create_complexes(
         clusters_path,
         first_result=0,
-        last_result=1,  # or another value
+        last_result=10,  # or another value
         output_folder=output_folder,
-        output_cif=True  # or False, as needed
+        output_cif=False  # or False, as needed
     )
     print(f"Assembly completed. Results saved to: {assembled_file}")
