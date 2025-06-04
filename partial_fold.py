@@ -12,6 +12,8 @@ if __name__ == "__main__":
     output_folder = os.path.join(results_path, "assembled_results")
     assembly_dir = os.path.join(results_path, "_unified_representation", "assembly_output")
 
+    print(f"Starting assembly process with results path: {results_path}")
+
     # Find the clusters file
     clusters_path = None
     for fname in os.listdir(assembly_dir):
@@ -31,3 +33,4 @@ if __name__ == "__main__":
         output_folder=output_folder,
         output_cif=True  # or False, as needed
     )
+    print(f"Assembly completed. Results saved to: {assembled_file}")
