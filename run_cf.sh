@@ -29,11 +29,14 @@ fi
 COMPLEX_DIR="$1"
 MODE="${2:-default}"
 
-if [ "$MODE" = "trivial" ]; then
+if [ -f "$COMPLEX_DIR/iupred_subunits_info.json" ]; then
+  SUBUNITS_INFO_JSON="$COMPLEX_DIR/iupred_subunits_info.json"
+else
   SUBUNITS_INFO_JSON="$COMPLEX_DIR/subunits_info.json"
+fi
   MODELS_DIR="$COMPLEX_DIR/models"
   RESULTS_DIR="$COMPLEX_DIR/results"
-  CIF_INPUT="$COMPLEX_DIR"
+  CIF_INPUT="$COMPLEX_DIR/combfold_trivial"
 elif [ "$MODE" = "high" ]; then
   SUBUNITS_INFO_JSON="$COMPLEX_DIR/combfold/subunits_info.json"
   MODELS_DIR="$COMPLEX_DIR/combfold/models"
