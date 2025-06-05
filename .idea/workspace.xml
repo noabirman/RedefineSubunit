@@ -125,8 +125,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-f27c65a3e318-JavaScript-PY-251.23774.444" />
-        <option value="bundled-python-sdk-890ed5b35930-d9c5bdb153f4-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-251.23774.444" />
+        <option value="bundled-js-predefined-d6986cc7102b-410509235cf1-JavaScript-PY-242.20224.347" />
+        <option value="bundled-python-sdk-c2d6afa66fbe-39cff9de6eef-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-242.20224.347" />
       </set>
     </attachedChunks>
   </component>
@@ -174,6 +174,7 @@
       <workItem from="1747214766657" duration="7705000" />
       <workItem from="1747311943158" duration="4529000" />
       <workItem from="1749052851861" duration="707000" />
+      <workItem from="1749120019871" duration="3875000" />
     </task>
     <task id="LOCAL-00059" summary="rename">
       <option name="closed" value="true" />
