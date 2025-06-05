@@ -17,7 +17,7 @@ set -e  # Exit on error
 #   2: High (uses high_subunits_info.json)
 #   3: Trivial (uses subunits_info or iupred + trivial dirs)
 #   4: Us-Trivial (subunits from combfold, trivial models/results)
-#   5: All (subunits from combfold, models/results to combfold_all)
+#   5: All (subunits from combfold, all models, results to combfold_all)
 
 if [ "$#" -lt 2 ]; then
   printf 'Usage: %s <COMPLEX_DIR> <MODE (1–5)>\n\
@@ -25,7 +25,7 @@ if [ "$#" -lt 2 ]; then
     2: High (uses high_subunits_info.json)\n\
     3: Trivial (uses subunits_info or iupred + trivial dirs)\n\
     4: Us-Trivial (subunits from combfold, trivial models/results)\n\
-    5: All (subunits from combfold, models/results to combfold_all)\n' "$0"
+    5: All (subunits from combfold,all models, results to combfold_all)\n' "$0"
 
   exit 1
 fi
