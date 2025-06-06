@@ -40,7 +40,13 @@ def process_complex(complex_dir: str, ben_scores: dict, variant_name: str):
     combfold_dir = os.path.join(variant_dir, "results", "assembled_results")
     ref_pdb = download_pdb_complex(pdb_id, complex_dir)
 
-    clustered_models = sorted(glob(os.path.join(combfold_dir, "cb_*_output_0.pdb")))
+    if "trivial" in variant_name.lower():
+        pattern = "output_clustered_0.pdb"
+    else:
+        pattern = "cb_*_output_0.pdb"
+
+    clustered_models = sorted(glob(os.path.join(combfold_dir, pattern)))
+
     if not clustered_models:
         print(f"⚠️  No clustered models found for {pdb_id} [{variant_name}]")
         return None
