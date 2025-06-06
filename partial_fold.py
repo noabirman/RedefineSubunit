@@ -8,7 +8,7 @@ if __name__ == "__main__":
         print("Usage: python script.py <results_path>")
         sys.exit(1)
 
-    results_path = sys.argv[1]
+    results_path = os.path.abspath(sys.argv[1])
     output_folder = os.path.join(results_path, "assembled_results")
     assembly_dir = os.path.join(results_path, "_unified_representation", "assembly_output")
 
