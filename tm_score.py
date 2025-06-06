@@ -260,3 +260,8 @@ if __name__ == "__main__":
 #
 # if __name__ == "__main__":
 #     tm_score_for_complex("/cs/labs/dina/tsori/af3_example/complexes/DONE_MSA2/7arc")
+
+
+
+
+
