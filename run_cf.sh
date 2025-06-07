@@ -94,6 +94,9 @@ echo "Running CombFold mode $MODE"
 echo "Subunits:   $SUBUNITS_INFO_JSON"
 echo "Models dir: $MODELS_DIR"
 echo "Results to: $RESULTS_DIR"
+#empty results dir
+rm -rf "$RESULTS_DIR"/*
+
 echo -------------------------------------------------------------------------------------
 
 python3 CombFold/scripts/run_on_pdbs.py "$SUBUNITS_INFO_JSON" "$MODELS_DIR" "$RESULTS_DIR"
