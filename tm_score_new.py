@@ -244,36 +244,72 @@ def process_complex(complex_dir: str, ben_scores: dict, variant_name: str):
         result["scores"]["ben"] = {"tm_score": ben_best_tm}
     return result
 
-def run_variant_on_all_complexes(root_dir: str, ben_scores: dict, variant_name: str, merged_results: dict = None):
-    """
-    Run evaluation on all complexes for a given variant and return updated results dict.
-    If merged_results is provided, results will be added into it.
-    """
+# def run_variant_on_all_complexes(root_dir: str, ben_scores: dict, variant_name: str, merged_results: dict = None):
+#     """
+#     Run evaluation on all complexes for a given variant and return updated results dict.
+#     If merged_results is provided, results will be added into it.
+#     """
+#     if merged_results is None:
+#         merged_results = {}
+#
+#     for entry in sorted(os.listdir(root_dir)):
+#         complex_path = os.path.join(root_dir, entry)
+#         if os.path.isdir(complex_path) and (
+#             os.path.isdir(os.path.join(complex_path, variant_name)) or variant_name == "combfold_high"
+#         ):
+#             result = process_complex(complex_path, ben_scores, variant_name)
+#             if result:
+#                 pdb_id = result["pdb_id"]
+#                 if pdb_id not in merged_results:
+#                     merged_results[pdb_id] = {"pdb_id": pdb_id, "scores": {}}
+#
+#                 # Add our scores
+#                 merged_results[pdb_id]["scores"][variant_name] = {
+#                     "tm_score": result["our_tm_score"],
+#                     "rmsd": result["our_rmsd"],
+#                 }
+#
+#                 # Add Ben's score only once
+#                 if "ben" not in merged_results[pdb_id]["scores"] and result["ben_best_tm_score"] > 0:
+#                     merged_results[pdb_id]["scores"]["ben"] = {
+#                         "tm_score": result["ben_best_tm_score"]
+#                     }
+#
+#     return merged_results
+def run_variant_on_all_complexes(root_dir: str, ben_scores: dict, variant_name: str, merged_results=None):
     if merged_results is None:
-        merged_results = {}
+        merged_results = []
+
+    merged_by_pdb = {entry["pdb_id"]: entry for entry in merged_results}
 
     for entry in sorted(os.listdir(root_dir)):
         complex_path = os.path.join(root_dir, entry)
-        if os.path.isdir(complex_path) and (
-            os.path.isdir(os.path.join(complex_path, variant_name)) or variant_name == "combfold_high"
-        ):
+        if os.path.isdir(complex_path) and os.path.isdir(os.path.join(complex_path, variant_name)):
             result = process_complex(complex_path, ben_scores, variant_name)
             if result:
                 pdb_id = result["pdb_id"]
-                if pdb_id not in merged_results:
-                    merged_results[pdb_id] = {"pdb_id": pdb_id, "scores": {}}
+                if pdb_id not in merged_by_pdb:
+                    merged_by_pdb[pdb_id] = {"pdb_id": pdb_id, "scores": {}}
+                merged_by_pdb[pdb_id]["scores"][variant_name] = result["scores"].get(variant_name, {})
 
-                # Add our scores
-                merged_results[pdb_id]["scores"][variant_name] = {
-                    "tm_score": result["our_tm_score"],
-                    "rmsd": result["our_rmsd"],
-                }
+    # Always include Ben’s scores if present
+    for pdb_id, merged_entry in merged_by_pdb.items():
+        if "ben" not in merged_entry["scores"]:
+            ben_entry = ben_scores.get(pdb_id.upper(), {}).get("scores", {})
+            if ben_entry:
+                # Pick best Ben model TM-score
+                best_ben_tm = max((v.get("tm_score", -1) for v in ben_entry.values()), default=-1)
+                if best_ben_tm > -1:
+                    merged_entry["scores"]["ben"] = {"tm_score": best_ben_tm}
 
-                # Add Ben's score only once
-                if "ben" not in merged_results[pdb_id]["scores"] and result["ben_best_tm_score"] > 0:
-                    merged_results[pdb_id]["scores"]["ben"] = {
-                        "tm_score": result["ben_best_tm_score"]
-                    }
+    merged_results = list(merged_by_pdb.values())
+
+    # Save to comparison JSON
+    variant_out_path = os.path.join(root_dir, variant_name, "tm_score_comparison.json")
+    os.makedirs(os.path.dirname(variant_out_path), exist_ok=True)
+    with open(variant_out_path, "w") as f:
+        json.dump(merged_results, f, indent=2)
+    print(f"💾 Saved comparison results to {variant_out_path}")
 
     return merged_results
 
