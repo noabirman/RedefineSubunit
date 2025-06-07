@@ -365,7 +365,7 @@ def main(root_dir: str, ben_json_path: str):
     # Save final comparison JSON
     output_path = os.path.join(root_dir, "tm_score_comparison.json")
     with open(output_path, "w") as f:
-        json.dump(list(all_results.values()), f, indent=2)
+        json.dump(all_results, f, indent=2)
     print(f"💾 Final comparison JSON saved to: {output_path}")
 
     with open(output_path) as f:
