@@ -4,7 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="edfa4e67-f0ed-43e6-a38c-fd2160380395" name="Changes" comment="sub_msa" />
+    <list default="true" id="edfa4e67-f0ed-43e6-a38c-fd2160380395" name="Changes" comment="new tm_score ag">
+      <change afterPath="$PROJECT_DIR$/tm_score_new_new.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tm_score_new.py" beforeDir="false" afterPath="$PROJECT_DIR$/tm_score_new.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -125,8 +129,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-410509235cf1-JavaScript-PY-242.20224.347" />
-        <option value="bundled-python-sdk-c2d6afa66fbe-39cff9de6eef-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-242.20224.347" />
+        <option value="bundled-js-predefined-1d06a55b98c1-0b3e54e931b4-JavaScript-PY-241.17011.127" />
+        <option value="bundled-python-sdk-48aec45f0201-7e9c3bbb6e34-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-241.17011.127" />
       </set>
     </attachedChunks>
   </component>
@@ -175,22 +179,7 @@
       <workItem from="1747311943158" duration="4529000" />
       <workItem from="1749052851861" duration="707000" />
       <workItem from="1749120019871" duration="3875000" />
-    </task>
-    <task id="LOCAL-00059" summary="rename">
-      <option name="closed" value="true" />
-      <created>1746523291464</created>
-      <option name="number" value="00059" />
-      <option name="presentableId" value="LOCAL-00059" />
-      <option name="project" value="LOCAL" />
-      <updated>1746523291464</updated>
-    </task>
-    <task id="LOCAL-00060" summary="check missing">
-      <option name="closed" value="true" />
-      <created>1746524301116</created>
-      <option name="number" value="00060" />
-      <option name="presentableId" value="LOCAL-00060" />
-      <option name="project" value="LOCAL" />
-      <updated>1746524301116</updated>
+      <workItem from="1749204562492" duration="9635000" />
     </task>
     <task id="LOCAL-00061" summary="check missing - names">
       <option name="closed" value="true" />
@@ -568,7 +557,23 @@
       <option name="project" value="LOCAL" />
       <updated>1749052884729</updated>
     </task>
-    <option name="localTasksCounter" value="108" />
+    <task id="LOCAL‎-00108" summary="new tm_score">
+      <option name="closed" value="true" />
+      <created>1749208312587</created>
+      <option name="number" value="00108" />
+      <option name="presentableId" value="LOCAL‎-00108" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1749208312588</updated>
+    </task>
+    <task id="LOCAL‎-00109" summary="new tm_score ag">
+      <option name="closed" value="true" />
+      <created>1749210659015</created>
+      <option name="number" value="00109" />
+      <option name="presentableId" value="LOCAL‎-00109" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1749210659016</updated>
+    </task>
+    <option name="localTasksCounter" value="110" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -598,8 +603,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="check missing" />
-    <MESSAGE value="check missing - names" />
     <MESSAGE value="check missing - save" />
     <MESSAGE value="indent" />
     <MESSAGE value="back" />
@@ -623,7 +626,9 @@
     <MESSAGE value="cif" />
     <MESSAGE value="subunits" />
     <MESSAGE value="sub_msa" />
-    <option name="LAST_COMMIT_MESSAGE" value="sub_msa" />
+    <MESSAGE value="new tm_score" />
+    <MESSAGE value="new tm_score ag" />
+    <option name="LAST_COMMIT_MESSAGE" value="new tm_score ag" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
