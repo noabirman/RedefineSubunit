@@ -148,6 +148,24 @@ def process_complex(complex_dir: str, ben_scores: dict, variant_name: str):
     # Ref structure
     ref_pdb = download_pdb_complex(pdb_id, complex_dir)
 
+    if variant_name == "combfold_trivial":
+        pattern = "output_clustered_0.pdb"
+    else:
+        pattern = "cb_*_output_0.pdb"
+
+    clustered_models = sorted(glob(os.path.join(combfold_dir, pattern)))
+
+    # Fallback for non-trivial variants if cb_* not found
+    if not clustered_models and variant_name != "combfold_trivial":
+        fallback_pattern = "output_clustered_0.pdb"
+        clustered_models = sorted(glob(os.path.join(combfold_dir, fallback_pattern)))
+        if clustered_models:
+            print("✅ CombFold succeeded with output_clustered_0.pdb")
+
+    if not clustered_models:
+        print(f"⚠️  No clustered models found for {pdb_id} [{variant_name}]")
+        return None
+
     # === CASE 1: If TM-score already computed, just read and return ===
     if os.path.exists(score_file):
         print(f"📄 Using existing TM-score file: {score_file}")
@@ -173,23 +191,6 @@ def process_complex(complex_dir: str, ben_scores: dict, variant_name: str):
         }
 
     # === CASE 2: Compute TM-score now ===
-    if variant_name == "combfold_trivial":
-        pattern = "output_clustered_0.pdb"
-    else:
-        pattern = "cb_*_output_0.pdb"
-
-    clustered_models = sorted(glob(os.path.join(combfold_dir, pattern)))
-
-    # Fallback for non-trivial variants if cb_* not found
-    if not clustered_models and variant_name != "combfold_trivial":
-        fallback_pattern = "output_clustered_0.pdb"
-        clustered_models = sorted(glob(os.path.join(combfold_dir, fallback_pattern)))
-        if clustered_models:
-            print("✅ CombFold succeeded with output_clustered_0.pdb")
-
-    if not clustered_models:
-        print(f"⚠️  No clustered models found for {pdb_id} [{variant_name}]")
-        return None
 
     # Align and compute TM-score
     best_tm, best_rmsd, best_model = -1, float("inf"), None
@@ -276,6 +277,39 @@ def run_variant_on_all_complexes(root_dir: str, ben_scores: dict, variant_name: 
 
     return merged_results
 
+def plot_tm_score_summary(all_results, out_dir):
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    groups = list(all_results[0]["scores"].keys())
+    tm_by_group = {g: [] for g in groups}
+
+    for entry in all_results:
+        for g in groups:
+            tm_score = entry["scores"][g].get("tm_score", None)
+            if tm_score is not None:
+                tm_by_group[g].append(tm_score)
+
+    above_07 = [np.mean([s >= 0.7 for s in tm_by_group[g]]) * 100 for g in groups]
+    above_08 = [np.mean([s >= 0.8 for s in tm_by_group[g]]) * 100 for g in groups]
+
+    x = np.arange(len(groups))
+    width = 0.35
+
+    fig, ax = plt.subplots()
+    ax.bar(x - width/2, above_07, width, label='TM ≥ 0.7')
+    ax.bar(x + width/2, above_08, width, label='TM ≥ 0.8')
+
+    ax.set_ylabel('Percentage of complexes')
+    ax.set_title('TM-score thresholds by group')
+    ax.set_xticks(x)
+    ax.set_xticklabels(groups, rotation=45, ha='right')
+    ax.legend()
+
+    plt.tight_layout()
+    plt.savefig(os.path.join(out_dir, "tm_score_summary.png"))
+    plt.close()
+
 def main(root_dir: str, ben_json_path: str):
     with open(ben_json_path) as f:
         ben_scores = json.load(f)
@@ -297,6 +331,11 @@ def main(root_dir: str, ben_json_path: str):
     with open(output_path, "w") as f:
         json.dump(list(all_results.values()), f, indent=2)
     print(f"💾 Final comparison JSON saved to: {output_path}")
+
+    with open(output_path) as f:
+        all_results = json.load(f)
+
+    plot_tm_score_summary(all_results, out_dir="plots")
 
 
 if __name__ == "__main__":
