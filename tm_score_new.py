@@ -6,6 +6,7 @@ import requests
 import subprocess
 from glob import glob
 from typing import Tuple
+import pandas as pd
 
 MMALIGN_PATH = "/cs/labs/dina/bshor/scripts/MMalign"
 
@@ -222,7 +223,7 @@ def plot_tm_score_summary(all_results, out_dir):
     plt.savefig(os.path.join(out_dir, "tm_score_summary.png"))
     plt.close()
 
-def main(root_dir: str, ben_json_path: str):
+def main_tm_score_script(root_dir: str, ben_json_path: str):
     with open(ben_json_path) as f:
         ben_scores = json.load(f)
 
@@ -252,6 +253,33 @@ def main(root_dir: str, ben_json_path: str):
     plot_tm_score_summary(all_results, out_dir=plots)
 
 
+def check_complexes(root_dir):
+    variants = [
+        "combfold",
+        "combfold_all",
+        "combfold_trivial",
+        "combfold_us_trivial",
+        "combfold_high"
+    ]
+
+    records = []
+    for complex_id in sorted(os.listdir(root_dir)):
+        complex_dir = os.path.join(root_dir, complex_id)
+        if not os.path.isdir(complex_dir):
+            continue
+
+        row = {"complex": complex_id}
+        for variant in variants:
+            variant_dir = os.path.join(complex_dir, variant, "results", "assembled_results")
+            if os.path.exists(os.path.join(variant_dir, "output_clustered_0.pdb")):
+                row[variant] = "success"
+            else:
+                row[variant] = "failed"
+        records.append(row)
+
+    df = pd.DataFrame(records)
+    return df
+
 if __name__ == "__main__":
     if len(sys.argv) != 3:
         # python3 tm_score_new.py /cs/labs/dina/tsori/af3_example/complexes/DONE_MSA2 /cs/labs/dina/tsori/af3_example/complexes/DONE_MSA2/combfold_results.json
@@ -260,4 +288,9 @@ if __name__ == "__main__":
 
     root_dir = os.path.abspath(sys.argv[1])
     ben_json_path = os.path.abspath(sys.argv[2])
-    main(root_dir, ben_json_path)
+    #main_tm_score_script(root_dir, ben_json_path) #todo: this should be a line
+    #seder
+    df = check_complexes(root_dir)
+    print(df.to_string(index=False))
+    # also save
+    df.to_csv(os.path.join(root_dir, "clustered_presence_table.csv"), index=False)
