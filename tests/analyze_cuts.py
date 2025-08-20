@@ -8,8 +8,16 @@ def load_json(path):
         return json.load(f)
 
 def analyze_complex(complex_path, complex_name):
-    original_info = load_json(os.path.join(complex_path, "subunits_info.json"))
-    redefine_info = load_json(os.path.join(complex_path, "combfold", "subunits_info.json"))
+    subunit_info_path1 = os.path.join(complex_path, "subunits_info.json")
+    subunit_info_path2 = os.path.join(complex_path, "combfold", "subunits_info.json")
+    if not os.path.exists(subunit_info_path1):
+        print(f"{subunit_info_path1} does not exists")
+        return None
+    if not os.path.exists(subunit_info_path2):
+        print(f"{subunit_info_path2} does not exists")
+        return None
+    original_info = load_json(subunit_info_path1)
+    redefine_info = load_json(subunit_info_path2)
     mapping_file = os.path.join(complex_path, "chain_id_mapping.json")
     if not os.path.exists(mapping_file):
         return None  # Skip if no mapping
