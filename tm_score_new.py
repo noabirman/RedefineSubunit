@@ -290,6 +290,7 @@ if __name__ == "__main__":
     ben_json_path = os.path.abspath(sys.argv[2])
     main_tm_score_script(root_dir, ben_json_path)
     #check which of the complexs sucsess run fully
+    #hey
     df = check_complexes(root_dir)
     print(df.to_string(index=False))
     df.to_csv(os.path.join(root_dir, "clustered_presence_table.csv"), index=False)
