@@ -3,6 +3,8 @@ import json
 import csv
 from collections import defaultdict
 import pandas as pd
+import re
+
 
 def load_json(path):
     with open(path) as f:
@@ -94,9 +96,50 @@ def check_cf_variants(root_dir):
                 row[variant] = "failed"
         records[complex_id] = row
     return records
+
+def count_chains_in_subunits_info(subunits_info_path):
+    with open(subunits_info_path) as f:
+        data = json.load(f)
+    total_chains = 0
+    for subunit in data.values():
+        chain_names = subunit.get("chain_names", [])
+        total_chains += len(chain_names)
+    return total_chains
+
+def extract_cb_number(results_dir):
+    if not os.path.isdir(results_dir):
+        return None
+    for fname in os.listdir(results_dir):
+        match = re.match(r"cb_(\d+)_output\.res", fname)
+        if match:
+            return int(match.group(1))
+    return None
+
+def compute_chain_coverage(base_dir):
+    coverage = {}
+    for complex_name in os.listdir(base_dir):
+        combfold_dir = os.path.join(base_dir, complex_name, "combfold")
+        subunits_info_path = os.path.join(combfold_dir, "subunits_info.json")
+        results_dir = os.path.join(combfold_dir, "results", "_unified_representation", "assembly_output")
+
+        if not os.path.exists(subunits_info_path):
+            continue
+
+        total_chains = count_chains_in_subunits_info(subunits_info_path)
+        cb_number = extract_cb_number(results_dir)
+
+        if cb_number is None or total_chains == 0:
+            coverage[complex_name] = None
+        else:
+            coverage[complex_name] = round(cb_number / total_chains, 3)  # fraction, 0–1
+    return coverage
+
 def main(base_dir, output_csv="complex_summary.csv"):
     # === gather combfold status first ===
     cf_status = check_cf_variants(base_dir)
+
+    # === gather coverage ===
+    coverage_status = compute_chain_coverage(base_dir)
 
     # map long variant names -> short names
     col_rename = {
@@ -115,19 +158,21 @@ def main(base_dir, output_csv="complex_summary.csv"):
         result = analyze_complex(complex_path, complex_name)
         if result:
             if complex_name in cf_status:
-                # remap combfold keys to shorter names
                 for old, new in col_rename.items():
                     if old in cf_status[complex_name]:
                         result[new] = cf_status[complex_name][old]
+            if complex_name in coverage_status:
+                cov = coverage_status[complex_name]
+                result["coverage"] = cov if cov is not None else "-"
             rows.append(result)
 
     # headers with short names
-    extra_cols = list(col_rename.values())
+    extra_cols = list(col_rename.values()) + ["coverage"]
     headers = ["complex_name", "preprocess_cut", "redefine_cut", "new_sizes", "chain_transition"] + extra_cols
 
     # === Print table ===
     print(" | ".join(h.ljust(15) for h in headers))
-    print("-" * 140)
+    print("-" * 160)
     for r in rows:
         print(" | ".join(str(r.get(h, "-")).ljust(15) for h in headers))
 
@@ -137,7 +182,8 @@ def main(base_dir, output_csv="complex_summary.csv"):
         writer.writeheader()
         writer.writerows(rows)
 
-    print(f"\n✅ Table saved to {output_csv}")
+    print(f"\n Table saved to {output_csv}")
+
 
 if __name__ == "__main__":
     root_dir = "/cs/labs/dina/tsori/af3_example/complexes/DONE_MSA2"
