@@ -327,7 +327,7 @@ def plot_results_tm_score(json_path):
 if __name__ == "__main__":
     # Run the check from the current directory
     #find_double_chain_proteins(base_dir="/cs/labs/dina/tsori/af3_example/complexes/DONE_MSA2")
-    #main("/cs/labs/dina/tsori/af3_example/complexes/DONE_MSA2")
-    plot_results_tm_score("/cs/labs/dina/tsori/af3_example/complexes/DONE_MSA2/tm_score_comparison.json")
+    main("/cs/labs/dina/tsori/af3_example/complexes/DONE_MSA2")
+    #plot_results_tm_score("/cs/labs/dina/tsori/af3_example/complexes/DONE_MSA2/tm_score_comparison.json")
 
 
