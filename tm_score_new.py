@@ -199,7 +199,7 @@ def plot_tm_score_summary(all_results, out_dir):
 
     for entry in all_results:
         for g in groups:
-            tm_score = entry["scores"][g].get("tm_score", None)
+            tm_score = entry.get("scores", {}).get(g, {}).get("tm_score", None)
             if tm_score is not None:
                 tm_by_group[g].append(tm_score)
 
