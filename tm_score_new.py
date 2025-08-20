@@ -288,9 +288,8 @@ if __name__ == "__main__":
 
     root_dir = os.path.abspath(sys.argv[1])
     ben_json_path = os.path.abspath(sys.argv[2])
-    #main_tm_score_script(root_dir, ben_json_path) #todo: this should be a line
-    #seder
+    main_tm_score_script(root_dir, ben_json_path)
+    #check which of the complexs sucsess run fully
     df = check_complexes(root_dir)
     print(df.to_string(index=False))
-    # also save
     df.to_csv(os.path.join(root_dir, "clustered_presence_table.csv"), index=False)
