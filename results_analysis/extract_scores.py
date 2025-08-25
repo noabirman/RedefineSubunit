@@ -63,6 +63,8 @@ def main(main_dir):
     subdirs = ['combfold', 'combfold_trivial']
 
     for complex_name in os.listdir(main_dir):
+        if complex_name == 'plots':
+            continue
         complex_path = os.path.join(main_dir, complex_name)
         if not os.path.isdir(complex_path):
             continue
