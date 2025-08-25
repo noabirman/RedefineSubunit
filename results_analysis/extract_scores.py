@@ -32,7 +32,7 @@ def parse_tm_score(file_path):
 
 def main(main_dir):
     result = []
-    subdirs = ['combfold', 'combfold_all', 'combfold_us_trivial', 'combfold_trivial']
+    subdirs = ['combfold', 'combfold_trivial']
 
     for complex_name in os.listdir(main_dir):
         complex_path = os.path.join(main_dir, complex_name)
@@ -54,8 +54,8 @@ def main(main_dir):
 
             # Fill values
             row[f"{subdir}_TM"] = our_tm
-            row[f"{subdir}_RMSD"] = rmsd
-            row[f"{subdir}_num_subunits"] = num_subunits
+            # row[f"{subdir}_RMSD"] = rmsd
+            # row[f"{subdir}_num_subunits"] = num_subunits
 
             if ben_tm is not None:
                 if ben_tm_collected is None:
