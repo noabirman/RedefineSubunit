@@ -4,6 +4,34 @@ import pandas as pd
 import argparse
 import matplotlib.pyplot as plt
 import seaborn as sns
+import os
+import glob
+import numpy as np
+from Bio.PDB import PDBParser
+
+
+def get_avg_plddt(sub_path):
+    results_dir = os.path.join(sub_path, 'results', 'assembled_results')
+
+    clustered_file = os.path.join(results_dir, "output_clustered_0.pdb")
+    if os.path.exists(clustered_file):
+        pdb_file = clustered_file
+    else:
+        candidates = glob.glob(os.path.join(results_dir, "cb_*_output_0.pdb"))
+        if not candidates:
+            raise FileNotFoundError(f"No suitable PDB file found in {results_dir}")
+        pdb_file = candidates[0]
+
+    parser = PDBParser(QUIET=True)
+    structure = parser.get_structure("model", pdb_file)
+
+    plddts = [atom.bfactor for atom in structure.get_atoms()]
+    return np.mean(plddts)
+
+
+# Example usage:
+# avg = get_avg_plddt("/path/to/sub_path")
+# print("Average pLDDT:", avg)
 
 
 def parse_tm_score(file_path):
@@ -46,10 +74,17 @@ def main(main_dir):
             sub_path = os.path.join(complex_path, subdir)
             tm_file = os.path.join(sub_path, 'tm_score.txt')
 
+
             if not os.path.exists(tm_file):
                 print(f"Warning: Missing file {tm_file}")
                 continue
-
+            if subdir == 'combfold':
+                try:
+                    avg_plddt = get_avg_plddt(sub_path)
+                    row[f"{subdir}_avg_pLDDT"] = avg_plddt
+                except Exception as e:
+                    print(f"Warning: Could not compute avg pLDDT for {sub_path} ({e})")
+                    row[f"{subdir}_avg_pLDDT"] = None
             our_tm, rmsd, ben_tm, num_subunits = parse_tm_score(tm_file)
 
             # Fill values
