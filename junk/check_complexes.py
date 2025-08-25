@@ -2,9 +2,36 @@ import os
 import json
 
 def normalize_pair(pair):
+    """
+    Normalize a pair of strings by:
+      - converting both parts to lowercase
+      - sorting them alphabetically
+    This ensures pairs like ("A", "B") and ("B", "A") are treated the same.
+
+    Args:
+        pair (list or tuple): Two elements representing a pair.
+
+    Returns:
+        tuple: Normalized pair as a lowercase, alphabetically sorted tuple.
+    """
     return tuple(sorted(part.lower() for part in pair))
 
 def find_missing_pairs(msa_pairs_dir, af_pairs_dir):
+    """
+    Compare MSA pairs and AF pairs to find missing pairs.
+
+    MSA pairs come from .json files in msa_pairs_dir.
+    AF pairs come from subdirectory names in af_pairs_dir.
+
+    A pair is considered "missing" if it exists in MSA pairs but not in AF pairs.
+
+    Args:
+        msa_pairs_dir (str): Path to the MSA pairs directory.
+        af_pairs_dir (str): Path to the AF pairs directory.
+
+    Returns:
+        list: List of missing pairs (each as a tuple).
+    """
     # Collect pairs from MSA files
     msa_pairs = {normalize_pair(file_name.replace('.json', '').split('_')) for file_name in os.listdir(msa_pairs_dir) if file_name.endswith('.json')}
 
@@ -16,6 +43,18 @@ def find_missing_pairs(msa_pairs_dir, af_pairs_dir):
     return missing_pairs
 
 def find_shared_chains(subunits_info_path):
+    """
+    Find subunit pairs that share at least one chain name.
+
+    Reads subunits_info.json and checks each pair of subunits
+    for common chain names.
+
+    Args:
+        subunits_info_path (str): Path to subunits_info.json file.
+
+    Returns:
+        dict: Keys are "subunit1,subunit2", values are lists of shared chains.
+    """
     with open(subunits_info_path, 'r') as f:
         subunits_info = json.load(f)
 
@@ -34,6 +73,16 @@ def find_shared_chains(subunits_info_path):
     return shared_chains
 
 def main(dir_path):
+    """
+    Process all subdirectories in dir_path to:
+      1. Identify missing AF pairs compared to MSA pairs.
+      2. Detect subunit pairs sharing chains.
+
+    Results for each subdirectory are saved to summary.json in dir_path.
+
+    Args:
+        dir_path (str): Parent directory containing subdirectories to analyze.
+    """
     output = {}
     subdirs_with_missing_pairs = []
     subdirs_with_shared_chains = []

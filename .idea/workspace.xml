@@ -4,38 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="edfa4e67-f0ed-43e6-a38c-fd2160380395" name="Changes" comment="new tm_score ag">
-      <change beforePath="$PROJECT_DIR$/.idea/RedefineSubunit.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/RedefineSubunit.iml" afterDir="false" />
+    <list default="true" id="edfa4e67-f0ed-43e6-a38c-fd2160380395" name="Changes" comment="added % of covarge to the table">
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/check_complexes.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/check_transformation.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/explore_complex_charc.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/jupyter_labs/Explore_Ben_DS.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/jupyter_labs/PAE_explore.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/jupyter_labs/forReal.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/output_plots/all_plot.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/output_plots/skip4_pae15_all_plot.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/output_plots/with_weights_plot.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocess/6i3m/chain_id_mapping.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocess/6i3m/msa_output/split_from_iupred_a/A.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocess/6i3m/msa_output/split_from_iupred_b/B.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocess/6i3m/msa_output/split_from_iupred_c/C.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocess/6i3m/subunits_info.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocess/change_split_names.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocess/clean_folders.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocess/data_from_Dina/PSD_residue_pairs.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocess/data_from_Dina/synapse_all_seqs.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocess/data_from_Dina/synapse_pre_msa.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocess/data_from_Dina/unique_pairs.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocess/msas.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocess/synapse_extract_pairs.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocess/synapse_pre_msa.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocess/synapse_preprocess.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/terms_of_use.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_complex_graph.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tm_score.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -81,7 +52,6 @@
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
     &quot;Python tests.Python tests in test.py.executor&quot;: &quot;Run&quot;,
     &quot;Python.complex_graph.executor&quot;: &quot;Run&quot;,
     &quot;Python.merge_graphs (2).executor&quot;: &quot;Debug&quot;,
@@ -155,6 +125,14 @@
       </list>
     </recent_temporary>
   </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-1d06a55b98c1-0b3e54e931b4-JavaScript-PY-241.17011.127" />
+        <option value="bundled-python-sdk-48aec45f0201-7e9c3bbb6e34-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-241.17011.127" />
+      </set>
+    </attachedChunks>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -201,75 +179,6 @@
       <workItem from="1749052851861" duration="707000" />
       <workItem from="1749120019871" duration="3875000" />
       <workItem from="1749204562492" duration="9635000" />
-      <workItem from="1755511775209" duration="1361000" />
-      <workItem from="1755513451063" duration="553000" />
-      <workItem from="1755514071772" duration="121000" />
-      <workItem from="1755514203672" duration="63000" />
-      <workItem from="1755514313744" duration="41000" />
-    </task>
-    <task id="LOCAL-00061" summary="check missing - names">
-      <option name="closed" value="true" />
-      <created>1746524458325</created>
-      <option name="number" value="00061" />
-      <option name="presentableId" value="LOCAL-00061" />
-      <option name="project" value="LOCAL" />
-      <updated>1746524458325</updated>
-    </task>
-    <task id="LOCAL-00062" summary="check missing - names">
-      <option name="closed" value="true" />
-      <created>1746524495172</created>
-      <option name="number" value="00062" />
-      <option name="presentableId" value="LOCAL-00062" />
-      <option name="project" value="LOCAL" />
-      <updated>1746524495172</updated>
-    </task>
-    <task id="LOCAL-00063" summary="check missing - names">
-      <option name="closed" value="true" />
-      <created>1746524549768</created>
-      <option name="number" value="00063" />
-      <option name="presentableId" value="LOCAL-00063" />
-      <option name="project" value="LOCAL" />
-      <updated>1746524549768</updated>
-    </task>
-    <task id="LOCAL-00064" summary="check missing - save">
-      <option name="closed" value="true" />
-      <created>1746524897922</created>
-      <option name="number" value="00064" />
-      <option name="presentableId" value="LOCAL-00064" />
-      <option name="project" value="LOCAL" />
-      <updated>1746524897922</updated>
-    </task>
-    <task id="LOCAL-00065" summary="indent">
-      <option name="closed" value="true" />
-      <created>1746525023693</created>
-      <option name="number" value="00065" />
-      <option name="presentableId" value="LOCAL-00065" />
-      <option name="project" value="LOCAL" />
-      <updated>1746525023693</updated>
-    </task>
-    <task id="LOCAL-00066" summary="indent">
-      <option name="closed" value="true" />
-      <created>1746525380482</created>
-      <option name="number" value="00066" />
-      <option name="presentableId" value="LOCAL-00066" />
-      <option name="project" value="LOCAL" />
-      <updated>1746525380482</updated>
-    </task>
-    <task id="LOCAL-00067" summary="indent">
-      <option name="closed" value="true" />
-      <created>1746525443174</created>
-      <option name="number" value="00067" />
-      <option name="presentableId" value="LOCAL-00067" />
-      <option name="project" value="LOCAL" />
-      <updated>1746525443174</updated>
-    </task>
-    <task id="LOCAL-00068" summary="indent">
-      <option name="closed" value="true" />
-      <created>1746525560770</created>
-      <option name="number" value="00068" />
-      <option name="presentableId" value="LOCAL-00068" />
-      <option name="project" value="LOCAL" />
-      <updated>1746525560770</updated>
     </task>
     <task id="LOCAL-00069" summary="indent">
       <option name="closed" value="true" />
@@ -599,7 +508,71 @@
       <option name="project" value="LOCAL‎" />
       <updated>1749210659016</updated>
     </task>
-    <option name="localTasksCounter" value="110" />
+    <task id="LOCAL‎-00110" summary="new tm_score ag">
+      <option name="closed" value="true" />
+      <created>1755599439734</created>
+      <option name="number" value="00110" />
+      <option name="presentableId" value="LOCAL‎-00110" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1755599439736</updated>
+    </task>
+    <task id="LOCAL‎-00111" summary="new tm_score ag">
+      <option name="closed" value="true" />
+      <created>1755679154174</created>
+      <option name="number" value="00111" />
+      <option name="presentableId" value="LOCAL‎-00111" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1755679154174</updated>
+    </task>
+    <task id="LOCAL‎-00112" summary="new tm_score ag">
+      <option name="closed" value="true" />
+      <created>1755680479729</created>
+      <option name="number" value="00112" />
+      <option name="presentableId" value="LOCAL‎-00112" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1755680479729</updated>
+    </task>
+    <task id="LOCAL‎-00113" summary="new tm_score ag">
+      <option name="closed" value="true" />
+      <created>1755681559530</created>
+      <option name="number" value="00113" />
+      <option name="presentableId" value="LOCAL‎-00113" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1755681559530</updated>
+    </task>
+    <task id="LOCAL‎-00114" summary="new tm_score ag">
+      <option name="closed" value="true" />
+      <created>1755681640432</created>
+      <option name="number" value="00114" />
+      <option name="presentableId" value="LOCAL‎-00114" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1755681640432</updated>
+    </task>
+    <task id="LOCAL‎-00115" summary="new tm_score ag">
+      <option name="closed" value="true" />
+      <created>1755684343638</created>
+      <option name="number" value="00115" />
+      <option name="presentableId" value="LOCAL‎-00115" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1755684343638</updated>
+    </task>
+    <task id="LOCAL‎-00116" summary="added % of covarge to the table">
+      <option name="closed" value="true" />
+      <created>1755685307163</created>
+      <option name="number" value="00116" />
+      <option name="presentableId" value="LOCAL‎-00116" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1755685307163</updated>
+    </task>
+    <task id="LOCAL‎-00117" summary="added % of covarge to the table">
+      <option name="closed" value="true" />
+      <created>1755685617036</created>
+      <option name="number" value="00117" />
+      <option name="presentableId" value="LOCAL‎-00117" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1755685617036</updated>
+    </task>
+    <option name="localTasksCounter" value="118" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -629,7 +602,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="check missing - save" />
     <MESSAGE value="indent" />
     <MESSAGE value="back" />
     <MESSAGE value="sm03" />
@@ -654,7 +626,8 @@
     <MESSAGE value="sub_msa" />
     <MESSAGE value="new tm_score" />
     <MESSAGE value="new tm_score ag" />
-    <option name="LAST_COMMIT_MESSAGE" value="new tm_score ag" />
+    <MESSAGE value="added % of covarge to the table" />
+    <option name="LAST_COMMIT_MESSAGE" value="added % of covarge to the table" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

@@ -109,7 +109,7 @@ def missing_chains_in_cf(base_dir):
         cb_number = extract_cb_number(results_dir)
 
         if cb_number is None:
-            print(f"{complex_name}: ❌ No cb_*_output.res file found")
+            print(f"{complex_name}: No cb_*_output.res file found")
             continue
 
         missing = total_chains - cb_number
@@ -138,7 +138,7 @@ def count_residues_in_pdb(pdb_path):
     try:
         structure = parser.get_structure("model", pdb_path)
     except Exception as e:
-        print(f"❌ Failed to parse {pdb_path}: {e}")
+        print(f" Failed to parse {pdb_path}: {e}")
         return None
     residue_count = 0
     for model in structure:
@@ -161,7 +161,7 @@ def compare_residue_counts(base_dir):
         expected_residues = count_expected_residues(subunits_info_path)
         pdb_path = find_cb_pdb_file(pdb_dir)
         if not pdb_path:
-            print(f"{complex_name}: ❌ No cb_*_output_0.pdb found")
+            print(f"{complex_name}: No cb_*_output_0.pdb found")
             continue
 
         actual_residues = count_residues_in_pdb(pdb_path)
@@ -320,7 +320,7 @@ def plot_results_tm_score(json_path):
     output_dir = os.path.dirname(json_path)
     output_path = os.path.join(output_dir, "tm_score_quality_comparison.png")
     plt.savefig(output_path)
-    print(f"✅ Plot saved to: {output_path}")
+    print(f"Plot saved to: {output_path}")
 
 
 

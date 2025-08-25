@@ -125,7 +125,7 @@ if __name__ == '__main__':
     with open(output_map, "w") as f:
         json.dump(fragment_map, f, indent=2)
 
-    print(f"✅ Done! Output saved to {output_fasta} and {output_map}")
+    print(f" Done! Output saved to {output_fasta} and {output_map}")
 
     # === Create AF3-style JSON ===
     af3_sequences = [
@@ -141,5 +141,5 @@ if __name__ == '__main__':
 
     with open(os.path.join(complex_name,"af3_input.json"), "w") as f:
         json.dump(af3_json, f, indent=2)
-    print("✅ AlphaFold 3 input JSON saved to af3_input.json")
+    print(" AlphaFold 3 input JSON saved to af3_input.json")
 

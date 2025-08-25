@@ -17,9 +17,9 @@ def load_json(path):
         with open(path, encoding="utf-8") as f:
             return json.load(f)
     except FileNotFoundError:
-        sys.exit(f"❌  File not found: {path}")
+        sys.exit(f"File not found: {path}")
     except json.JSONDecodeError as e:
-        sys.exit(f"❌  Failed to parse JSON: {e}")
+        sys.exit(f"Failed to parse JSON: {e}")
 
 
 def save_json(data, path):
@@ -45,12 +45,12 @@ def main():
     high_only = keep_high_only(data)
 
     if not high_only:
-        sys.exit("⚠️  No keys containing '_high_' were found — nothing to write.")
+        sys.exit("No keys containing '_high_' were found - nothing to write.")
 
     output_path = os.path.join(os.path.dirname(input_path), "high_subunits_info.json")
     save_json(high_only, output_path)
 
-    print(f"✅  Saved {len(high_only)} high subunit(s) → {output_path}")
+    print(f"Saved {len(high_only)} high subunit(s) → {output_path}")
 
 
 if __name__ == "__main__":

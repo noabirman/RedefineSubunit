@@ -120,7 +120,7 @@ def check_af_pair_completeness_and_integrity(base_dir):
         msa_path = os.path.join(complex_path, "msa_inputs")
         mapping_path = os.path.join(complex_path, "chain_id_mapping.json")
         af_pairs_path = os.path.join(complex_path, "af_pairs")
-        subunits_info_path = os.path.join(complex_path, "subunits_info.json")  # ✅ NEW
+        subunits_info_path = os.path.join(complex_path, "subunits_info.json")  #  NEW
 
         if not (os.path.isdir(msa_path) and os.path.isfile(mapping_path)
                 and os.path.isdir(af_pairs_path) and os.path.isfile(subunits_info_path)):
@@ -136,7 +136,7 @@ def check_af_pair_completeness_and_integrity(base_dir):
             print(f"{complex_name}: Failed to load mapping or subunits_info: {e}")
             continue
 
-        # ✅ Detect which chain_ids came from multi-chain subunits (allow self-pairs only for them)
+        # Detect which chain_ids came from multi-chain subunits (allow self-pairs only for them)
         self_pair_allowed_chain_ids = set()
         for subunit in subunits_info.values():
             if len(subunit.get("chain_names", [])) > 1:
@@ -161,7 +161,7 @@ def check_af_pair_completeness_and_integrity(base_dir):
 
         chain_ids = sorted(msa_seqs_by_chain_id.keys())
 
-        # ✅ Generate all unordered normalized expected pairs
+        # Generate all unordered normalized expected pairs
         expected_pairs = set()
         for a, b in itertools.combinations(chain_ids, 2):
             pair = f"{min(a, b).lower()}_{max(a, b).lower()}"

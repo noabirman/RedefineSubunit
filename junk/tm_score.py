@@ -170,14 +170,14 @@ def get_tm_score_rmsd_mmalign(ref_path: str, sample_path: str) -> Tuple[float, f
 
 def process_complex(complex_dir: str, ben_scores: dict):
     pdb_id = os.path.basename(complex_dir)
-    print(f"\n🔍 Processing {pdb_id}")
+    print(f"\nProcessing {pdb_id}")
 
     combfold_dir = os.path.join(complex_dir, "combfold", "results", "assembled_results")
     ref_pdb = download_pdb_complex(pdb_id, complex_dir)
 
     clustered_models = sorted(glob(os.path.join(combfold_dir, "cb_*_output_0.pdb")))
     if not clustered_models:
-        print(f"⚠️  No clustered models found for {pdb_id}")
+        print(f"No clustered models found for {pdb_id}")
         return None
 
     best_tm, best_rmsd, best_model = -1, float("inf"), None
@@ -188,7 +188,7 @@ def process_complex(complex_dir: str, ben_scores: dict):
             if tm > best_tm:
                 best_tm, best_rmsd, best_model = tm, rmsd, os.path.basename(model)
         except Exception as e:
-            print(f"  ❌ Error processing {model}: {e}")
+            print(f"Error processing {model}: {e}")
 
     # Ben's scores
     pdb_id = os.path.basename(complex_dir).upper()
@@ -201,11 +201,11 @@ def process_complex(complex_dir: str, ben_scores: dict):
             ben_best_tm = tm_score
             ben_best_model = model_name
 
-    print(f"✅ Best of ours: {best_model} (TM={best_tm:.5f}, RMSD={best_rmsd:.2f})")
+    print(f"Best of ours: {best_model} (TM={best_tm:.5f}, RMSD={best_rmsd:.2f})")
     if ben_best_model:
-        print(f"✅ Best of Ben: {ben_best_model} (TM={ben_best_tm:.5f})")
+        print(f"Best of Ben: {ben_best_model} (TM={ben_best_tm:.5f})")
     else:
-        print("⚠️  No Ben results found for this PDB")
+        print("No Ben results found for this PDB")
 
     # Save to tm_score.txt
     score_file = os.path.join(complex_dir, "tm_score.txt")

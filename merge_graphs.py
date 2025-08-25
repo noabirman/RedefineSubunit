@@ -191,7 +191,7 @@ def merge_sequence(subunits, start, end):
             if merged_sequence[pos] == '-':
                 merged_sequence[pos] = char
             elif merged_sequence[pos] != char:
-                print(f"⚠ Conflict at pos={pos + start}: existing={merged_sequence[pos]} vs new={char}")
+                print(f"Conflict at pos={pos + start}: existing={merged_sequence[pos]} vs new={char}")
                 raise ValueError(f"Conflict detected at position {pos}: {merged_sequence[pos]} vs {char}")
     merged_sequence = "".join(merged_sequence)
     return merged_sequence

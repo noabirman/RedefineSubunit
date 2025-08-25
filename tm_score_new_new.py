@@ -3,7 +3,7 @@ def process_complex(complex_dir: str, ben_scores: dict, variant_name: str):
     from glob import glob
 
     pdb_id = os.path.basename(complex_dir)
-    print(f"\n🔍 Processing {pdb_id} [{variant_name}]")
+    print(f"\nProcessing {pdb_id} [{variant_name}]")
 
     # Paths
     if variant_name == "combfold_high":
@@ -19,7 +19,7 @@ def process_complex(complex_dir: str, ben_scores: dict, variant_name: str):
 
     # === CASE 1: If TM-score already computed, just read and return ===
     if os.path.exists(score_file):
-        print(f"📄 Using existing TM-score file: {score_file}")
+        print(f"Using existing TM-score file: {score_file}")
         best_model, best_tm, best_rmsd, ben_best_model, ben_best_tm = None, -1, -1, None, -1
         with open(score_file) as f:
             for line in f:
@@ -54,10 +54,10 @@ def process_complex(complex_dir: str, ben_scores: dict, variant_name: str):
         fallback_pattern = "output_clustered_0.pdb"
         clustered_models = sorted(glob(os.path.join(combfold_dir, fallback_pattern)))
         if clustered_models:
-            print("✅ CombFold succeeded with output_clustered_0.pdb")
+            print("CombFold succeeded with output_clustered_0.pdb")
 
     if not clustered_models:
-        print(f"⚠️  No clustered models found for {pdb_id} [{variant_name}]")
+        print(f"No clustered models found for {pdb_id} [{variant_name}]")
         return None
 
     # Align and compute TM-score
@@ -71,7 +71,7 @@ def process_complex(complex_dir: str, ben_scores: dict, variant_name: str):
                 best_rmsd = rmsd
                 best_model = os.path.basename(model)
         except Exception as e:
-            print(f"  ❌ Error processing {model}: {e}")
+            print(f"Error processing {model}: {e}")
 
     # Ben's scores
     pdb_id_upper = pdb_id.upper()
@@ -84,11 +84,11 @@ def process_complex(complex_dir: str, ben_scores: dict, variant_name: str):
             ben_best_tm = tm_score
             ben_best_model = model_name
 
-    print(f"✅ Best of ours: {best_model} (TM={best_tm:.5f}, RMSD={best_rmsd:.2f})")
+    print(f"Best of ours: {best_model} (TM={best_tm:.5f}, RMSD={best_rmsd:.2f})")
     if ben_best_model:
-        print(f"✅ Best of Ben: {ben_best_model} (TM={ben_best_tm:.5f})")
+        print(f"Best of Ben: {ben_best_model} (TM={ben_best_tm:.5f})")
     else:
-        print("⚠️  No Ben results found for this PDB")
+        print("No Ben results found for this PDB")
 
     # Write TM-score file
     with open(score_file, "w") as f:

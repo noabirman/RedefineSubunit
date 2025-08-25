@@ -77,7 +77,7 @@ def rename_subunits_and_create_msa_input(input_file, dir_path, min_length):
             output_file = os.path.join(output_subdir, f"{label_lower}_data.json")
             with open(output_file, 'w') as f:
                 json.dump(msa_output, f, indent=4)
-            print(f"⚠️ Short sequence. Saved msa_output: {output_file}")
+            print(f"Short sequence. Saved msa_output: {output_file}")
 
         # Long enough sequence → msa_input
         else:
@@ -98,13 +98,13 @@ def rename_subunits_and_create_msa_input(input_file, dir_path, min_length):
             output_file = os.path.join(msa_inputs_dir, f"{new_label}.json")
             with open(output_file, 'w') as f:
                 json.dump(msa_input, f, indent=4)
-            print(f"✅ Saved msa_input: {output_file}")
+            print(f"Saved msa_input: {output_file}")
 
     # Save the mapping file
     mapping_file_path = os.path.join(dir_path, "chain_id_mapping.json")
     with open(mapping_file_path, 'w') as f:
         json.dump(mapping, f, indent=4)
-    print(f"📄 Mapping file saved to {mapping_file_path}")
+    print(f"Mapping file saved to {mapping_file_path}")
 
 if __name__ == '__main__':
     if len(sys.argv) < 2 or len(sys.argv) > 4:
@@ -115,8 +115,8 @@ if __name__ == '__main__':
     input_file = os.path.join(combfold_dir_path, 'subunits_info.json') if len(sys.argv) < 4 else os.path.abspath(sys.argv[3])
     min_length = int(sys.argv[2]) if len(sys.argv) == 3 else 10
 
-    print(f"📂 Directory path: {combfold_dir_path}")
-    print(f"📄 Input file: {input_file}")
-    print(f"🔢 Minimum sequence length for msa_input: {min_length}")
+    print(f"Directory path: {combfold_dir_path}")
+    print(f"Input file: {input_file}")
+    print(f"Minimum sequence length for msa_input: {min_length}")
 
     rename_subunits_and_create_msa_input(input_file, combfold_dir_path, min_length)

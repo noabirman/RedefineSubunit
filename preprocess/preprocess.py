@@ -89,7 +89,7 @@ def split_af3_json_by_chain(input_json_path, output_dir="msa_input"):
         with open(output_path, 'w') as out_file:
             json.dump(chain_data, out_file, indent=2)
 
-        print(f"✅ Saved {output_path}")
+        print(f"Saved {output_path}")
 
 import json
 from collections import defaultdict
@@ -167,20 +167,20 @@ if __name__ == '__main__':
     msa_inputs_path = os.path.join(dir_path, "msa_inputs")
 
     # Print preprocessing message
-    print(f"⚙️ Preprocessing \"{dir_path}\"...")
+    print(f"Preprocessing \"{dir_path}\"...")
     # === Step 1: Convert JSON to full FASTA ===
-    print("🔄 Converting JSON to FASTA...")
+    print("Converting JSON to FASTA...")
     if mode:
         json_to_fasta(json_path, dir_path)
     else:
         merge_duplicate_chain_sequences(json_path)
         subunit_to_fasta(json_path, dir_path)
     # === Step 2: Split FASTA and run IUPred3 on each chain ===
-    print("🔬 Splitting FASTA and running IUPred3...")
+    print("Splitting FASTA and running IUPred3...")
     subprocess.run(["bash", split_script, dir_path], check=True)
 
     # === Step 3: Split long sequences based on IUPred3 disorder ===
-    print("✂️  Splitting long sequences at disordered regions...")
+    print("Splitting long sequences at disordered regions...")
     subprocess.run([
         "python3",os.path.join(script_dir, "split_sequences_on_disorder.py"),
         iupred_outputs_path,
@@ -189,7 +189,7 @@ if __name__ == '__main__':
     ], check=True)
 
     # === Step 4: Rename chain IDs and save mapping ===
-    print("🔠 Renaming chain IDs...")
+    print("Renaming chain IDs...")
 
     # Rename chain IDs and save mapping
     rename_protein_ids(af3_json, af3_json_renamed, mapping_file_path, split_mapping_file)
@@ -197,4 +197,4 @@ if __name__ == '__main__':
     # === Step 5: Split the renamed json into per chain===
     split_af3_json_by_chain(af3_json_renamed, msa_inputs_path)
 
-    print("✅ Preprocessing complete.")
+    print("Preprocessing complete.")

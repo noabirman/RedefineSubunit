@@ -39,7 +39,7 @@ def process_complex(complex_dir: str, ben_scores: dict, variant_name: str):
     from glob import glob
 
     pdb_id = os.path.basename(complex_dir)
-    print(f"\n🔍 Processing {pdb_id} [{variant_name}]")
+    print(f"\nProcessing {pdb_id} [{variant_name}]")
 
     # Paths
     # if variant_name == "combfold_high":
@@ -65,15 +65,15 @@ def process_complex(complex_dir: str, ben_scores: dict, variant_name: str):
         fallback_pattern = "output_clustered_0.pdb"
         clustered_models = sorted(glob(os.path.join(combfold_dir, fallback_pattern)))
         if clustered_models:
-            print("✅ CombFold succeeded with output_clustered_0.pdb")
+            print("CombFold succeeded with output_clustered_0.pdb")
 
     if not clustered_models:
-        print(f"⚠️  No clustered models found for {pdb_id} [{variant_name}]")
+        print(f"No clustered models found for {pdb_id} [{variant_name}]")
         return None
 
     # === CASE 1: If TM-score already computed, just read and return ===
     if os.path.exists(score_file):
-        print(f"📄 Using existing TM-score file: {score_file}")
+        print(f"Using existing TM-score file: {score_file}")
         best_model, best_tm, best_rmsd, ben_best_model, ben_best_tm = None, -1, -1, None, -1
         with open(score_file) as f:
             for line in f:
@@ -102,13 +102,13 @@ def process_complex(complex_dir: str, ben_scores: dict, variant_name: str):
     for model in clustered_models:
         try:
             tm, rmsd = get_tm_score_rmsd_mmalign(ref_pdb, model)
-            print(f"  → {os.path.basename(model)}: TM-score={tm:.5f}, RMSD={rmsd:.2f}")
+            print(f"  -> {os.path.basename(model)}: TM-score={tm:.5f}, RMSD={rmsd:.2f}")
             if tm > best_tm:
                 best_tm = tm
                 best_rmsd = rmsd
                 best_model = os.path.basename(model)
         except Exception as e:
-            print(f"  ❌ Error processing {model}: {e}")
+            print(f"Error processing {model}: {e}")
 
     # Ben's scores
     pdb_id_upper = pdb_id.upper()
@@ -121,11 +121,11 @@ def process_complex(complex_dir: str, ben_scores: dict, variant_name: str):
             ben_best_tm = tm_score
             ben_best_model = model_name
 
-    print(f"✅ Best of ours: {best_model} (TM={best_tm:.5f}, RMSD={best_rmsd:.2f})")
+    print(f"Best of ours: {best_model} (TM={best_tm:.5f}, RMSD={best_rmsd:.2f})")
     if ben_best_model:
-        print(f"✅ Best of Ben: {ben_best_model} (TM={ben_best_tm:.5f})")
+        print(f"Best of Ben: {ben_best_model} (TM={ben_best_tm:.5f})")
     else:
-        print("⚠️  No Ben results found for this PDB")
+        print("No Ben results found for this PDB")
 
     # Write TM-score file
     with open(score_file, "w") as f:
@@ -184,7 +184,7 @@ def run_variant_on_all_complexes(root_dir: str, ben_scores: dict, variant_name: 
     os.makedirs(os.path.dirname(variant_out_path), exist_ok=True)
     with open(variant_out_path, "w") as f:
         json.dump(merged_results, f, indent=2)
-    print(f"💾 Saved comparison results to {variant_out_path}")
+    print(f"Saved comparison results to {variant_out_path}")
 
     return merged_results
 
@@ -237,13 +237,13 @@ def main_tm_score_script(root_dir: str, ben_json_path: str):
 
     all_results = {}
     for variant in all_variants:
-        print(f"\n🧪 Running TM-score evaluation for: {variant}")
+        print(f"\nRunning TM-score evaluation for: {variant}")
         all_results = run_variant_on_all_complexes(root_dir, ben_scores, variant, merged_results=all_results)
     # Save final comparison JSON
     output_path = os.path.join(root_dir, "tm_score_comparison.json")
     with open(output_path, "w") as f:
         json.dump(all_results, f, indent=2)
-    print(f"💾 Final comparison JSON saved to: {output_path}")
+    print(f"Final comparison JSON saved to: {output_path}")
 
     with open(output_path) as f:
         all_results = json.load(f)

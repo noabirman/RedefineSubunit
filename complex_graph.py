@@ -24,24 +24,6 @@ class SubunitInfo:
     sequence: str
 
 
-# def extract_sequence_with_seqio(structure_path,af_version: int):
-#     """
-#     Extracts the sequence from an mmCIF/PDB file using Bio.SeqIO.
-#
-#     Args:
-#         structure_path (str): Path to the mmCIF/PDB file.
-#         af_version if 2 then PDB and if 3 cif
-#
-#     Returns:
-#         str: The amino acid sequence as a single-letter code string.
-#     """
-#     format = {'2':"pdb-atom", '3':"cif-atom"}
-#     sequences = []
-#     for record in SeqIO.parse(structure_path, format[af_version]):
-#         sequences.append(str(record.seq))
-#         print(record.id)
-#     return ''.join(sequences)
-
 def extract_sequence_with_seqio(structure_path, af_version: int):
     """
     Extracts the sequence from an mmCIF/PDB file using Bio.SeqIO.
