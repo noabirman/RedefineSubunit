@@ -1,4 +1,4 @@
-# tests/test_complex_graph.py
+# tests/test_create_graph_from_af_model.py
 import json
 import os
 import itertools
@@ -8,8 +8,8 @@ from collections import defaultdict
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-import complex_graph as cg
-from complex_graph import SubunitInfo
+import create_graph_from_af_model as cg
+from create_graph_from_af_model import SubunitInfo
 
 class DummySeqIO:
     """A dummy SeqIO.parse replacement that yields SeqRecords."""
@@ -22,7 +22,7 @@ class DummySeqIO:
 @pytest.fixture(autouse=True)
 def patch_seqio(monkeypatch):
     """Monkeypatch SeqIO.parse for extract_sequence_with_seqio tests."""
-    monkeypatch.setattr("complex_graph.SeqIO", DummySeqIO)
+    monkeypatch.setattr("create_graph_from_af_model.SeqIO", DummySeqIO)
     yield
 
 def test_extract_sequence_with_seqio_concatenates():

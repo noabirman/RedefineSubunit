@@ -4,7 +4,7 @@ import sys
 from collections import defaultdict
 import difflib
 import networkx as nx
-from complex_graph import graph, SubunitInfo, extract_sequence_with_seqio
+from create_graph_from_af_model import graph, SubunitInfo, extract_sequence_with_seqio
 from typing import List
 from vizualization_plots import show_circle
 

@@ -150,7 +150,7 @@ def main(main_dir):
     ax.set_title('TM-score Success Rate', pad=10)
     ax.spines[['top', 'right']].set_visible(False)
 
-    # 👉 Add this block here (after plotting bars, before layout)
+    # Add this block here (after plotting bars, before layout)
     fig, ax = plt.subplots(figsize=(2.5, 4))
 
     for idx, method in enumerate(success_df.index):
@@ -166,7 +166,7 @@ def main(main_dir):
     ax.set_title('TM-score Success Rate', pad=10)
     ax.spines[['top', 'right']].set_visible(False)
 
-    # # 👉 Add this block here (after plotting bars, before layout)
+    #  Add this block here (after plotting bars, before layout)
     # legend_elements = [
     #     plt.Rectangle((0, 0), 1, 1, color='#D55E00', label='High (CF)'),
     #     plt.Rectangle((0, 0), 1, 1, color='#FFA07A', label='Acceptable (CF)'),
@@ -193,7 +193,7 @@ def main(main_dir):
                        pad_inches=0.1)
     plt.close(fig_legend)
 
-    print("✅ Saved: combined_scores.csv")
+    print("Saved: combined_scores.csv")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Extract TM-scores and RMSDs from CombFold results.")
