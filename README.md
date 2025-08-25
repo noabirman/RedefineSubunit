@@ -1,6 +1,31 @@
-# RedefineSubunit: Improved Subunit Definition for CombFold
+# RedefineSubunit: Improved Subunit Definition for CombFold/Graph-based Complex Splitting for CombFold
 
-This repository provides a pipeline for preprocessing protein complex inputs to improve structure prediction using [CombFold](https://github.com/dina-lab3D/CombFold), a method for predicting structures of large protein assemblies based on a combinatorial assembly algorithm and AlphaFold2, as described in:
+This repository provides an alternative way to insert protein complexes into [CombFold](https://github.com/dina-lab3D/CombFold), not just as individual chains but as **subunits defined by high-confidence structural regions**.  
+
+It takes AlphaFold model outputs (mmCIF + confidence JSON) and:
+1. **Splits chains into subunits** using plDDT thresholds and gaps.
+2. **Builds graphs** where subunits are nodes and edges reflect inter-subunit PAE interactions.
+3. **Merges overlapping subunits** across models into final `subunits_info.json` for CombFold.
+
+---
+
+## Installation  
+
+Clone the repository and install dependencies:
+
+```bash
+git clone https://github.com/username/RedefineSubunit.git
+cd RedefineSubunit
+pip install -r requirements.txt
+```
+
+Dependencies include:
+- 'biopython' for structure parsing
+- 'networkx' for graph construction
+- 'numpy' for matrix handling
+
+
+
 
 **CombFold: predicting structures of large protein assemblies using a combinatorial assembly algorithm and AlphaFold2**  
 Ben Shor & Dina Schneidman-Duhovny  

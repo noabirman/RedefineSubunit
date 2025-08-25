@@ -70,5 +70,5 @@ python /cs/usr/bshor/sci/installations/af3_variations/deepmind/localalphafold3/a
   --flash_attention_implementation xla
 
 # cd /cs/labs/dina/tsori/af3_example/RedefineSubunit/
-# python3 merge_graphs.py "$OUTPUT_DIR" "$MAPPING_JSON" "$SUBUNITS_INFO_JSON"
+# python3 create_graph_from_complex.py "$OUTPUT_DIR" "$MAPPING_JSON" "$SUBUNITS_INFO_JSON"
 

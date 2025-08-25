@@ -4,9 +4,9 @@ import sys
 from collections import defaultdict
 import difflib
 import networkx as nx
-from create_graph_from_af_model import graph, SubunitInfo, extract_sequence_with_seqio
+from create_graph_from_af_model import graph, SubunitInfo
 from typing import List
-from vizualization_plots import show_circle
+from results_analysis.vizualization_plots import show_circle
 
 def check_subunit_sequence_reconstruction(original_path, new_path):
     import json
@@ -71,7 +71,7 @@ def overlap(v1: SubunitInfo, v2: SubunitInfo, threshold = 5) -> bool:
     """Check if two SubunitInfo nodes overlap in at least one chain."""
     return any(chain in v2.chain_names for chain in v1.chain_names) and not (v1.end + threshold < v2.start or v2.end + threshold < v1.start)
 
-def merge_graphs(graphs: List[nx.Graph], name_mapping,subunits_info) -> nx.Graph:
+def merge_graphs(graphs: List[nx.Graph], name_mapping: object, subunits_info: object) -> nx.Graph:
     """Merge nodes with overlapping indices in the same chain across multiple graphs."""
     # Build an overlap graph
     overlap_graph = create_overlap_graph(graphs)
