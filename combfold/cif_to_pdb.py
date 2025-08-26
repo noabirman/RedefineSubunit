@@ -27,6 +27,8 @@ def batch_convert_generic(input_dir: str, output_dir: str) -> None:
         if os.path.isdir(subdir_path):
             for file in os.listdir(subdir_path):
                 if file.endswith('.cif'):
+                    if file.startswith('fold') and not file.endswith('0.cif'): #AF3 sever files
+                        continue
                     cif_path = os.path.join(subdir_path, file)
                     pdb_filename = os.path.splitext(file)[0] + '.pdb'
                     pdb_path = os.path.join(output_dir, pdb_filename)
