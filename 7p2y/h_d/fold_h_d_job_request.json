@@ -1,0 +1,25 @@
+[{
+ "name": "H_D",
+ "modelSeeds": [
+  "1383049657"
+ ],
+ "sequences": [
+  {
+   "proteinChain": {
+    "sequence": "MATMQCDVVSVKESIYSGAVTMLIAKGAGGELGILPGHAPLVTLLQPGPIRVLLENGTEEIVYVSGGVLEVQPHVVTVLADTAIRADNLDEAAILEARKNAEQLLANQKSDLDSAAALAALAETAAQLETIRKIKNRAQ",
+    "count": 1,
+    "useStructureTemplate": true
+   }
+  },
+  {
+   "proteinChain": {
+    "sequence": "MAAEEH",
+    "count": 1,
+    "useStructureTemplate": true
+   }
+  }
+ ],
+ "dialect": "alphafoldserver",
+ "version": 1
+}
+]

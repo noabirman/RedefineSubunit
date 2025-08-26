@@ -1,0 +1,25 @@
+[{
+ "name": "C_D",
+ "modelSeeds": [
+  "168167664"
+ ],
+ "sequences": [
+  {
+   "proteinChain": {
+    "sequence": "MELTLGLVAIASAILIAFGALGTAIGFGLLGGRFLEAVARQPELAPQLQTRMFLIAGLLDAVPMIGVGIGLFFIFANPFVG",
+    "count": 1,
+    "useStructureTemplate": true
+   }
+  },
+  {
+   "proteinChain": {
+    "sequence": "MAAEEH",
+    "count": 1,
+    "useStructureTemplate": true
+   }
+  }
+ ],
+ "dialect": "alphafoldserver",
+ "version": 1
+}
+]

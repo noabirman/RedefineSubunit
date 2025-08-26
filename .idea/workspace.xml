@@ -4,8 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="edfa4e67-f0ed-43e6-a38c-fd2160380395" name="Changes" comment="added % of covarge to the table">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="edfa4e67-f0ed-43e6-a38c-fd2160380395" name="Changes" comment="avg plddt">
+      <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.name" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -179,22 +179,6 @@
       <workItem from="1749052851861" duration="707000" />
       <workItem from="1749120019871" duration="3875000" />
       <workItem from="1749204562492" duration="9635000" />
-    </task>
-    <task id="LOCAL-00069" summary="indent">
-      <option name="closed" value="true" />
-      <created>1746525602556</created>
-      <option name="number" value="00069" />
-      <option name="presentableId" value="LOCAL-00069" />
-      <option name="project" value="LOCAL" />
-      <updated>1746525602556</updated>
-    </task>
-    <task id="LOCAL-00070" summary="indent">
-      <option name="closed" value="true" />
-      <created>1746525805991</created>
-      <option name="number" value="00070" />
-      <option name="presentableId" value="LOCAL-00070" />
-      <option name="project" value="LOCAL" />
-      <updated>1746525805991</updated>
     </task>
     <task id="LOCAL-00071" summary="indent">
       <option name="closed" value="true" />
@@ -572,7 +556,23 @@
       <option name="project" value="LOCAL‎" />
       <updated>1755685617036</updated>
     </task>
-    <option name="localTasksCounter" value="118" />
+    <task id="LOCAL-00118" summary="avg plddt">
+      <option name="closed" value="true" />
+      <created>1756127960476</created>
+      <option name="number" value="00118" />
+      <option name="presentableId" value="LOCAL-00118" />
+      <option name="project" value="LOCAL" />
+      <updated>1756127960476</updated>
+    </task>
+    <task id="LOCAL-00119" summary="avg plddt">
+      <option name="closed" value="true" />
+      <created>1756128202575</created>
+      <option name="number" value="00119" />
+      <option name="presentableId" value="LOCAL-00119" />
+      <option name="project" value="LOCAL" />
+      <updated>1756128202575</updated>
+    </task>
+    <option name="localTasksCounter" value="120" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -602,7 +602,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="indent" />
     <MESSAGE value="back" />
     <MESSAGE value="sm03" />
     <MESSAGE value="sm*" />
@@ -627,7 +626,8 @@
     <MESSAGE value="new tm_score" />
     <MESSAGE value="new tm_score ag" />
     <MESSAGE value="added % of covarge to the table" />
-    <option name="LAST_COMMIT_MESSAGE" value="added % of covarge to the table" />
+    <MESSAGE value="avg plddt" />
+    <option name="LAST_COMMIT_MESSAGE" value="avg plddt" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
