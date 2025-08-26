@@ -193,6 +193,61 @@ def compute_residue_coverage(base_dir):
         coverage[complex_name] = round(actual / expected, 3)  # fraction 0–1
     return coverage
 
+import os
+import csv
+import re
+
+def find_missing_subunits(complex_path):
+    """Find subunits with 0 kept results from the last iteration where kept != 0."""
+    log_path = os.path.join(complex_path, "combfold", "results", "_unified_representation", "assembly_output", "output.log")
+    chain_list_path = os.path.join(complex_path, "combfold", "results", "_unified_representation", "assembly_output", "chain.list")
+
+    if not (os.path.isfile(log_path) and os.path.isfile(chain_list_path)):
+        return []
+
+    # Read all lines
+    with open(log_path) as f:
+        log_lines = f.readlines()
+
+    # Find all "kept results" blocks
+    kept_blocks = []
+    current_block = None
+    for line in log_lines:
+        if line.startswith("new kept results by chain"):
+            # Start new block
+            current_block = {"chains": line.strip(), "kept": None}
+        elif "kept results:" in line and current_block:
+            # End of block
+            match = re.search(r"kept results:\s*(\d+)", line)
+            if match:
+                current_block["kept"] = int(match.group(1))
+                kept_blocks.append(current_block)
+                current_block = None
+
+    if not kept_blocks:
+        return []
+
+    # Get last block with kept != 0
+    last_block = None
+    for block in reversed(kept_blocks):
+        if block["kept"] != 0:
+            last_block = block
+            break
+    if last_block is None:
+        return []
+
+    # Parse chain kept results
+    chain_results = re.findall(r"(\d+):(\d+)", last_block["chains"])
+    zero_indices = [int(idx) for idx, val in chain_results if val == "0"]
+
+    # Map indices to chain.list names
+    with open(chain_list_path) as f:
+        chain_names = [line.strip() for line in f]
+
+    missing_names = [chain_names[i] for i in zero_indices if i < len(chain_names)]
+    return missing_names
+
+
 def main(base_dir, output_csv="complex_summary.csv"):
     # --- Gather combfold run status ---
     cf_status = check_cf_variants(base_dir)  # returns dict[complex] = {variant: success/failed}
@@ -203,7 +258,6 @@ def main(base_dir, output_csv="complex_summary.csv"):
     # --- Gather residue coverage ---
     residue_cov_status = compute_residue_coverage(base_dir)  # dict[complex] = fraction
 
-    # --- Column rename for short names ---
     col_rename = {
         "combfold": "us",
         "combfold_all": "all",
@@ -217,6 +271,7 @@ def main(base_dir, output_csv="complex_summary.csv"):
         complex_path = os.path.join(base_dir, complex_name)
         if not os.path.isdir(complex_path):
             continue
+
         result = analyze_complex(complex_path, complex_name)
         if not result:
             continue
@@ -230,24 +285,30 @@ def main(base_dir, output_csv="complex_summary.csv"):
         # Merge chain coverage
         if complex_name in chain_cov_status:
             cov = chain_cov_status[complex_name]
-            result["chain_coverage"] = round(cov*100, 1) if cov is not None else "-"
+            result["chain_coverage"] = round(cov * 100, 1) if cov is not None else "-"
 
         # Merge residue coverage
         if complex_name in residue_cov_status:
             cov = residue_cov_status[complex_name]
-            result["residue_coverage"] = round(cov*100, 1) if cov is not None else "-"
+            result["residue_coverage"] = round(cov * 100, 1) if cov is not None else "-"
+
+        # Add missing subunits
+        missing = find_missing_subunits(complex_path)
+        result["missing_subunits"] = ", ".join(missing) if missing else "-"
+        if missing:
+            print(f"{complex_name} - Missing subunits: {', '.join(missing)}")
 
         rows.append(result)
 
     # Headers
-    extra_cols = list(col_rename.values()) + ["chain_coverage", "residue_coverage"]
+    extra_cols = list(col_rename.values()) + ["chain_coverage", "residue_coverage", "missing_subunits"]
     headers = ["complex_name", "preprocess_cut", "redefine_cut", "new_sizes", "chain_transition"] + extra_cols
 
     # --- Print table ---
-    print(" | ".join(h.ljust(15) for h in headers))
-    print("-" * 160)
+    print(" | ".join(h.ljust(20) for h in headers))
+    print("-" * 200)
     for r in rows:
-        print(" | ".join(str(r.get(h, "-")).ljust(15) for h in headers))
+        print(" | ".join(str(r.get(h, "-")).ljust(20) for h in headers))
 
     # --- Save CSV ---
     with open(output_csv, "w", newline="") as f:
@@ -255,7 +316,71 @@ def main(base_dir, output_csv="complex_summary.csv"):
         writer.writeheader()
         writer.writerows(rows)
 
-    print(f"\n Table saved to {output_csv}")
+    print(f"\nTable saved to {output_csv}")
+
+# def main(base_dir, output_csv="complex_summary.csv"):
+#     # --- Gather combfold run status ---
+#     cf_status = check_cf_variants(base_dir)  # returns dict[complex] = {variant: success/failed}
+#
+#     # --- Gather chain-wise coverage ---
+#     chain_cov_status = compute_chain_coverage(base_dir)  # dict[complex] = fraction
+#
+#     # --- Gather residue coverage ---
+#     residue_cov_status = compute_residue_coverage(base_dir)  # dict[complex] = fraction
+#
+#     # --- Column rename for short names ---
+#     col_rename = {
+#         "combfold": "us",
+#         "combfold_all": "all",
+#         "combfold_trivial": "trivial",
+#         "combfold_us_trivial": "us_trivial",
+#         "combfold_high": "high",
+#     }
+#
+#     rows = []
+#     for complex_name in sorted(os.listdir(base_dir)):
+#         complex_path = os.path.join(base_dir, complex_name)
+#         if not os.path.isdir(complex_path):
+#             continue
+#         result = analyze_complex(complex_path, complex_name)
+#         if not result:
+#             continue
+#
+#         # Merge combfold variant status
+#         if complex_name in cf_status:
+#             for old, new in col_rename.items():
+#                 if old in cf_status[complex_name]:
+#                     result[new] = cf_status[complex_name][old]
+#
+#         # Merge chain coverage
+#         if complex_name in chain_cov_status:
+#             cov = chain_cov_status[complex_name]
+#             result["chain_coverage"] = round(cov*100, 1) if cov is not None else "-"
+#
+#         # Merge residue coverage
+#         if complex_name in residue_cov_status:
+#             cov = residue_cov_status[complex_name]
+#             result["residue_coverage"] = round(cov*100, 1) if cov is not None else "-"
+#
+#         rows.append(result)
+#
+#     # Headers
+#     extra_cols = list(col_rename.values()) + ["chain_coverage", "residue_coverage"]
+#     headers = ["complex_name", "preprocess_cut", "redefine_cut", "new_sizes", "chain_transition"] + extra_cols
+#
+#     # --- Print table ---
+#     print(" | ".join(h.ljust(15) for h in headers))
+#     print("-" * 160)
+#     for r in rows:
+#         print(" | ".join(str(r.get(h, "-")).ljust(15) for h in headers))
+#
+#     # --- Save CSV ---
+#     with open(output_csv, "w", newline="") as f:
+#         writer = csv.DictWriter(f, fieldnames=headers)
+#         writer.writeheader()
+#         writer.writerows(rows)
+#
+#     print(f"\n Table saved to {output_csv}")
 
 
 

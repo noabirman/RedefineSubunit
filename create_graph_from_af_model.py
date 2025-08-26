@@ -277,10 +277,6 @@ def graph(structure_path: str, data_path:str, af_version: str)->nx.Graph: # het
 
     groups_indices = find_high_confidence_regions(plddt_array,token_chain_ids_updated)
 
-    #todo: check if start & end belong to the same chain
-
-
-
     subunits_info = extract_subunit_info(groups_indices, token_chain_ids_updated, full_seq)
     G = nx.Graph()
     edges = find_edges(subunits_info, pae_as_arr, threshold=15)
