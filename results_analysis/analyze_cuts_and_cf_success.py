@@ -5,8 +5,8 @@ from collections import defaultdict
 import pandas as pd
 import re
 from Bio.PDB import PDBParser, MMCIFParser
-import warnings
-from Bio import BiopythonWarning
+# import warnings
+# from Bio import BiopythonWarning
 
 warnings.simplefilter("ignore", BiopythonWarning)
 
