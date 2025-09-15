@@ -7,8 +7,7 @@ import re
 from Bio.PDB import PDBParser, MMCIFParser
 # import warnings
 # from Bio import BiopythonWarning
-
-warnings.simplefilter("ignore", BiopythonWarning)
+#warnings.simplefilter("ignore", BiopythonWarning)
 
 COMPLEXES = ["8a3t", "8adl", "8cte", "8f5o", "7wff", "7e8t", "8hil", "7t3b", "7oba", "7uic", "7pkn", "7xho", "7zkq",
              "8a5o", "8fee", "8bel", "7qve", "7arc", "7ozn", "8adn", "7t2r", "7p2y", "7qru", "7use", "8e9g"]
