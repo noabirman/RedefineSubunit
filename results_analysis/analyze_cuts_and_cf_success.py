@@ -176,11 +176,12 @@ def count_chains(structure_file, structure_id="struct"):
 def compute_chain_coverage(base_dir):
     coverage = {}
     for complex_name in os.listdir(base_dir):
-        combfold_dir = os.path.join(base_dir, complex_name, "combfold")
+        complex_dir = os.path.join(base_dir, complex_name)
+        combfold_dir = os.path.join(complex_dir, "combfold")
         subunits_info_path = os.path.join(combfold_dir, "subunits_info.json")
         #results_dir = os.path.join(combfold_dir, "results", "_unified_representation", "assembly_output")
         pdb_dir = os.path.join(combfold_dir, "results", "assembled_results")
-        pdb_path = find_cb_pdb_file(pdb_dir)
+        pdb_path = find_models_path(complex_dir)[0]
         if not os.path.exists(subunits_info_path):
             continue
         subunits_info = load_json(subunits_info_path)
@@ -231,7 +232,8 @@ def count_residues_in_pdb(pdb_path):
 def compute_residue_coverage(base_dir):
     coverage = {}
     for complex_name in os.listdir(base_dir):
-        combfold_dir = os.path.join(base_dir, complex_name, "combfold")
+        complex_dir = os.path.join(base_dir, complex_name)
+        combfold_dir = os.path.join(complex_dir, "combfold")
         subunits_info_path = os.path.join(combfold_dir, "subunits_info.json")
         pdb_dir = os.path.join(combfold_dir, "results", "assembled_results")
 
@@ -239,7 +241,7 @@ def compute_residue_coverage(base_dir):
             continue
 
         expected = count_expected_residues(subunits_info_path)
-        pdb_path = find_cb_pdb_file(pdb_dir)
+        pdb_path = find_models_path(complex_dir)[0]
         if not pdb_path or expected == 0:
             coverage[complex_name] = None
             continue
@@ -304,6 +306,23 @@ def analyze_structure_violations(structure_file_path):
     except Exception as e:
         return {"total_violations": 0, "chains_with_violations": 0, "violation_details": "Error", "total_chains": 0}
 
+def find_models_path(complex_dir):
+    # returns the path for our structure model and combfold trivial structure model
+    model_file = None
+    cf_trivial_model_file = None
+    structure_dir = os.path.join(complex_dir, "combfold", "results", "assembled_results")
+    triv_structure_dir = os.path.join(complex_dir, "combfold_trivial", "results", "assembled_results")
+
+    for filename in os.listdir(structure_dir):
+        if filename.endswith("0.pdb"):
+            model_file = os.path.join(complex_dir, filename)
+            break
+    for filename in os.listdir(triv_structure_dir):
+        if filename.endswith("0.pdb"):
+            cf_trivial_model_file = os.path.join(complex_dir, filename)
+            break
+    return model_file, cf_trivial_model_file
+
 
 def main(base_dir, output_csv="complex_summary.csv"):
     # --- Gather combfold run status ---
@@ -328,7 +347,7 @@ def main(base_dir, output_csv="complex_summary.csv"):
         complex_path = os.path.join(base_dir, complex_name)
         if not os.path.isdir(complex_path):
             continue
-
+        our_model, triv_model = find_models_path(complex_path)
         result = analyze_complex(complex_path, complex_name)
         if not result:
             continue
@@ -351,35 +370,17 @@ def main(base_dir, output_csv="complex_summary.csv"):
 
         # --- NEW: Add structure violation analysis ---
         # Structure file ends with "0.pdb" - find it in the complex directory
-        structure_file = None
-        structure_dir = os.path.join(complex_path, "combfold", "results", "assembled_results")
-        for filename in os.listdir(structure_dir):
-            if filename.endswith("0.pdb"):
-                structure_file = os.path.join(complex_path, filename)
-                break
 
-        if structure_file:
-            violation_analysis = analyze_structure_violations(structure_file)
-        else:
-            violation_analysis = {"total_violations": "-", "chains_with_violations": "-",
-                                  "violation_details": "No 0.pdb file"}
+        violation_analysis = analyze_structure_violations(our_model)
+        triv_violation_analysis = analyze_structure_violations(triv_model)
 
-        triv_structure_file = None
-        triv_structure_dir = os.path.join(complex_path, "combfold_trivial", "results", "assembled_results")
-        for filename in os.listdir(triv_structure_dir):
-            if filename.endswith("0.pdb"):
-                triv_structure_file = os.path.join(complex_path, filename)
-                break
-
-        if triv_structure_file:
-            triv_violation_analysis = analyze_structure_violations(structure_file)
-        else:
-            triv_violation_analysis = {"total_violations": "-", "chains_with_violations": "-",
-                                  "violation_details": "No 0.pdb file"}
         # Add violation data to result
-        result["triv_distance_violations"] = violation_analysis["total_violations"]
-        result["triv_chains_with_violations"] = violation_analysis["chains_with_violations"]
-        result["triv_violation_details"] = violation_analysis["violation_details"]
+        result["distance_violations"] = violation_analysis["total_violations"]
+        result["chains_with_violations"] = violation_analysis["chains_with_violations"]
+        result["violation_details"] = violation_analysis["violation_details"]
+        result["triv_distance_violations"] = triv_violation_analysis["total_violations"]
+        result["triv_chains_with_violations"] = triv_violation_analysis["chains_with_violations"]
+        result["triv_violation_details"] = triv_violation_analysis["violation_details"]
 
         rows.append(result)
 
