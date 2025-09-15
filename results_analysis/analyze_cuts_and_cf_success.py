@@ -321,11 +321,11 @@ def find_models_path(complex_dir):
 
     for filename in os.listdir(structure_dir):
         if filename.endswith("0.pdb"):
-            model_file = os.path.join(complex_dir, filename)
+            model_file = os.path.join(structure_dir, filename)
             break
     for filename in os.listdir(triv_structure_dir):
         if filename.endswith("0.pdb"):
-            cf_trivial_model_file = os.path.join(complex_dir, filename)
+            cf_trivial_model_file = os.path.join(triv_structure_dir, filename)
             break
     return model_file, cf_trivial_model_file
 
