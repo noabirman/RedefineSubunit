@@ -5,6 +5,10 @@ from collections import defaultdict
 import pandas as pd
 import re
 from Bio.PDB import PDBParser, MMCIFParser
+import warnings
+from Bio import BiopythonWarning
+
+warnings.simplefilter("ignore", BiopythonWarning)
 
 COMPLEXES = ["8a3t", "8adl", "8cte", "8f5o", "7wff", "7e8t", "8hil", "7t3b", "7oba", "7uic", "7pkn", "7xho", "7zkq",
              "8a5o", "8fee", "8bel", "7qve", "7arc", "7ozn", "8adn", "7t2r", "7p2y", "7qru", "7use", "8e9g"]
@@ -289,9 +293,14 @@ def analyze_structure_violations(structure_file_path):
         total_violations = 0
 
         for chain_id in chain_ids:
-            violations = get_pdb_long_jumps(structure_file_path, chain_id)
+            violations_df = get_pdb_long_jumps(structure_file_path, chain_id)
+            violations = len(violations_df)
             chain_violations[chain_id] = violations
             total_violations += violations
+
+            # violations = get_pdb_long_jumps(structure_file_path, chain_id)
+            # chain_violations[chain_id] = violations
+            # total_violations += violations
 
         chains_with_violations = sum(1 for count in chain_violations.values() if count > 0)
 
