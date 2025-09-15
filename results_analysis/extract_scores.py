@@ -9,6 +9,14 @@ import glob
 import numpy as np
 from Bio.PDB import PDBParser
 
+SKIPPED_DIRS = [
+        "combfold",
+        "combfold_all",
+        "combfold_trivial",
+        "combfold_us_trivial",
+        "combfold_high",
+        "plots"
+    ]
 
 def get_avg_plddt(sub_path):
     results_dir = os.path.join(sub_path, 'results', 'assembled_results')
@@ -63,7 +71,7 @@ def main(main_dir):
     subdirs = ['combfold', 'combfold_trivial']
 
     for complex_name in os.listdir(main_dir):
-        if complex_name == 'plots':
+        if complex_name in SKIPPED_DIRS:
             continue
         complex_path = os.path.join(main_dir, complex_name)
         if not os.path.isdir(complex_path):
