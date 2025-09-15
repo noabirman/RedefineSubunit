@@ -6,6 +6,10 @@ import pandas as pd
 import re
 from Bio.PDB import PDBParser, MMCIFParser
 
+COMPLEXES = ["8a3t", "8adl", "8cte", "8f5o", "7wff", "7e8t", "8hil", "7t3b", "7oba", "7uic", "7pkn", "7xho", "7zkq",
+             "8a5o", "8fee", "8bel", "7qve", "7arc", "7ozn", "8adn", "7t2r", "7p2y", "7qru", "7use", "8e9g"]
+
+
 def load_json(path):
     with open(path) as f:
         return json.load(f)
@@ -175,7 +179,8 @@ def count_chains(structure_file, structure_id="struct"):
 
 def compute_chain_coverage(base_dir):
     coverage = {}
-    for complex_name in os.listdir(base_dir):
+    #for complex_name in os.listdir(base_dir):
+    for complex_name in COMPLEXES:
         complex_dir = os.path.join(base_dir, complex_name)
         combfold_dir = os.path.join(complex_dir, "combfold")
         subunits_info_path = os.path.join(combfold_dir, "subunits_info.json")
@@ -231,7 +236,8 @@ def count_residues_in_pdb(pdb_path):
 
 def compute_residue_coverage(base_dir):
     coverage = {}
-    for complex_name in os.listdir(base_dir):
+    #for complex_name in os.listdir(base_dir):
+    for complex_name in COMPLEXES:
         complex_dir = os.path.join(base_dir, complex_name)
         combfold_dir = os.path.join(complex_dir, "combfold")
         subunits_info_path = os.path.join(combfold_dir, "subunits_info.json")
@@ -343,7 +349,8 @@ def main(base_dir, output_csv="complex_summary.csv"):
     }
 
     rows = []
-    for complex_name in sorted(os.listdir(base_dir)):
+    #for complex_name in sorted(os.listdir(base_dir)):
+    for complex_name in sorted(COMPLEXES):
         complex_path = os.path.join(base_dir, complex_name)
         if not os.path.isdir(complex_path):
             continue
