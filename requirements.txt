@@ -3,3 +3,7 @@ matplotlib~=3.10.0
 numpy~=1.26.4
 biopython~=1.84
 scikit-learn~=1.5.1
+requests~=2.32.3
+bio~=1.7.1
+scipy~=1.16.2
+pandas~=2.2.3

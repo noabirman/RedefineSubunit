@@ -1,3 +1,4 @@
+import sys
 
 from Bio.PDB import PDBParser, MMCIFParser, PPBuilder
 # import os
@@ -397,47 +398,51 @@ def get_pdb_long_jumps(pdb_file_path, chain_id, output_file=None):
 
 
 if __name__ == "__main__":
-    structure_file = "7e8t/cb_34_output_0.pdb"
-    complex_name = "7e8t"
-    #structure_file = "7e8t.pdb"
-    subunit_json_file = "7e8t/subunits_info_after.json"
-    #
-    # with open(subunit_json_file, "r") as f:
-    #     subunit_info = json.load(f)
-    #
-    # results = analyze_all_chains(structure_file, subunit_info)
-    # # Build and display summary table
-    # # summary_df = build_summary_table(results, subunit_info)
-    # # print("\n=== Summary Table ===")
-    # # print(summary_df.to_string(index=False))
-    # # summary_df.to_csv(f"{complex_name}_summary.csv", index=False)
-    # #
-    # # # Print results
-    # # for chain_id, chain_report in results.items():
-    # #     print(f"\n=== Chain {chain_id} ===")
-    # #     if "error" in chain_report:
-    # #         print(" ", chain_report["error"])
-    # #         continue
-    # #     for subunit, info in chain_report.items():
-    # #         if info["missing"]:
-    # #             print(f" Subunit {subunit} (expected {info['expected_range']}):")
-    # #             print(f"   - Missing {len(info['missing'])} residues "
-    # #                   f"({info['missing'][0]}–{info['missing'][-1]})")
-    # #         if info["mismatches"]:
-    # #             print(f" Subunit {subunit} (expected {info['expected_range']}):")
-    # #             for resnum, exp, obs in info["mismatches"]:
-    # #                 print(f"   - Mismatch at {resnum}: expected {exp}, found {obs}")
-    # #         # if not info["missing"] and not info["mismatches"]:
-    # #         #     print("   - OK (all residues match)")
-    # #     observed_chain = extract_chain_sequence(structure_file, chain_id)
-    # #     print(f"Chain {chain_id} Structure len: {len(observed_chain)}, seq: {observed_chain}")
-    # #     expected_seq, mapping = reconstruct_expected_chain_sequence(subunit_info, chain_id)
-    # #     print(f"Chain {chain_id} Subunits Info len: {len(expected_seq)}, seq: {expected_seq}")
-    # #     print(f"Done processing Chain {chain_id}")
-    #
-    # #export_summary_excel(results, subunit_info, filename=f"{complex_name}_summary.xlsx")
-    # export_summary_excel_rich(results, subunit_info, filename=f"{complex_name}_summary.xlsx")
-    chain_id = 'J'
-    # Save to CSV file
-    long_jumps_table = get_pdb_long_jumps(structure_file,chain_id, output_file=f'{complex_name}_long_jumps.csv')
-    print(long_jumps_table)
+    if len(sys.argv) == 5:
+        # disscussion.py "7use" "/cs/labs/dina/tsori/af3_example/complexes/DONE_MSA2/7use/combfold/results/assembled_results/output_clustered_0.pdb" "/cs/labs/dina/tsori/af3_example/complexes/DONE_MSA2/7use/combfold/subunits_info.json" "C"
+        complex_name = sys.argv[1] # for example "7e8t"
+        structure_file = os.path.abspath(sys.argv[2])
+        subunit_json_file = os.path.abspath(sys.argv[3])
+        chain_id = sys.argv[4]
+        # with open(subunit_json_file, "r") as f:
+        #     subunit_info = json.load(f)
+        #
+        # results = analyze_all_chains(structure_file, subunit_info)
+        # # Build and display summary table
+        # # summary_df = build_summary_table(results, subunit_info)
+        # # print("\n=== Summary Table ===")
+        # # print(summary_df.to_string(index=False))
+        # # summary_df.to_csv(f"{complex_name}_summary.csv", index=False)
+        # #
+        # # # Print results
+        # # for chain_id, chain_report in results.items():
+        # #     print(f"\n=== Chain {chain_id} ===")
+        # #     if "error" in chain_report:
+        # #         print(" ", chain_report["error"])
+        # #         continue
+        # #     for subunit, info in chain_report.items():
+        # #         if info["missing"]:
+        # #             print(f" Subunit {subunit} (expected {info['expected_range']}):")
+        # #             print(f"   - Missing {len(info['missing'])} residues "
+        # #                   f"({info['missing'][0]}–{info['missing'][-1]})")
+        # #         if info["mismatches"]:
+        # #             print(f" Subunit {subunit} (expected {info['expected_range']}):")
+        # #             for resnum, exp, obs in info["mismatches"]:
+        # #                 print(f"   - Mismatch at {resnum}: expected {exp}, found {obs}")
+        # #         # if not info["missing"] and not info["mismatches"]:
+        # #         #     print("   - OK (all residues match)")
+        # #     observed_chain = extract_chain_sequence(structure_file, chain_id)
+        # #     print(f"Chain {chain_id} Structure len: {len(observed_chain)}, seq: {observed_chain}")
+        # #     expected_seq, mapping = reconstruct_expected_chain_sequence(subunit_info, chain_id)
+        # #     print(f"Chain {chain_id} Subunits Info len: {len(expected_seq)}, seq: {expected_seq}")
+        # #     print(f"Done processing Chain {chain_id}")
+        #
+        # #export_summary_excel(results, subunit_info, filename=f"{complex_name}_summary.xlsx")
+        # export_summary_excel_rich(results, subunit_info, filename=f"{complex_name}_summary.xlsx")
+
+        # Save to CSV file
+        long_jumps_table = get_pdb_long_jumps(structure_file, chain_id, output_file=f'{complex_name}_long_jumps.csv')
+        print(long_jumps_table)
+    else:
+        print("usage: <script> <complex_name> <structure_file> <subunits_info>")
+        print("IMPORTANT: subunits_info after RedefineSubunit")
