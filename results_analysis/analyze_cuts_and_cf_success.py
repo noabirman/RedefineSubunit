@@ -435,3 +435,4 @@ def main(base_dir, output_csv="complex_summary.csv"):
 if __name__ == "__main__":
     root_dir = "/cs/labs/dina/tsori/af3_example/complexes/DONE_MSA2"
     main(root_dir, output_csv=os.path.join(root_dir, "complex_summary_violations.csv"))
+    #analyze_structure_violations("/cs/labs/dina/tsori/af3_example/complexes/DONE_MSA2/8a5o/combfold/results/assembled_results/cb_20_output_0.pdb")
