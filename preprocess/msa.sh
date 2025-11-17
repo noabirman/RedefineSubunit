@@ -5,11 +5,11 @@
 #SBATCH --time=4-00:00:00
 
 #SBATCH --mail-type=END
-#SBATCH --mail-user=tsori.kislev@gmail.com
+#SBATCH --mail-user=noa.birman@mail.huji.ac.il
 
 #SBATCH --exclude=sm-01,sm-16,sm-02,sm-03,sm-04,sm-08
 
-#SBATCH --output=/cs/labs/dina/tsori/af3_example/slurms_outs/msa/%j.out
+#SBATCH --output=/cs/labs/dina/noabirman/slurms_outs/msa/%j.out
 
 #export XLA_FLAGS="--xla_disable_hlo_passes=custom-kernel-fusion-rewriter"
 
@@ -17,13 +17,14 @@
 # This script runs the MSA (Multiple Sequence Alignment) process for a given input directory.
 # Usage:
 #   ./msa.sh <INPUT_DIR> [MAPPING_JSON] [SUBUNITS_INFO_JSON]
+#   or: sbatch msa.sh /cs/labs/dina/noabirman/tcellsUniprots/AF3_COMPLEX_RESULTS/msa_inputs
 # Arguments:
 #   <INPUT_DIR>: Path to the input directory containing JSON files.
 #   [MAPPING_JSON]: (Optional) Path to the mapping JSON file. If not specified, assumes 'mapping.json' in the parent directory of INPUT_DIR.
 #   [SUBUNITS_INFO_JSON]: (Optional) Path to the subunits info JSON file. If not specified, assumes 'subunits_info.json' in the parent directory of INPUT_DIR.
 # Output:
 #   The MSA results will be saved in a directory named 'msa_output' in the same parent directory as the input directory.
-#   Pairwise MSA files will be generated using the msa_to_pairwise.py script.
+#   Pairwise MSA files will be generated using the msa_to_pairwise.py script if needed.
 
 export PATH="/sci/labs/dina/bshor/projects/af_combdock/tools/conda_install/miniconda3/bin:$PATH"
 . "/sci/labs/dina/bshor/projects/af_combdock/tools/conda_install/miniconda3/etc/profile.d/conda.sh"

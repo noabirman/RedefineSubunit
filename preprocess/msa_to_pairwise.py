@@ -2,7 +2,7 @@ import json
 import itertools
 import os
 import sys
-
+#doing it after MSA
 
 def create_pairwise_msa(msa_folder: str, mapping_file: str, subunits_info_file: str, output_dir: str) -> None:
     """
