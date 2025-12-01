@@ -5,9 +5,10 @@
 #SBATCH --time=4-00:00:00
 
 #SBATCH --mail-type=END
-#SBATCH --mail-user=tsori.kislev@gmail.com
+#SBATCH --mail-user=noa.birman@mail.huji.ac.il
 
-#SBATCH --output=/cs/labs/dina/tsori/af3_example/slurms_outs/CF/%j.out
+#SBATCH --output=/cs/labs/dina/noabirman/slurms_outs/CF/%j.out
+
 
 set -e  # Exit on error
 

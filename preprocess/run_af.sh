@@ -6,9 +6,9 @@
 #SBATCH --exclude=creek-01,creek-02,firth-02,firth-01
 
 #SBATCH --mail-type=END
-#SBATCH --mail-user=tsori.kislev@gmail.com
+#SBATCH --mail-user=noa.birman@mail.huji.ac.il
 
-#SBATCH --output=/cs/labs/dina/tsori/af3_example/slurms_outs/AF/%j.out
+#SBATCH --output=/cs/labs/dina/noabirman/slurms_outs/msa/%j.out
 
 export XLA_FLAGS="--xla_disable_hlo_passes=custom-kernel-fusion-rewriter"
 
@@ -71,4 +71,3 @@ python /cs/usr/bshor/sci/installations/af3_variations/deepmind/localalphafold3/a
 
 # cd /cs/labs/dina/tsori/af3_example/RedefineSubunit/
 # python3 create_graph_from_complex.py "$OUTPUT_DIR" "$MAPPING_JSON" "$SUBUNITS_INFO_JSON"
-
