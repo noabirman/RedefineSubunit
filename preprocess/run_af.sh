@@ -8,7 +8,7 @@
 #SBATCH --mail-type=END
 #SBATCH --mail-user=noa.birman@mail.huji.ac.il
 
-#SBATCH --output=/cs/labs/dina/noabirman/slurms_outs/msa/%j.out
+#SBATCH --output=/cs/labs/dina/noabirman/slurms_outs/af/%j.out
 
 export XLA_FLAGS="--xla_disable_hlo_passes=custom-kernel-fusion-rewriter"
 
