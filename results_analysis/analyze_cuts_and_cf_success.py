@@ -8,7 +8,7 @@ from Bio.PDB import PDBParser, MMCIFParser
 # import warnings
 # from Bio import BiopythonWarning
 #warnings.simplefilter("ignore", BiopythonWarning)
-
+import sys
 COMPLEXES = ["8a3t", "8adl", "8cte", "8f5o", "7wff", "7e8t", "8hil", "7t3b", "7oba", "7uic", "7pkn", "7xho", "7zkq",
              "8a5o", "8fee", "8bel", "7qve", "7arc", "7ozn", "8adn", "7t2r", "7p2y", "7qru", "7use", "8e9g"]
 
@@ -41,7 +41,7 @@ def total_sequence_length(subunits_info):
 
     return total_length
 
-def analyze_complex(complex_path, complex_name):
+def analyze_complex(complex_path, complex_name, save_json=False):
     subunit_info_path1 = os.path.join(complex_path, "subunits_info.json")
     subunit_info_path2 = os.path.join(complex_path, "combfold", "subunits_info.json")
     if not os.path.exists(subunit_info_path1) or not os.path.exists(subunit_info_path2):
@@ -97,7 +97,7 @@ def analyze_complex(complex_path, complex_name):
 
     new_sizes = " | ".join(chain_fragments) if chain_fragments else "-"
 
-    return {
+    result = {
         "complex_name": complex_name,
         "preprocess_cut": "Yes" if any(len(cuts) > 1 for cuts in preprocess_cuts.values()) else "No",
         "redefine_cut": "Yes" if any(len(cuts) > 1 for cuts in redefine_cuts.values()) else "No",
@@ -106,6 +106,13 @@ def analyze_complex(complex_path, complex_name):
         "number_of_chains": orig_chain_num,
         "subunit_transition": f"{len(original_info)} -> {len(redefine_info)}",
     }
+    #  Optional save
+    if save_json:
+        out_path = os.path.join(complex_path, "analyze_cut.json")
+        with open(out_path, "w") as f:
+            json.dump(result, f, indent=2)
+
+    return result
 
 def check_cf_variants(root_dir):
     """Check success/failure for all combfold variants per complex"""
@@ -433,6 +440,10 @@ def main(base_dir, output_csv="complex_summary.csv"):
 
 
 if __name__ == "__main__":
-    root_dir = "/cs/labs/dina/tsori/af3_example/complexes/DONE_MSA2"
-    main(root_dir, output_csv=os.path.join(root_dir, "complex_summary_violations.csv"))
+    # root_dir = "/cs/labs/dina/tsori/af3_example/complexes/DONE_MSA2"
+    # main(root_dir, output_csv=os.path.join(root_dir, "complex_summary_violations.csv"))
     #analyze_structure_violations("/cs/labs/dina/tsori/af3_example/complexes/DONE_MSA2/8a5o/combfold/results/assembled_results/cb_20_output_0.pdb")
+    #analayze complex before combfold if you want after you need to take the first 3 rows
+    complex_path = os.path.abspath(sys.argv[1])
+    complex_name = os.path.abspath(sys.argv[2])
+    analyze_complex(complex_path, complex_name, save_json=True)

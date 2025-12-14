@@ -184,7 +184,7 @@ def merge_sequence(subunits, start, end):
     merged_sequence = ['-'] * (end + 1 - start)  # inclusion of end position
     print(f"→ Merging sequence from {start} to {end}")
     for subunit in subunits:
-        print(f"  ↳ Subunit: {subunit.name}, start={subunit.start}, end={subunit.end}, seq_len={len(subunit.sequence)}")
+        print(f"  ↳ Subunit: {subunit.name}, start={subunit.start}, end={subunit.end}, seq_len={len(subunit.sequence)} seq={subunit.sequence}")
         for i, char in enumerate(subunit.sequence):
             pos = subunit.start - start + i
             if pos < 0 or pos >= len(merged_sequence):
@@ -273,7 +273,6 @@ def save_subunits_info(graph: nx.Graph, name_mapping: dict, subunits_info: dict,
         base_name = node.split('_')[0]
         # Get original subunit name from mapping
         node_data = graph.nodes[node]['data']
-
         original_name, subunit_info = find_original_subunit_info(base_name, name_mapping, subunits_info, node_data.start, node_data.end)
         # added for debug
         print("→ JSON chain_names:", subunit_info['chain_names'])
@@ -284,7 +283,6 @@ def save_subunits_info(graph: nx.Graph, name_mapping: dict, subunits_info: dict,
         start = node_data.start + iupred_shift
         end = node_data.end + iupred_shift
         sequence = node_data.sequence
-
         # Verify sequence matches the original
         #expected_sequence = subunit_info['sequence'][start-1:end]
         # Extract what we think is the “correct” slice
@@ -309,20 +307,21 @@ def save_subunits_info(graph: nx.Graph, name_mapping: dict, subunits_info: dict,
         #     raise ValueError(f"Sequence mismatch in node '{node}'. Expected: {expected_sequence}, Found: {sequence}")
 
         # Store high segment information
+        node_index = len(high_segments_by_subunit[original_name]) + 1 #todo: changed here
+        high_name = f"{subunit_info['name']}_high_{node_index}"
         high_segments_by_subunit[original_name].append({
             'node_name': node,
+            'high_name': high_name,
             'start': start,
             'end': end
         })
-        node_index = len(high_segments_by_subunit[original_name])
-        high_name = f"{subunit_info['name']}_high_{node_index}"
-        # Create high segment entry
         unified_subunits[high_name] = {
             'name': high_name,
             'sequence': sequence,
             'chain_names': subunit_info['chain_names'],
             'start_res': start
         }
+
 
     # Process each original subunit to create low segments
     for original_name, segments in high_segments_by_subunit.items():
@@ -368,25 +367,36 @@ def save_subunits_info(graph: nx.Graph, name_mapping: dict, subunits_info: dict,
             print(f"Updated last_end to {last_end} after segment {segment}")
 
         # Check for gap after last high segment
-        print(f"last_end: {last_end}, total_length: {total_length}")
-        if last_end < total_length: #todo: was if last_end < total_length - 1: before
-            low_start = last_end + 1
-            low_end = total_length
+        remaining_len = total_length - last_end
 
-            # Create low segment name
-            low_name = f"{subunit_info['name']}_low_{low_segment_index}"
+        if remaining_len > 0:
+            # THRESHOLD CHECK: If the tail is tiny (e.g., < 5 residues), merge it backward
+            if remaining_len < 5 and segments:
+                # 1. Identify the last high segment we just created
+                last_segment_dict = segments[-1]
+                last_high_name = last_segment_dict['high_name']
+                print(f"→ Merging tiny tail (size {remaining_len}) into {last_high_name}")
 
-            # Extract sequence for low segment
-            low_sequence = full_sequence[low_start-1:low_end]  # +1 because end is inclusive
+                # 2. Append the orphan sequence to it
+                orphan_seq = full_sequence[last_end:]  # from last_end to end
+                unified_subunits[last_high_name]['sequence'] += orphan_seq
 
-            # Create low segment entry
-            print(f"Creating low segment: {low_name} ({low_start}-{low_end})")
-            unified_subunits[low_name] = {
-                'name': low_name,
-                'sequence': low_sequence,
-                'chain_names': subunit_info['chain_names'],
-                'start_res': low_start # Convert to 1-based indexing
-            }
+            else:
+                # Normal behavior: Create a new low-confidence segment
+                low_start = last_end + 1
+                low_end = total_length
+                low_name = f"{subunit_info['name']}_low_{low_segment_index}"
+                # Extract sequence for low segment
+                low_sequence = full_sequence[low_start - 1:low_end]
+
+                # Create low segment entry
+                print(f"Creating low segment: {low_name} ({low_start}-{low_end})")
+                unified_subunits[low_name] = {
+                    'name': low_name,
+                    'sequence': low_sequence,
+                    'chain_names': subunit_info['chain_names'],
+                    'start_res': low_start
+                }
 
     sorted_unified_subunits = dict(
         sorted(

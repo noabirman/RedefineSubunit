@@ -218,70 +218,66 @@ def get_chain_ids_per_residue(structure):
 
 
 def rename_chains_from_file(data_path: str, token_chain_ids: list[str]) -> list[str]:
-    """Renames chain identifiers based on filename components.
+    filename = os.path.basename(data_path)
+    # Assumes filename structure is "Name1_Name2_..."
+    target_names = filename.split('_')[:2]  # Adjust slice if you have more chains
 
-    Args:
-        data_path (Path): Path to the data file (used for extracting chain names).
-        token_chain_ids (list[str]): Original chain identifiers.
+    # 1. Detect chains in the order they appear in the JSON
+    # This captures ['A', 'B'] OR ['B', 'I'] without assuming specific letters
+    unique_json_chains = list(dict.fromkeys(token_chain_ids).keys())
 
-    Returns:
-        list[str]: Updated chain identifiers.
+    # 2. Safety Check: Do residue counts match filename parts?
+    if len(unique_json_chains) != len(target_names):
+        print(f"Warning: JSON has {len(unique_json_chains)} chains but filename implies {len(target_names)}.")
+        # FALLBACK: If counts mismatch, trust the JSON and do not rename
+        return token_chain_ids
+
+    # 3. Create the map based on ORDER
+    # 1st JSON Chain -> 1st Filename Part
+    # 2nd JSON Chain -> 2nd Filename Part
+    replacement_dict = {
+        old: new.upper()
+        for old, new in zip(unique_json_chains, target_names)
+    }
+
+    # 4. Apply
+    return [replacement_dict.get(c, c) for c in token_chain_ids]
+
+
+def token_to_residue_pae(pae_as_arr: np.ndarray, token_res_ids: list[int], token_chain_ids: list[str]) -> np.ndarray:
     """
-
-    # Extract filename without extension
-    #filename = data_path.stem  # "cdf_afg_ajs_confidences" → "cdf_afg_ajs"
-    filename = os.path.basename(data_path)  # Extract 'cdf_ddf' #todo: assume here there is only 2 chains
-    # Split by '_' to get chain names
-    parts = filename.split('_')[:2]
-
-    # Ensure we have enough parts to map chains
-    if len(parts) < 2:
-        raise ValueError(f"Unexpected filename format: {filename}. Expected at least 2 parts.")
-
-    # Generate a mapping dynamically (A → first part, B → second, etc.)
-    # In case of chain with itself (e_e ) change to E1, E2
-    if parts [0] == parts[1]: # chain with itself case
-        replacement_dict = {chr(65 + i): part.upper() + "_"+ str (i+1) for i, part in enumerate(parts)}
-    else: #regular case
-        replacement_dict = {chr(65 + i): part.upper() for i, part in enumerate(parts)}
-
-    # Update token_chain_ids based on mapping
-    return [replacement_dict.get(chain, chain) for chain in token_chain_ids]
-
-
-def token_to_residue_pae(pae_as_arr: np.ndarray, token_res_ids: list[int]) -> np.ndarray:
+    Optimized version: Reduces matrix in two linear passes (2N) instead of quadratic (N^2).
     """
-    Convert token-level PAE matrix to residue-level PAE matrix.
+    # 1. Map (chain_id, res_id) to token indices
+    res_key_to_tokens = defaultdict(list)
+    for token_idx, (res_id, chain_id) in enumerate(zip(token_res_ids, token_chain_ids)):
+        res_key_to_tokens[(chain_id, res_id)].append(token_idx)
 
-    Args:
-        pae_as_arr (np.ndarray): token-level PAE array, shape (n_tokens, n_tokens)
-        token_res_ids (list[int]): list of residue indices corresponding to each token
-                                   (can contain repeated residues due to modifications)
+    # 2. Prepare sorted keys (residues)
+    sorted_unique_keys = list(res_key_to_tokens.keys())
+    n_res = len(sorted_unique_keys)
+    n_tokens = pae_as_arr.shape[0]
 
-    Returns:
-        np.ndarray: residue-level PAE matrix, shape (n_residues, n_residues)
-    """
-    # Map each residue to the list of token indices corresponding to it
-    res_to_tokens = defaultdict(list)
-    for token_idx, res_id in enumerate(token_res_ids):
-        res_to_tokens[res_id].append(token_idx)
+    # 3. Pass 1: Collapse Rows (Average over the tokens belonging to residue i)
+    # Output shape: (n_res, n_tokens)
+    semi_reduced = np.zeros((n_res, n_tokens), dtype=np.float32)
 
-    # Sort residues by residue number to preserve order
-    residue_ids = sorted(res_to_tokens.keys())
-    n_res = len(residue_ids)
-    res_pae = np.zeros((n_res, n_res), dtype=float)
+    for i, key in enumerate(sorted_unique_keys):
+        tokens_indices = res_key_to_tokens[key]
+        # Take the mean of the rows for this residue
+        semi_reduced[i, :] = np.mean(pae_as_arr[tokens_indices, :], axis=0)
 
-    # Build residue-level PAE by averaging over tokens
-    for i, res_i in enumerate(residue_ids):
-        tokens_i = res_to_tokens[res_i]
-        for j, res_j in enumerate(residue_ids):
-            tokens_j = res_to_tokens[res_j]
-            # Extract submatrix of PAE values for all token pairs
-            submatrix = pae_as_arr[np.ix_(tokens_i, tokens_j)]
-            # Average over all token pairs
-            res_pae[i, j] = np.mean(submatrix)
+    # 4. Pass 2: Collapse Columns (Average over the tokens belonging to residue j)
+    # Output shape: (n_res, n_res)
+    final_res_pae = np.zeros((n_res, n_res), dtype=np.float32)
 
-    return res_pae
+    for j, key in enumerate(sorted_unique_keys):
+        tokens_indices = res_key_to_tokens[key]
+        # Take the mean of the columns for this residue (from the semi_reduced matrix)
+        final_res_pae[:, j] = np.mean(semi_reduced[:, tokens_indices], axis=1)
+
+    return final_res_pae
+
 
 def graph(structure_path: str, data_path:str, af_version: str)->nx.Graph: # het
     # args: "fold_mll4_1100_end_rbbp5_wdr5_p53x2/fold_mll4_1100_end_rbbp5_wdr5_p53x2_model_0.cif" "fold_mll4_1100_end_rbbp5_wdr5_p53x2/fold_mll4_1100_end_rbbp5_wdr5_p53x2_full_data_0.json" 3
@@ -313,16 +309,20 @@ def graph(structure_path: str, data_path:str, af_version: str)->nx.Graph: # het
 
     # phosporilation bug fix:
     residue_chain_ids = []
-    seen_residues = set()
+    residue_numbers = []
+    seen_residues = set()  # Stores tuples of (chain_id, res_id)
+
     for res_id, chain_id in zip(token_res_ids, token_chain_ids_updated):
-        if res_id not in seen_residues:
+        unique_key = (chain_id, res_id)
+        if unique_key not in seen_residues:
             residue_chain_ids.append(chain_id)
-            seen_residues.add(res_id)
+            residue_numbers.append(res_id)
+            seen_residues.add(unique_key)
 
     groups_indices = find_high_confidence_regions(plddt_array,residue_chain_ids) # before phosp fix it was (plddt_array,token_chain_ids_updated)
 
     # Suppose pae_as_arr is n_tokens x n_tokens, token_res_ids contains repeated tokens
-    residue_pae = token_to_residue_pae(pae_as_arr, token_res_ids)
+    residue_pae = token_to_residue_pae(pae_as_arr, token_res_ids, token_chain_ids_updated)
     # Now residue_pae.shape == (num_residues, num_residues
 
     subunits_info = extract_subunit_info(groups_indices, residue_chain_ids, full_seq)
@@ -332,7 +332,7 @@ def graph(structure_path: str, data_path:str, af_version: str)->nx.Graph: # het
     # index per chain instead of per full seq (by doing token_res_ids[subunit.start])
     res_num = np.unique(token_res_ids) #addition for phosp
     updated_subunits = [
-        dataclasses.replace(subunit, start=res_num[subunit.start], end=res_num[subunit.end])
+        dataclasses.replace(subunit, start=residue_numbers[subunit.start], end=residue_numbers[subunit.end])
         for subunit in subunits_info
     ]
 
