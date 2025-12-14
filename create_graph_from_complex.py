@@ -87,7 +87,7 @@ def create_graphs_from_folder(folder_path):
     for item in os.listdir(folder_path):
         item_path = os.path.join(folder_path, item)
         if os.path.isdir(item_path):
-            print(f"Processing {item}")
+            print(f"Processing {item}") # todo: print this I just removed it for debug
             data_path = os.path.join(item_path, f"{item}_confidences.json")
             data_path = os.path.abspath(data_path)
             structure_path = os.path.join(item_path, f"{item}_model.cif")
@@ -126,6 +126,8 @@ def merge_connected_components(overlap_graph, graphs: List[nx.Graph],subunit_nam
     merged_graph = nx.Graph()
     node_mapping = {}
     node_dict = {name: data['data'] for name, data in overlap_graph.nodes(data=True)}
+    # for name, sub in node_dict.items():
+    #     print("DEBUG node:", name, sub.start, sub.end, sub.chain_names)
 
     # Group components by chain prefix
     chain_components = defaultdict(list)

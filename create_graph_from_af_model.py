@@ -232,7 +232,7 @@ def rename_chains_from_file(data_path: str, token_chain_ids: list[str]) -> list[
     #filename = data_path.stem  # "cdf_afg_ajs_confidences" → "cdf_afg_ajs"
     filename = os.path.basename(data_path)  # Extract 'cdf_ddf' #todo: assume here there is only 2 chains
     # Split by '_' to get chain names
-    parts = filename.split('_')
+    parts = filename.split('_')[:2]
 
     # Ensure we have enough parts to map chains
     if len(parts) < 2:
@@ -248,6 +248,40 @@ def rename_chains_from_file(data_path: str, token_chain_ids: list[str]) -> list[
     # Update token_chain_ids based on mapping
     return [replacement_dict.get(chain, chain) for chain in token_chain_ids]
 
+
+def token_to_residue_pae(pae_as_arr: np.ndarray, token_res_ids: list[int]) -> np.ndarray:
+    """
+    Convert token-level PAE matrix to residue-level PAE matrix.
+
+    Args:
+        pae_as_arr (np.ndarray): token-level PAE array, shape (n_tokens, n_tokens)
+        token_res_ids (list[int]): list of residue indices corresponding to each token
+                                   (can contain repeated residues due to modifications)
+
+    Returns:
+        np.ndarray: residue-level PAE matrix, shape (n_residues, n_residues)
+    """
+    # Map each residue to the list of token indices corresponding to it
+    res_to_tokens = defaultdict(list)
+    for token_idx, res_id in enumerate(token_res_ids):
+        res_to_tokens[res_id].append(token_idx)
+
+    # Sort residues by residue number to preserve order
+    residue_ids = sorted(res_to_tokens.keys())
+    n_res = len(residue_ids)
+    res_pae = np.zeros((n_res, n_res), dtype=float)
+
+    # Build residue-level PAE by averaging over tokens
+    for i, res_i in enumerate(residue_ids):
+        tokens_i = res_to_tokens[res_i]
+        for j, res_j in enumerate(residue_ids):
+            tokens_j = res_to_tokens[res_j]
+            # Extract submatrix of PAE values for all token pairs
+            submatrix = pae_as_arr[np.ix_(tokens_i, tokens_j)]
+            # Average over all token pairs
+            res_pae[i, j] = np.mean(submatrix)
+
+    return res_pae
 
 def graph(structure_path: str, data_path:str, af_version: str)->nx.Graph: # het
     # args: "fold_mll4_1100_end_rbbp5_wdr5_p53x2/fold_mll4_1100_end_rbbp5_wdr5_p53x2_model_0.cif" "fold_mll4_1100_end_rbbp5_wdr5_p53x2/fold_mll4_1100_end_rbbp5_wdr5_p53x2_full_data_0.json" 3
@@ -273,18 +307,35 @@ def graph(structure_path: str, data_path:str, af_version: str)->nx.Graph: # het
         token_chain_ids = get_chain_ids_per_residue(structure)
     full_seq = extract_sequence_with_seqio(structure_path,
                                            af_version)
+    #print(full_seq)
+
     token_chain_ids_updated = rename_chains_from_file(data_path, token_chain_ids)
 
-    groups_indices = find_high_confidence_regions(plddt_array,token_chain_ids_updated)
+    # phosporilation bug fix:
+    residue_chain_ids = []
+    seen_residues = set()
+    for res_id, chain_id in zip(token_res_ids, token_chain_ids_updated):
+        if res_id not in seen_residues:
+            residue_chain_ids.append(chain_id)
+            seen_residues.add(res_id)
 
-    subunits_info = extract_subunit_info(groups_indices, token_chain_ids_updated, full_seq)
+    groups_indices = find_high_confidence_regions(plddt_array,residue_chain_ids) # before phosp fix it was (plddt_array,token_chain_ids_updated)
+
+    # Suppose pae_as_arr is n_tokens x n_tokens, token_res_ids contains repeated tokens
+    residue_pae = token_to_residue_pae(pae_as_arr, token_res_ids)
+    # Now residue_pae.shape == (num_residues, num_residues
+
+    subunits_info = extract_subunit_info(groups_indices, residue_chain_ids, full_seq)
+
     G = nx.Graph()
-    edges = find_edges(subunits_info, pae_as_arr, threshold=15)
+    edges = find_edges(subunits_info, residue_pae, threshold=15)
     # index per chain instead of per full seq (by doing token_res_ids[subunit.start])
+    res_num = np.unique(token_res_ids) #addition for phosp
     updated_subunits = [
-        dataclasses.replace(subunit, start=token_res_ids[subunit.start], end=token_res_ids[subunit.end])
+        dataclasses.replace(subunit, start=res_num[subunit.start], end=res_num[subunit.end])
         for subunit in subunits_info
     ]
+
     for subunit in updated_subunits:
             G.add_node(subunit.name, data=subunit)
     for e in edges: # e is (v1, v2, weight)
