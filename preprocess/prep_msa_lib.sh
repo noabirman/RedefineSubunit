@@ -14,5 +14,4 @@ TARGET_DIR=$1
 cd "$TARGET_DIR" || exit
 
 # 3. Run the python script (using full path)
-# REPLACE THIS PATH with your real path
 python3 /cs/labs/dina/noabirman/RedefineSubunit/preprocess/extract_MSA_templates.py
