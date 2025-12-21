@@ -6,6 +6,8 @@ from Bio import SeqIO
 from multiprocessing import Pool, cpu_count
 import subprocess as sp
 
+# Tomer's script with changes
+
 # --- CONFIGURATION ---
 # Path to the big databases on the server
 database_dir = "/cs/usr/bshor/sci/installations/af3_variations/deepmind/localalphafold3/databases"
@@ -25,42 +27,44 @@ A_MSA_headers = dict()
 
 
 def update_headers_one_seq(af3_json):
-    """
-    Parses an AlphaFold3 JSON to extract all protein IDs (templates and MSA hits).
-    """
     try:
         data = json.load(open(af3_json, "r"))
-        # Check if 'sequences' exists to avoid errors on empty/malformed JSONs
-        if 'sequences' not in data:
+        if "sequences" not in data:
             return
 
-        protein_data = data['sequences'][0]['protein']
+        for seq_entry in data["sequences"]:
+            if "protein" not in seq_entry:
+                continue
 
-        # Parse Unpaired MSA
-        A_uMSA = protein_data['unpairedMsa'].split("\n")[2:-1]
-        for header_line in range(0, len(A_uMSA), 2):
-            header = A_uMSA[header_line].split("/")[0][1:]
-            seq = A_uMSA[header_line + 1].replace("-", "")
-            A_MSA_headers[header] = seq
+            protein = seq_entry["protein"]
 
-        # Parse Paired MSA
-        A_pMSA = protein_data['pairedMsa'].split("\n")[2:-1]
-        for header_line in range(0, len(A_pMSA), 2):
-            header = A_pMSA[header_line].split("/")[0][1:]
-            seq = A_pMSA[header_line + 1].replace("-", "")
-            if header not in A_MSA_headers:
-                A_MSA_headers[header] = seq
+            # --- Unpaired MSA ---
+            if "unpairedMsa" in protein:
+                uMSA = protein["unpairedMsa"].split("\n")[2:-1]
+                for i in range(0, len(uMSA), 2):
+                    header = uMSA[i].split("/")[0][1:]
+                    seq = uMSA[i + 1].replace("-", "")
+                    A_MSA_headers[header] = seq
 
-        # Parse Templates (PDB IDs)
-        A_templates = protein_data.get('templates', [])
-        for template in A_templates:
-            line = template['mmcif'].split("\n")[0]
-            pdb = (line.split("_")[1]).lower()
-            if pdb not in A_MSA_headers:
-                A_MSA_headers[pdb] = ""
+            # --- Paired MSA ---
+            if "pairedMsa" in protein:
+                pMSA = protein["pairedMsa"].split("\n")[2:-1]
+                for i in range(0, len(pMSA), 2):
+                    header = pMSA[i].split("/")[0][1:]
+                    seq = pMSA[i + 1].replace("-", "")
+                    if header not in A_MSA_headers:
+                        A_MSA_headers[header] = seq
+
+            # --- Templates ---
+            for template in protein.get("templates", []):
+                line = template["mmcif"].split("\n")[0]
+                pdb = line.split("_")[1].lower()
+                if pdb not in A_MSA_headers:
+                    A_MSA_headers[pdb] = ""
 
     except Exception as e:
-        print(f"Error reading {af3_json}: {e}")
+        print(f"Error parsing {af3_json}: {e}")
+
 
 
 def write_db_one(new_database_name, database):
@@ -96,7 +100,13 @@ if __name__ == '__main__':
     for data_json in predictions:
         update_headers_one_seq(data_json)
 
-    print(f"Total unique headers to find: {len(A_MSA_headers)}")
+    print(f"Collected MSAs from {len(predictions)} AF3 JSON files")
+    print(f"Total unique MSA/template headers: {len(A_MSA_headers)}")
+
+    if len(A_MSA_headers) == 0:
+        raise RuntimeError("No MSA headers collected — check AF3 JSON format")
+
+    print("finish collecting headers")
 
     # 3. Parallel processing to write filtered databases
     # Arguments: (Desired Filename, Source Database Path)
