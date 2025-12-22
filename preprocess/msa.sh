@@ -16,12 +16,14 @@
 # Documentation:
 # This script runs the MSA (Multiple Sequence Alignment) process for a given input directory.
 # Usage:
-#   ./msa.sh <INPUT_DIR> [MAPPING_JSON] [SUBUNITS_INFO_JSON]
-#   or: sbatch msa.sh /cs/labs/dina/noabirman/tcellsUniprots/AF3_COMPLEX_RESULTS/msa_inputs
+#   ./msa.sh <INPUT_DIR> [DB_DIR]
+# Example:
+#   sbatch msa.sh msa_inputs
+#   sbatch msa.sh msa_inputs /path/to/mini_msa_db
+
 # Arguments:
 #   <INPUT_DIR>: Path to the input directory containing JSON files.
-#   [MAPPING_JSON]: (Optional) Path to the mapping JSON file. If not specified, assumes 'mapping.json' in the parent directory of INPUT_DIR.
-#   [SUBUNITS_INFO_JSON]: (Optional) Path to the subunits info JSON file. If not specified, assumes 'subunits_info.json' in the parent directory of INPUT_DIR.
+#   <DB_DIR>: Path to the MSA DB dir, if mini MSA library was created.
 # Output:
 #   The MSA results will be saved in a directory named 'msa_output' in the same parent directory as the input directory.
 #   Pairwise MSA files will be generated using the msa_to_pairwise.py script if needed.
@@ -30,10 +32,9 @@ export PATH="/sci/labs/dina/bshor/projects/af_combdock/tools/conda_install/minic
 . "/sci/labs/dina/bshor/projects/af_combdock/tools/conda_install/miniconda3/etc/profile.d/conda.sh"
 conda activate /cs/usr/bshor/sci/installations/af3_variations/deepmind/localalphafold3/alphafold3-conda
 
-
 # Check for required arguments
 if [ "$#" -lt 1 ]; then
-  echo "Usage: $0 <INPUT_DIR> [MAPPING_JSON] [SUBUNITS_INFO_JSON]"
+  echo "Usage: $0 <INPUT_DIR> [DB_DIR]"
   exit 1
 fi
 
@@ -44,6 +45,23 @@ if [ ! -d "$INPUT_DIR" ]; then
   echo "Error: Input directory '$INPUT_DIR' does not exist."
   exit 1
 fi
+
+# Default database directory
+DEFAULT_DB_DIR="/cs/usr/bshor/sci/installations/af3_variations/deepmind/localalphafold3/databases"
+
+# Optional override DB_DIR
+if [ "$#" -ge 2 ]; then
+  DB_DIR="$2"
+else
+  DB_DIR="$DEFAULT_DB_DIR"
+fi
+
+# Validate DB_DIR
+if [ ! -d "$DB_DIR" ]; then
+  echo "Error: DB_DIR '$DB_DIR' does not exist."
+  exit 1
+fi
+echo "Using DB directory: $DB_DIR"
 
 # Determine parent directory and set default paths
 PARENT_DIR=$(dirname "$INPUT_DIR")
@@ -71,7 +89,7 @@ echo Output directory: "$OUTPUT_DIR"
 
 python /cs/usr/bshor/sci/installations/af3_variations/deepmind/localalphafold3/alphafold3/run_alphafold.py \
   --jackhmmer_binary_path /cs/usr/bshor/sci/installations/af3_variations/deepmind/localalphafold3/hmmer/bin/jackhmmer \
-  --db_dir /cs/usr/bshor/sci/installations/af3_variations/deepmind/localalphafold3/databases \
+  --db_dir "$DB_DIR" \
   --model_dir /cs/usr/bshor/sci/installations/af3_variations/deepmind/models \
   --hmmbuild_binary_path /cs/usr/bshor/sci/installations/af3_variations/deepmind/localalphafold3/hmmer/bin/hmmbuild \
   --hmmsearch_binary_path /cs/usr/bshor/sci/installations/af3_variations/deepmind/localalphafold3/hmmer/bin/hmmsearch \
@@ -79,5 +97,3 @@ python /cs/usr/bshor/sci/installations/af3_variations/deepmind/localalphafold3/a
   --output_dir "$OUTPUT_DIR" \
   --input_dir "$INPUT_DIR"
 
-# cd /cs/labs/dina/tsori/af3_example/RedefineSubunit/
-# python preprocess/msa_to_pairwise.py "$OUTPUT_DIR" "$MAPPING_JSON" "$SUBUNITS_INFO_JSON"
