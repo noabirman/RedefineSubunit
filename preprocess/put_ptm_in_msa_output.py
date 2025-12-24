@@ -67,6 +67,6 @@ def main(msa_output_root, phospho_file):
 
 
 if __name__ == "__main__":
-    MSA_OUTPUT_ROOT = "/cs/labs/dina/noabirman/tcellsUniprots/AF3_COMPLEX_RESULTS/msa_output"
-    PHOSPHO_FILE = "phospho_after_preprocess.json"
+    MSA_OUTPUT_ROOT = "/cs/labs/dina/noabirman/tcellsUniprots/AF3_COMPLEX_RESULTS/combfold/msa_output" #before was "/cs/labs/dina/noabirman/tcellsUniprots/AF3_COMPLEX_RESULTS/msa_output"
+    PHOSPHO_FILE = "phospho_final.json" #before was phospho_after_preprocess.json
     main(MSA_OUTPUT_ROOT, PHOSPHO_FILE)
