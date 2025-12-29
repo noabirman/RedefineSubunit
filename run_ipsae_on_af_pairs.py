@@ -6,17 +6,17 @@ import sys
 
 # --- CONFIGURATION ---
 # The folder containing your pair subfolders (e.g., current directory)
-ROOT_DIR = "."
+ROOT_DIR = "/cs/labs/dina/noabirman/tcellsUniprots/AF3_COMPLEX_RESULTS/af_pairs"
 
 # The folder where you want to gather all outputs (created if not exists)
-OUTPUT_DIR = "ipsae_results"
+OUTPUT_DIR = "/cs/labs/dina/noabirman/tcellsUniprots/AF3_COMPLEX_RESULTS/ipsae_results"
 
 # Cutoff parameters
 PAE_CUTOFF = 15
 DIST_CUTOFF = 10
 
 # Path to the ipsae.py tool
-IPSAE_SCRIPT = "ipsae.py"
+IPSAE_SCRIPT = "/cs/labs/dina/tomer.cohen13/IPSAE/ipsae.py"
 
 
 # ---------------------

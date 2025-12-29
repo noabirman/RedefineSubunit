@@ -65,8 +65,16 @@ def main(msa_output_root, phospho_file):
         # process the JSON file
         process_msa_file(msa_json_path, phospho_sites, output_dir)
 
+def run_on_one_file(phospho_file):
+    with open(PHOSPHO_FILE, "r") as f:
+        phospho_sites = json.load(f)
+    msa_json_path ="/cs/labs/dina/noabirman/tcellsUniprots/AF3_COMPLEX_RESULTS/combfold/msa_output/a_ab/a_ab_data.json"
+    output_dir = "/cs/labs/dina/noabirman/tcellsUniprots/AF3_COMPLEX_RESULTS/combfold/msa_output/a_ab/a_ab_try_pho.json"
+    process_msa_file(msa_json_path, phospho_sites, output_dir)
 
 if __name__ == "__main__":
     MSA_OUTPUT_ROOT = "/cs/labs/dina/noabirman/tcellsUniprots/AF3_COMPLEX_RESULTS/combfold/msa_output" #before was "/cs/labs/dina/noabirman/tcellsUniprots/AF3_COMPLEX_RESULTS/msa_output"
     PHOSPHO_FILE = "phospho_final.json" #before was phospho_after_preprocess.json
     main(MSA_OUTPUT_ROOT, PHOSPHO_FILE)
+
+    #run_on_one_file(PHOSPHO_FILE)
