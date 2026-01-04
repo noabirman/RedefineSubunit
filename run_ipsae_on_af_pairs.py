@@ -16,7 +16,7 @@ PAE_CUTOFF = 15
 DIST_CUTOFF = 10
 
 # Path to the ipsae.py tool
-IPSAE_SCRIPT = "/cs/labs/dina/tomer.cohen13/IPSAE/ipsae.py"
+IPSAE_SCRIPT = "/cs/labs/dina/noabirman/RedefineSubunit/ipsae.py"
 
 
 # ---------------------
@@ -40,15 +40,17 @@ def run_pipeline():
         # 3. Find the required files (.cif and _confidences.json)
         # We look for any .cif file and any JSON ending in 'confidences.json'
         cif_files = glob.glob(os.path.join(folder_path, "*.cif"))
-        json_files = glob.glob(os.path.join(folder_path, "*confidences.json"))
+        json_candidates = glob.glob(os.path.join(folder_path, "*confidences.json"))
 
-        if not cif_files or not json_files:
+        full_json_files = [f for f in json_candidates if "summary" not in os.path.basename(f)]
+
+        if not cif_files or not full_json_files:
             print(f"  [Skipping] Missing .cif or confidences.json in {folder_name}")
             continue
 
         # Take the first match found
         structure_file = cif_files[0]
-        pae_file = json_files[0]
+        pae_file = full_json_files[0]
 
         # 4. Construct the command
         # Syntax: python ipsae.py <pae_file> <structure_file> <pae_cutoff> <dist_cutoff>
