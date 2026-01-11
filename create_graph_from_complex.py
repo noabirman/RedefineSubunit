@@ -6,7 +6,10 @@ import difflib
 import networkx as nx
 from create_graph_from_af_model import graph, SubunitInfo
 from typing import List
-from results_analysis.vizualization_plots import show_circle
+
+from results_analysis.vizualization_plots import show_circle, show_subunit_circle_graph
+import pickle
+
 
 def check_subunit_sequence_reconstruction(original_path, new_path):
     import json
@@ -319,6 +322,8 @@ def save_subunits_info(graph: nx.Graph, name_mapping: dict, subunits_info: dict,
         Path to output folder
     output_subdir: str
     """
+    output_folder = os.path.join(os.path.dirname(folder), output_subdir)
+
     # Dictionary to store all segments (high and low)
     unified_subunits = {}
 
@@ -462,7 +467,6 @@ def save_subunits_info(graph: nx.Graph, name_mapping: dict, subunits_info: dict,
             key=lambda item: (item[1]['name'].split('_')[0], item[1]['start_res'])
         )
     )
-    output_folder = os.path.join(os.path.dirname(folder), output_subdir)
     #output_folder = os.path.join(os.path.dirname(folder), 'combfold')
     os.makedirs(output_folder, exist_ok=True)
     output_json_path = os.path.join(output_folder, 'subunits_info.json')
@@ -491,7 +495,7 @@ if __name__ == "__main__":
             output_subdir_name = "combfold_ipsae"
             print(">>> RUNNING IN ipSAE MODE <<<")
         else:
-            output_subdir_name = "combfold_plddt"
+            output_subdir_name = "combfold"
             print(">>> RUNNING IN pLDDT (Standard) MODE <<<")
 
         # (Standard loading logic...)
@@ -529,7 +533,20 @@ if __name__ == "__main__":
         )
 
         final_graph = rename_graph_nodes(merged_graph, name_mapping)
+
+        output_path = os.path.join(os.path.dirname(folder_path), output_subdir_name)
+        pickle_file = os.path.join(output_path, "graph.pkl")
+
+        with open(pickle_file, "wb") as f:
+            pickle.dump(final_graph, f)
+
         show_circle(final_graph, os.path.dirname(folder_path))
+
+
+        new_subunits_info_path = os.path.join(os.path.dirname(folder_path), output_subdir_name, "subunits_info.json")
+        with open(new_subunits_info_path, "r") as f:
+            new_subunits_info = json.load(f)
+        show_subunit_circle_graph(final_graph, new_subunits_info, os.path.join(os.path.dirname(folder_path), output_subdir_name), mapping_path)
 
     else:
         print("usage: python create_graph_from_complex.py <folder_path> [mapping_json] [subunits_json] [ipsae]")

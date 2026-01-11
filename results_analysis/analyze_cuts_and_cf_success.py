@@ -41,9 +41,12 @@ def total_sequence_length(subunits_info):
 
     return total_length
 
-def analyze_complex(complex_path, complex_name, save_json=False):
+def analyze_complex(complex_path, complex_name, save_json=False, ipsae=False):
     subunit_info_path1 = os.path.join(complex_path, "subunits_info.json")
-    subunit_info_path2 = os.path.join(complex_path, "combfold", "subunits_info.json")
+    if(ipsae):
+        subunit_info_path2 = os.path.join(complex_path, "combfold_ipsae", "subunits_info.json")
+    else:
+        subunit_info_path2 = os.path.join(complex_path, "combfold", "subunits_info.json")
     if not os.path.exists(subunit_info_path1) or not os.path.exists(subunit_info_path2):
         return None
 
@@ -108,7 +111,10 @@ def analyze_complex(complex_path, complex_name, save_json=False):
     }
     #  Optional save
     if save_json:
-        out_path = os.path.join(complex_path, "analyze_cut.json")
+        if ipsae:
+            out_path = os.path.join(complex_path, "analyze_cut_ipsae.json")
+        else:
+            out_path = os.path.join(complex_path, "analyze_cut.json")
         with open(out_path, "w") as f:
             json.dump(result, f, indent=2)
 
@@ -446,4 +452,4 @@ if __name__ == "__main__":
     #analayze complex before combfold if you want after you need to take the first 3 rows
     complex_path = os.path.abspath(sys.argv[1])
     complex_name = os.path.abspath(sys.argv[2])
-    analyze_complex(complex_path, complex_name, save_json=True)
+    analyze_complex(complex_path, complex_name, save_json=True, ipsae=True)

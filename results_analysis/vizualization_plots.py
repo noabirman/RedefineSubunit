@@ -1,4 +1,6 @@
+import json
 import os
+import sys
 
 import networkx as nx
 import numpy as np
@@ -6,9 +8,18 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 from matplotlib.colors import BoundaryNorm, ListedColormap
 from matplotlib.patches import Patch
+from matplotlib.patches import Wedge, Arc
+from matplotlib import cm
+
 from collections import defaultdict
-import matplotlib.cm as cm
 import matplotlib.colors as mcolors
+import math
+import pickle
+
+def spaced_colors(n):
+    phi = 0.61803398875  # golden ratio conjugate
+    return [(i * phi) % 1.0 for i in range(n)]
+
 
 def plot_pae_plddt(pae_as_arr: np.array, plddt_array, nodes, edges, plot_name: str): #todo: add edge width due weight
     # Define AlphaFold plDDT color scheme
@@ -243,34 +254,392 @@ def show_graph_with_spacing(graph: nx.Graph, folder_path: str, name:str):
     plt.savefig(save_path, bbox_inches='tight')
     plt.show()
 
+# def show_circle(graph: nx.Graph, folder_path: str):
+#     """
+#     Displays a graph in a circular layout with straight edges.
+#
+#     Args:
+#         graph (nx.Graph): The graph to display.
+#         folder_path (str): Path to save the output image.
+#     """
+#     plt.figure(figsize=(12, 12))
+#
+#     # Sort nodes alphabetically
+#     sorted_nodes = sorted(graph.nodes())
+#
+#     # Generate positions for the nodes in circular layout
+#     pos = nx.circular_layout(sorted_nodes)
+#
+#     # Draw nodes and labels
+#     nx.draw_networkx_nodes(graph, pos, node_color='lightblue', node_size=300)
+#     nx.draw_networkx_labels(graph, pos, font_size=5)
+#
+#     # Draw straight edges
+#     nx.draw_networkx_edges(graph, pos, edge_color='gray')
+#
+#     # Hide axes
+#     plt.axis('off')
+#
+#     # Save the plot
+#     plt.savefig(os.path.join(folder_path, "curved_graph.png"))
 def show_circle(graph: nx.Graph, folder_path: str):
     """
-    Displays a graph in a circular layout with straight edges.
-
-    Args:
-        graph (nx.Graph): The graph to display.
-        folder_path (str): Path to save the output image.
+    Displays a graph in a circular layout.
+    Nodes are colored by the first letter of their name.
     """
-    plt.figure(figsize=(12, 12))
+    n = graph.number_of_nodes()
+
+    plt.figure(figsize=(16, 16))
 
     # Sort nodes alphabetically
-    sorted_nodes = sorted(graph.nodes())
+    nodes = sorted(graph.nodes())
 
-    # Generate positions for the nodes in circular layout
-    pos = nx.circular_layout(sorted_nodes)
+    # Circular layout
+    pos = nx.circular_layout(nodes)
 
-    # Draw nodes and labels
-    nx.draw_networkx_nodes(graph, pos, node_color='lightblue', node_size=300)
-    nx.draw_networkx_labels(graph, pos, font_size=5)
+    # --- Adaptive sizing ---
+    node_size = max(50, 3000 / max(n, 1))
+    font_size = max(3, 12 / math.log2(n + 2))
 
-    # Draw straight edges
-    nx.draw_networkx_edges(graph, pos, edge_color='gray')
+    # --- Group nodes by first letter ---
+    groups = sorted({node[0] for node in nodes})
 
-    # Hide axes
-    plt.axis('off')
+    # Color map (supports many groups)
+    #cmap = cm.get_cmap("tab20", len(groups))
+    cmap = cm.get_cmap("hsv")  # or "turbo"
+    # Map each group to a color
+    group_to_color = {
+        group: cmap(i / len(groups))
+        for i, group in enumerate(groups)
+    }
 
-    # Save the plot
-    plt.savefig(os.path.join(folder_path, "curved_graph.png"))
+    # Assign color per node
+    node_colors = [group_to_color[node[0]] for node in nodes]
+
+    # Draw nodes
+    nx.draw_networkx_nodes(
+        graph,
+        pos,
+        node_color=node_colors,
+        node_size=node_size,
+        linewidths=0.5,
+        edgecolors="black",
+        alpha=0.9
+    )
+
+    # Draw labels
+    nx.draw_networkx_labels(
+        graph,
+        pos,
+        font_size=font_size
+    )
+
+    # Draw edges
+    nx.draw_networkx_edges(
+        graph,
+        pos,
+        edge_color="gray",
+        width=0.5,
+        alpha=0.6
+    )
+
+    plt.axis("off")
+
+    plt.savefig(
+        os.path.join(folder_path, "curved_graph.png"),
+        dpi=300,
+        bbox_inches="tight"
+    )
+    plt.close()
+
+def draw_curve(ax, angle1, angle2, r_inner, color="gray", alpha=0.5, lw=0.5, curvature=0.6):
+    x0, y0 = r_inner * np.cos(angle1), r_inner * np.sin(angle1)
+    x2, y2 = r_inner * np.cos(angle2), r_inner * np.sin(angle2)
+
+    # control point
+    cx, cy = curvature * 0 + (1 - curvature) * (x0 + x2)/2, curvature * 0 + (1 - curvature) * (y0 + y2)/2
+
+    t = np.linspace(0, 1, 50)
+    x = (1-t)**2 * x0 + 2*(1-t)*t*cx + t**2 * x2
+    y = (1-t)**2 * y0 + 2*(1-t)*t*cy + t**2 * y2
+    ax.plot(x, y, color=color, alpha=alpha, lw=lw)
+
+
+def show_subunit_circle_graph(graph: nx.Graph, subunit_info: dict, output_path: str,path_to_chain_mapping_json: str):
+    """
+    Circular arc graph:
+    - Each protein is an arc (size ∝ total length)
+    - Subunits split arcs
+    - Edges connect subunit positions
+    """
+
+    # ---------- Parse subunits ----------
+    proteins = {}
+    chain_to_subunit = {}
+
+    with open(path_to_chain_mapping_json, 'r') as f:
+        chain_mapping = json.load(f)
+
+    # Create reverse mapping: actual_chain_id -> list of graph_chain_ids
+    actual_to_graph_chains = {}
+    for graph_chain, info in chain_mapping.items():
+        actual_chain = info['chain_id']
+        actual_to_graph_chains.setdefault(actual_chain, []).append(graph_chain)
+
+    for sub_name, info in subunit_info.items():
+        protein = sub_name.split("_")[0]
+        length = len(info["sequence"])
+
+        for actual_chain in info["chain_names"]:
+            # Get all graph chain IDs that map to this actual chain
+            graph_chains = actual_to_graph_chains.get(actual_chain, [actual_chain])
+
+            for graph_chain in graph_chains:
+                # Create mapping using GRAPH chain IDs
+                chain_key = f"{graph_chain}_{sub_name.split('_', 1)[1]}"  # e.g., "R_high_1"
+                chain_to_subunit[chain_key] = sub_name  # Maps to "O43561_high_1"
+
+        proteins.setdefault(protein, []).append({
+            "name": sub_name,
+            "length": length,
+            "start_res": info["start_res"]
+        })
+
+    # Total lengths
+    protein_lengths = {
+        p: sum(s["length"] for s in subs)
+        for p, subs in proteins.items()
+    }
+    total_length = sum(protein_lengths.values())
+
+    # ---------- Color per protein ----------
+    if len(proteins) <= 10:
+        cmap = cm.get_cmap("tab10")
+        colors = [cmap(i) for i in range(len(proteins))]
+    elif len(proteins) <= 20:
+        cmap = cm.get_cmap("tab20")
+        colors = [cmap(i) for i in range(len(proteins))]
+    else:
+        # For many proteins, use improved HSV
+        golden_ratio = 0.618033988749895
+        colors = [cm.get_cmap("hsv")((i * golden_ratio) % 1.0) for i in range(len(proteins))]
+
+    protein_colors = {
+        protein: colors[i]
+        for i, protein in enumerate(sorted(proteins))
+    }
+
+    # ---------- Figure ----------
+    fig, ax = plt.subplots(figsize=(28, 28))
+    ax.set_aspect("equal")
+    ax.axis("off")
+
+    radius = 25.0
+    width = 2.0
+
+    angle_start = 0
+    subunit_angles = {}  # subunit -> angle (for edges)
+
+    # Gap between proteins (in degrees)
+    gap_size = 2.0  # Adjust this value for larger/smaller gaps
+    total_gap = gap_size * len(proteins)
+    # Adjust total angle to account for gaps
+    total_angle = 360 - total_gap
+
+    # ---------- Draw arcs ----------
+    for protein in sorted(proteins):
+        p_len = protein_lengths[protein]
+        p_angle = total_angle * p_len / total_length
+        p_start = angle_start
+        p_end = angle_start + p_angle
+
+
+        # ---------- Subunit divisions ----------
+        sub_start = p_start
+        for sub in proteins[protein]:
+            sub_angle = p_angle * sub["length"] / p_len
+
+            # Set alpha for low/high
+            if "low" in sub["name"]:
+                alpha = 0.4
+            else:
+                alpha = 1.0
+
+            # Draw the subunit wedge
+            wedge = Wedge(
+                center=(0, 0),
+                r=radius,
+                theta1=sub_start,
+                theta2=sub_start + sub_angle,
+                width=width,
+                facecolor=protein_colors[protein],
+                alpha=alpha,
+                edgecolor="black",
+                linewidth=1.5
+            )
+            ax.add_patch(wedge)
+
+            sub_mid = sub_start + sub_angle / 2
+            subunit_angles[sub["name"]] = math.radians(sub_mid)
+
+            # Stronger divider line at START of each subunit
+            theta = math.radians(sub_start)
+            ax.plot(
+                [radius * math.cos(theta), (radius - width) * math.cos(theta)],
+                [radius * math.sin(theta), (radius - width) * math.sin(theta)],
+                color="black",
+                linewidth=2.0,
+                alpha=1.0
+            )
+            sub_start += sub_angle
+
+        # Add final divider at end of protein
+        theta = math.radians(sub_start)
+        ax.plot(
+            [radius * math.cos(theta), (radius - width) * math.cos(theta)],
+            [radius * math.sin(theta), (radius - width) * math.sin(theta)],
+            color="black",
+            linewidth=2.0,
+            alpha=1.0
+        )
+        # ---------- Add residue ruler (OUTSIDE the arc) ----------
+        # Draw ruler circle arc for this protein
+        ruler_radius = radius + 0.5
+        ruler_arc = Arc(
+            xy=(0, 0),
+            width=2 * ruler_radius,
+            height=2 * ruler_radius,
+            angle=0,
+            theta1=p_start,
+            theta2=p_end,
+            color='black',
+            linewidth=1.0,
+            alpha=0.6
+        )
+        ax.add_patch(ruler_arc)
+
+        # Determine tick interval based on protein length
+        if p_len < 200:
+            tick_interval = 50
+        elif p_len < 500:
+            tick_interval = 100
+        elif p_len < 1000:
+            tick_interval = 200
+        else:
+            tick_interval = 250
+
+        # Draw ticks and labels OUTSIDE the arc
+        for residue in range(0, p_len + 1, tick_interval):
+            if residue > p_len:
+                continue
+
+            # Calculate angle for this residue
+            res_angle = p_start + p_angle * (residue / p_len)
+            theta = math.radians(res_angle)
+
+            # Draw tick mark (pointing outward)
+            tick_start_r = ruler_radius
+            tick_end_r = ruler_radius + 0.8
+            ax.plot(
+                [tick_start_r * math.cos(theta), tick_end_r * math.cos(theta)],
+                [tick_start_r * math.sin(theta), tick_end_r * math.sin(theta)],
+                color="black",
+                linewidth=1.0,
+                alpha=0.8
+            )
+
+            # Add residue number label (outside the tick, parallel to ruler)
+            label_r = ruler_radius + 1.5
+            rotation = res_angle  # Parallel to the circle (tangent)
+
+            # Adjust text rotation for readability (flip if upside down)
+            if 90 < res_angle < 270:
+                rotation = res_angle + 180  # Flip to keep text right-side up
+
+            ax.text(
+                label_r * math.cos(theta),
+                label_r * math.sin(theta),
+                str(residue),
+                ha='center',
+                va='center',
+                fontsize=14,
+                rotation=rotation,
+                rotation_mode='anchor',
+                color='black'
+            )
+        # Protein label
+        mid_angle = math.radians((p_start + p_end) / 2)
+        label_radius = ruler_radius + 4.0  # Further out, past the ruler
+        ax.text(
+            label_radius * math.cos(mid_angle),
+            label_radius * math.sin(mid_angle),
+            protein,
+            ha="center",
+            va="center",
+            fontsize=18,
+            fontweight='bold'
+        )
+        angle_start += p_angle + gap_size
+
+    # ---------- Draw edges ----------
+    # ---------- Better Edge Debug ----------
+    print("\n=== Edge Debug Info ===")
+    print(f"Total edges in graph: {len(graph.edges())}")
+    print(f"Subunit angles available: {len(subunit_angles)}")
+    print(f"chain_to_subunit mappings: {len(chain_to_subunit)}")
+
+    # Sample data
+    print(f"\nSample graph edges (first 5): {list(graph.edges())[:5]}")
+    print(f"Sample chain_to_subunit keys (first 10): {list(chain_to_subunit.keys())[:10]}")
+    print(f"Sample subunit_angles keys (first 10): {list(subunit_angles.keys())[:10]}")
+
+
+    graph_chains = set()
+
+    for u, v in graph.edges():
+        su = chain_to_subunit.get(u)
+        sv = chain_to_subunit.get(v)
+
+        graph_chains.add(u)
+        graph_chains.add(v)
+
+
+        if su not in subunit_angles or sv not in subunit_angles:
+            continue
+
+        a1 = subunit_angles[su]
+        a2 = subunit_angles[sv]
+
+        # Determine if edge is inter-protein or intra-protein
+        protein_u = su.split("_")[0]  # Extract protein from subunit name
+        protein_v = sv.split("_")[0]
+
+        if protein_u == protein_v:
+            # Intra-protein edge (within same protein)
+            edge_color = "gray"
+            edge_alpha = 0.6
+            #edge_width = 0.5
+        else:
+            # Inter-protein edge (between different proteins)
+            edge_color = "magenta"  # or "purple", "blue", etc.
+            edge_alpha = 0.9
+            #edge_width = 1.0
+
+        draw_curve(ax, a1, a2, r_inner=radius - width / 2,
+                   color=edge_color, alpha=edge_alpha, lw=0.5, curvature=0.3)
+
+
+    # Find which ones are missing from chain_to_subunit
+    missing_chains = graph_chains - set(chain_to_subunit.keys())
+
+    print(f"\nTotal unique chains in graph: {len(graph_chains)}")
+    print(f"Chains in chain_to_subunit: {len(chain_to_subunit)}")
+    print(f"Missing chains ({len(missing_chains)}): {sorted(missing_chains)[:20]}")
+    print("======================\n")
+    # ---------- Save ----------
+    plt.savefig(os.path.join(output_path, "subunit_graph.png"), dpi=450, bbox_inches="tight")  # Even higher DPI
+    plt.close()
+
 
 def show_graph(graph: nx.Graph, folder_path:str):
     """Print the nodes and edges of a graph."""
@@ -374,3 +743,22 @@ def plot_graph_by_chain(G: nx.Graph):
     plt.axis("off")
     #plt.tight_layout()
     plt.savefig("G_by_chain.png")
+
+if __name__ == "__main__":
+    # test the function
+    folder = os.path.abspath(sys.argv[1])
+    parent_dir = os.path.dirname(folder)
+    chain_mapping_path = os.path.join(parent_dir, 'chain_id_mapping.json')
+
+    subunits_info_path = os.path.join(folder, "subunits_info.json")
+
+    with open(subunits_info_path, 'r') as f:
+        subunits_info = json.load(f)
+
+
+    with open(os.path.join(folder,"graph.pkl"), "rb") as f:
+        graph = pickle.load(f)
+
+
+    show_subunit_circle_graph(graph, subunits_info, folder,chain_mapping_path)
+
