@@ -80,23 +80,79 @@ def merge_graphs(graphs: List[nx.Graph], name_mapping: object, subunits_info: ob
 
     return merged_graph
 
-def create_graphs_from_folder(folder_path):
-    print(f"Creating graphs from folder {folder_path}")
+# def create_graphs_from_folder(folder_path):
+#     print(f"Creating graphs from folder {folder_path}")
+#     graphs = []
+#     # Iterate over all folders in the folder
+#     for item in os.listdir(folder_path):
+#         item_path = os.path.join(folder_path, item)
+#         if os.path.isdir(item_path):
+#             print(f"Processing {item}") # todo: print this I just removed it for debug
+#             data_path = os.path.join(item_path, f"{item}_confidences.json")
+#             data_path = os.path.abspath(data_path)
+#             structure_path = os.path.join(item_path, f"{item}_model.cif")
+#             structure_path = os.path.abspath(structure_path)
+#             if not os.path.exists(data_path) or not os.path.exists(structure_path):
+#                 print(f"Skipping {item}: Required files not found.")
+#                 continue
+#             graph1 = graph(structure_path, data_path, af_version='3')
+#             graphs.append(graph1)
+#     return graphs
+def create_graphs_from_folder(folder_path, use_ipsae=False):
+    print(f"Creating graphs from folder {folder_path} (Mode: {'ipSAE' if use_ipsae else 'pLDDT'})")
     graphs = []
-    # Iterate over all folders in the folder
+
+    # Define ipsae folder path (sibling directory)
+    ipsae_results_dir = os.path.join(os.path.dirname(folder_path), "ipsae_results")
+
+    # Cutoffs must match your ipsae run
+    pae_cut = "15"
+    dist_cut = "10"
+
     for item in os.listdir(folder_path):
         item_path = os.path.join(folder_path, item)
         if os.path.isdir(item_path):
-            print(f"Processing {item}") # todo: print this I just removed it for debug
+            print(f"Processing {item}")
             data_path = os.path.join(item_path, f"{item}_confidences.json")
-            data_path = os.path.abspath(data_path)
             structure_path = os.path.join(item_path, f"{item}_model.cif")
+
+            # Absolute paths
+            data_path = os.path.abspath(data_path)
             structure_path = os.path.abspath(structure_path)
+
             if not os.path.exists(data_path) or not os.path.exists(structure_path):
                 print(f"Skipping {item}: Required files not found.")
                 continue
-            graph1 = graph(structure_path, data_path, af_version='3')
+
+            ipsae_path = None
+            if use_ipsae:
+                # 1. Check if the main results folder exists
+                if not os.path.exists(ipsae_results_dir):
+                    raise FileNotFoundError(
+                        f"Error: You requested ipSAE mode, but the folder '{ipsae_results_dir}' does not exist.")
+
+                # 2. Find the specific file
+                expected_name = f"{item}_{item}_model_{pae_cut}_{dist_cut}_byres.txt"
+                candidate_path = os.path.join(ipsae_results_dir, expected_name)
+
+                # Fallback search
+                if not os.path.exists(candidate_path):
+                    candidates = [f for f in os.listdir(ipsae_results_dir) if
+                                  f.startswith(item) and f.endswith("_byres.txt")]
+                    if candidates:
+                        candidate_path = os.path.join(ipsae_results_dir, candidates[0])
+
+                if os.path.exists(candidate_path):
+                    ipsae_path = candidate_path
+                else:
+                    # STRICT BEHAVIOR: Raise error if missing, so you know the comparison failed
+                    print(f"Warning: No ipSAE file found for {item}. Skipping this graph.")
+                    continue
+
+                    # Pass the path (or None) to the graph function
+            graph1 = graph(structure_path, data_path, af_version='3', ipsae_path=ipsae_path)
             graphs.append(graph1)
+
     return graphs
 
 def create_overlap_graph(graphs):
@@ -246,7 +302,8 @@ def find_original_subunit_info(base_name: str, name_mapping: dict, subunits_info
     subunit_info = subunits_info[original_subunit_name]
     return original_subunit_name, subunit_info
 
-def save_subunits_info(graph: nx.Graph, name_mapping: dict, subunits_info: dict, folder: str) -> None:
+def save_subunits_info(graph: nx.Graph, name_mapping: dict, subunits_info: dict, folder: str,
+                           output_subdir: str = 'combfold') -> None:
     """
     Process graph nodes (high segments) and create a unified JSON with both high and low segments.
 
@@ -260,6 +317,7 @@ def save_subunits_info(graph: nx.Graph, name_mapping: dict, subunits_info: dict,
         Dictionary containing subunit information
     folder : str
         Path to output folder
+    output_subdir: str
     """
     # Dictionary to store all segments (high and low)
     unified_subunits = {}
@@ -404,8 +462,8 @@ def save_subunits_info(graph: nx.Graph, name_mapping: dict, subunits_info: dict,
             key=lambda item: (item[1]['name'].split('_')[0], item[1]['start_res'])
         )
     )
-
-    output_folder = os.path.join(os.path.dirname(folder), 'combfold')
+    output_folder = os.path.join(os.path.dirname(folder), output_subdir)
+    #output_folder = os.path.join(os.path.dirname(folder), 'combfold')
     os.makedirs(output_folder, exist_ok=True)
     output_json_path = os.path.join(output_folder, 'subunits_info.json')
 
@@ -420,27 +478,58 @@ def rename_graph_nodes (graph_to_rename, name_mapping):
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
         folder_path = os.path.abspath(sys.argv[1])
-        mapping_path = os.path.abspath(sys.argv[2]) if len(sys.argv) > 2 else os.path.join(os.path.dirname(folder_path), 'chain_id_mapping.json')
-        original_subunits_path = os.path.abspath(sys.argv[3]) if len(sys.argv) > 3 else os.path.join(os.path.dirname(folder_path), 'subunits_info.json')
 
-        # Load mapping and subunits files
+        # Check for optional "ipsae" flag
+        use_ipsae_mode = False
+        if "ipsae" in sys.argv:
+            use_ipsae_mode = True
+            # Remove "ipsae" from argv so it doesn't mess up file path indices if you used them loosely
+            sys.argv.remove("ipsae")
+
+        # Define Output Subdirectory based on mode
+        if use_ipsae_mode:
+            output_subdir_name = "combfold_ipsae"
+            print(">>> RUNNING IN ipSAE MODE <<<")
+        else:
+            output_subdir_name = "combfold_plddt"
+            print(">>> RUNNING IN pLDDT (Standard) MODE <<<")
+
+        # (Standard loading logic...)
+        mapping_path = os.path.abspath(sys.argv[2]) if len(sys.argv) > 2 else os.path.join(os.path.dirname(folder_path),
+                                                                                           'chain_id_mapping.json')
+        original_subunits_path = os.path.abspath(sys.argv[3]) if len(sys.argv) > 3 else os.path.join(
+            os.path.dirname(folder_path), 'subunits_info.json')
+
         try:
             with open(mapping_path, 'r') as f:
                 name_mapping = json.load(f)
             with open(original_subunits_path, 'r') as f:
                 subunits_info = json.load(f)
-        except FileNotFoundError as e:
-            print(f"Error: Could not find file - {e}")
-            sys.exit(1)
-        except json.JSONDecodeError as e:
-            print(f"Error: Invalid JSON in file - {e}")
+        except Exception as e:
+            print(f"Error loading JSONs: {e}")
             sys.exit(1)
 
-        graphs = create_graphs_from_folder(folder_path)
-        merged_graph = merge_graphs(graphs,name_mapping,subunits_info)
-        save_subunits_info(merged_graph, name_mapping, subunits_info, folder_path)
-        check_subunit_sequence_reconstruction(original_subunits_path, os.path.join(os.path.dirname(folder_path),"combfold/subunits_info.json"))
+        # 1. Create graphs (Passing the mode flag)
+        graphs = create_graphs_from_folder(folder_path, use_ipsae=use_ipsae_mode)
+
+        if not graphs:
+            print("No graphs created. Exiting.")
+            sys.exit(0)
+
+        # 2. Merge graphs
+        merged_graph = merge_graphs(graphs, name_mapping, subunits_info)
+
+        # 3. Save with custom folder name
+        save_subunits_info(merged_graph, name_mapping, subunits_info, folder_path, output_subdir=output_subdir_name)
+
+        # 4. Check results (Look in the new folder)
+        check_subunit_sequence_reconstruction(
+            original_subunits_path,
+            os.path.join(os.path.dirname(folder_path), output_subdir_name, "subunits_info.json")
+        )
+
         final_graph = rename_graph_nodes(merged_graph, name_mapping)
         show_circle(final_graph, os.path.dirname(folder_path))
+
     else:
-        print("usage: <script> enter af_pairs_folder_path, [subunits_json_path], [mapping_json_path], [output_json_path]")
+        print("usage: python create_graph_from_complex.py <folder_path> [mapping_json] [subunits_json] [ipsae]")

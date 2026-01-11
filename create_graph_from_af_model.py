@@ -23,6 +23,23 @@ class SubunitInfo:
     end: int
     sequence: str
 
+def parse_ipsae_scores(ipsae_path: str) -> np.ndarray:
+    """
+    Parses the ipSAE _byres.txt file.
+    Assumes the last column is the ipSAE score (psae_d0res).
+    """
+    scores = []
+    with open(ipsae_path, 'r') as f:
+        next(f)  # Skip the header line
+        for line in f:
+            if not line.strip(): continue
+            parts = line.split()
+            # The last column in the _byres.txt file is the relevant ipSAE score
+            try:
+                scores.append(float(parts[-1]))
+            except ValueError:
+                continue
+    return np.array(scores)
 
 def extract_sequence_with_seqio(structure_path, af_version: int):
     """
@@ -279,7 +296,7 @@ def token_to_residue_pae(pae_as_arr: np.ndarray, token_res_ids: list[int], token
     return final_res_pae
 
 
-def graph(structure_path: str, data_path:str, af_version: str)->nx.Graph: # het
+def graph(structure_path: str, data_path: str, af_version: str, ipsae_path: str = None) -> nx.Graph:
     # args: "fold_mll4_1100_end_rbbp5_wdr5_p53x2/fold_mll4_1100_end_rbbp5_wdr5_p53x2_model_0.cif" "fold_mll4_1100_end_rbbp5_wdr5_p53x2/fold_mll4_1100_end_rbbp5_wdr5_p53x2_full_data_0.json" 3
     # args: "example/cdf_ddf/cdf_ddf_model.cif" "example/cdf_ddf/cdf_ddf_confidences.json" 3
     with open(data_path, "r") as file:
@@ -319,7 +336,25 @@ def graph(structure_path: str, data_path:str, af_version: str)->nx.Graph: # het
             residue_numbers.append(res_id)
             seen_residues.add(unique_key)
 
-    groups_indices = find_high_confidence_regions(plddt_array,residue_chain_ids) # before phosp fix it was (plddt_array,token_chain_ids_updated)
+    # === MODIFICATION START ===
+    if ipsae_path and os.path.exists(ipsae_path):
+        print(f"Cutting subunits based on ipSAE scores from: {os.path.basename(ipsae_path)}")
+        # Use ipSAE scores.
+        # Threshold > 0 means the residue contributes to the interaction.
+        score_array = parse_ipsae_scores(ipsae_path)
+
+        # Safety check: Ensure array lengths match
+        if len(score_array) != len(residue_chain_ids):
+            raise ValueError(
+                f"Mismatch: ipSAE file has {len(score_array)} scores, but structure has {len(residue_chain_ids)} residues.")
+
+        # Use threshold 0.0 (anything > 0 is part of the interface)
+        groups_indices = find_high_confidence_regions(score_array, residue_chain_ids, confidence_threshold=0.0)
+    else:
+        print("Cutting subunits based on pLDDT scores (Default)")
+        # Use existing pLDDT array with standard threshold (40)
+        groups_indices = find_high_confidence_regions(plddt_array, residue_chain_ids, confidence_threshold=40)
+    # === MODIFICATION END ===
 
     # Suppose pae_as_arr is n_tokens x n_tokens, token_res_ids contains repeated tokens
     residue_pae = token_to_residue_pae(pae_as_arr, token_res_ids, token_chain_ids_updated)
