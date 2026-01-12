@@ -595,7 +595,7 @@ def show_subunit_circle_graph(graph: nx.Graph, subunit_info: dict, output_path: 
 
 
     graph_chains = set()
-
+    count_edges = 0
     for u, v in graph.edges():
         su = chain_to_subunit.get(u)
         sv = chain_to_subunit.get(v)
@@ -623,6 +623,7 @@ def show_subunit_circle_graph(graph: nx.Graph, subunit_info: dict, output_path: 
             # Inter-protein edge (between different proteins)
             edge_color = "magenta"  # or "purple", "blue", etc.
             edge_alpha = 0.9
+            count_edges+=1
             #edge_width = 1.0
 
         draw_curve(ax, a1, a2, r_inner=radius - width / 2,
@@ -635,6 +636,7 @@ def show_subunit_circle_graph(graph: nx.Graph, subunit_info: dict, output_path: 
     print(f"\nTotal unique chains in graph: {len(graph_chains)}")
     print(f"Chains in chain_to_subunit: {len(chain_to_subunit)}")
     print(f"Missing chains ({len(missing_chains)}): {sorted(missing_chains)[:20]}")
+    print(f"number of non internal edges: {count_edges}")
     print("======================\n")
     # ---------- Save ----------
     plt.savefig(os.path.join(output_path, "subunit_graph.png"), dpi=450, bbox_inches="tight")  # Even higher DPI

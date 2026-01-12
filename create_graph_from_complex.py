@@ -474,6 +474,177 @@ def save_subunits_info(graph: nx.Graph, name_mapping: dict, subunits_info: dict,
     with open(output_json_path, 'w') as f:
         json.dump(sorted_unified_subunits, f, indent=4)
 
+
+def save_connected_subunits_only(graph: nx.Graph, name_mapping: dict, subunits_info: dict,
+                                 folder: str, output_subdir: str = 'combfold') -> None:
+    """
+    Create subunits_info.json containing ONLY subunits that have non-internal edges.
+    Non-internal edge = edge between different chains (u[0] != v[0])
+
+    Parameters
+    ----------
+    graph : nx.Graph
+        Graph with SubunitInfo objects as node data
+    name_mapping : dict
+        Mapping of base names to chain names
+    subunits_info : dict
+        Dictionary containing subunit information
+    folder : str
+        Path to output folder
+    output_subdir: str
+        Subdirectory name for output
+    """
+    # Step 1: Identify nodes with NON-INTERNAL edges only
+    connected_nodes = set()
+    non_internal_edges = [
+        (u, v) for u, v in graph.edges()
+        if u[0] != v[0]  # Different chain prefixes
+    ]
+
+    print(f"\nTotal edges in graph: {len(graph.edges())}")
+    print(f"Non-internal edges: {len(non_internal_edges)}")
+
+    for edge in non_internal_edges:
+        connected_nodes.add(edge[0])
+        connected_nodes.add(edge[1])
+
+    print(
+        f"Found {len(connected_nodes)} connected nodes (via non-internal edges) out of {len(graph.nodes)} total nodes")
+    print(f"Connected nodes: {sorted(connected_nodes)}")
+
+    if not connected_nodes:
+        print("WARNING: No non-internal edges found! Output file will be empty.")
+
+    # Step 2: Build unified_subunits (same as save_subunits_info but filtered)
+    unified_subunits = {}
+    high_segments_by_subunit = defaultdict(list)
+
+    # Only process connected nodes
+    for node in connected_nodes:
+        base_name = node.split('_')[0]
+        node_data = graph.nodes[node]['data']
+        original_name, subunit_info = find_original_subunit_info(
+            base_name, name_mapping, subunits_info, node_data.start, node_data.end
+        )
+
+        iupred_shift = name_mapping[base_name]['start'] - 1
+        start = node_data.start + iupred_shift
+        end = node_data.end + iupred_shift
+        sequence = node_data.sequence
+
+        # Extract expected sequence
+        full_seq = subunit_info['sequence']
+        expected_sequence = full_seq[start - 1:end]
+
+        if not sequences_match(sequence, expected_sequence):
+            print(f"Warning: Sequence mismatch for node {node}")
+            print(f"  Merged: {sequence[:50]}...")
+            print(f"  Expected: {expected_sequence[:50]}...")
+        else:
+            sequence = expected_sequence
+
+        # Store high segment
+        node_index = len(high_segments_by_subunit[original_name]) + 1
+        high_name = f"{subunit_info['name']}_high_{node_index}"
+        high_segments_by_subunit[original_name].append({
+            'node_name': node,
+            'high_name': high_name,
+            'start': start,
+            'end': end
+        })
+
+        unified_subunits[high_name] = {
+            'name': high_name,
+            'sequence': sequence,
+            'chain_names': subunit_info['chain_names'],
+            'start_res': start
+        }
+
+    # # Step 3: Create low segments for gaps ONLY between connected high segments
+    # for original_name, segments in high_segments_by_subunit.items():
+    #     subunit_info = subunits_info[original_name]
+    #     full_sequence = subunit_info['sequence']
+    #     total_length = len(full_sequence)
+    #
+    #     segments.sort(key=lambda x: x['start'])
+    #
+    #     last_end = 0
+    #     low_segment_index = 1
+    #
+    #     for segment in segments:
+    #         current_start = segment['start']
+    #
+    #         # Gap before this segment
+    #         if current_start > last_end + 1:
+    #             low_start = last_end + 1
+    #             low_end = current_start - 1
+    #             low_name = f"{subunit_info['name']}_low_{low_segment_index}"
+    #             low_sequence = full_sequence[low_start - 1:low_end]
+    #
+    #             unified_subunits[low_name] = {
+    #                 'name': low_name,
+    #                 'sequence': low_sequence,
+    #                 'chain_names': subunit_info['chain_names'],
+    #                 'start_res': low_start
+    #             }
+    #             low_segment_index += 1
+    #
+    #         last_end = segment['end']
+    #
+    #     # Gap after last segment
+    #     remaining_len = total_length - last_end
+    #     if remaining_len > 0:
+    #         if remaining_len < 5 and segments:
+    #             # Merge tiny tail into last high segment
+    #             last_segment_dict = segments[-1]
+    #             last_high_name = last_segment_dict['high_name']
+    #             orphan_seq = full_sequence[last_end:]
+    #             unified_subunits[last_high_name]['sequence'] += orphan_seq
+    #         else:
+    #             # Create new low segment
+    #             low_start = last_end + 1
+    #             low_end = total_length
+    #             low_name = f"{subunit_info['name']}_low_{low_segment_index}"
+    #             low_sequence = full_sequence[low_start - 1:low_end]
+    #
+    #             unified_subunits[low_name] = {
+    #                 'name': low_name,
+    #                 'sequence': low_sequence,
+    #                 'chain_names': subunit_info['chain_names'],
+    #                 'start_res': low_start
+    #             }
+
+    # Step 4: Sort and save
+    sorted_unified_subunits = dict(
+        sorted(
+            unified_subunits.items(),
+            key=lambda item: (item[1]['name'].split('_')[0], item[1]['start_res'])
+        )
+    )
+
+    output_folder = os.path.join(os.path.dirname(folder), output_subdir)
+    os.makedirs(output_folder, exist_ok=True)
+    output_json_path = os.path.join(output_folder, 'subunits_info_connected_only.json')
+
+    with open(output_json_path, 'w') as f:
+        json.dump(sorted_unified_subunits, f, indent=4)
+
+    print(f"\nSaved connected subunits (non-internal edges only) to: {output_json_path}")
+    print(f"Total segments in filtered output: {len(sorted_unified_subunits)}")
+
+    # Summary stats
+    high_count = sum(1 for k in sorted_unified_subunits if '_high_' in k)
+    low_count = sum(1 for k in sorted_unified_subunits if '_low_' in k)
+    print(f"  High segments: {high_count}")
+    print(f"  Low segments: {low_count}")
+
+    # Show which chains are represented
+    chains_represented = set()
+    for info in sorted_unified_subunits.values():
+        chains_represented.update(info['chain_names'])
+    print(f"  Chains with interactions: {sorted(chains_represented)}")
+
+
 def rename_graph_nodes (graph_to_rename, name_mapping):
     mapping_dict = {name:name_mapping[name]['chain_id'] for name in name_mapping}
     graph_to_rename = nx.relabel_nodes(graph_to_rename, mapping_dict)
@@ -525,6 +696,7 @@ if __name__ == "__main__":
 
         # 3. Save with custom folder name
         save_subunits_info(merged_graph, name_mapping, subunits_info, folder_path, output_subdir=output_subdir_name)
+        save_connected_subunits_only(merged_graph, name_mapping, subunits_info, folder_path, output_subdir_name)
 
         # 4. Check results (Look in the new folder)
         check_subunit_sequence_reconstruction(
@@ -536,9 +708,13 @@ if __name__ == "__main__":
 
         output_path = os.path.join(os.path.dirname(folder_path), output_subdir_name)
         pickle_file = os.path.join(output_path, "graph.pkl")
+        pickle_file2 = os.path.join(output_path, "graph_before_renaming.pkl")
 
         with open(pickle_file, "wb") as f:
             pickle.dump(final_graph, f)
+
+        with open(pickle_file2, "wb") as f:
+            pickle.dump(merged_graph, f)
 
         show_circle(final_graph, os.path.dirname(folder_path))
 
