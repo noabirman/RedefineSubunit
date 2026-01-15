@@ -3,7 +3,7 @@ import os
 import pickle
 import sys
 
-import create_graph_from_af_model
+sys.path.append('/cs/labs/dina/noabirman/RedefineSubunit')
 
 from vizualization_plots import show_subunit_circle_graph
 
