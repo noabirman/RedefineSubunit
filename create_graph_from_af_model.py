@@ -195,7 +195,7 @@ def find_edges(subunits_info: List[SubunitInfo], pae_matrix: np.array, threshold
     Args:
         subunits_info (List[SubunitInfo]): vertices information.
         pae_matrix (np.array): PAE matrix.
-        threshold (int): adding edge iff pae of the link between two vertices > threshold.
+        threshold (int): adding edge iff pae of the link between two vertices < threshold.
 
     Returns:
         List[tuple[str,str,float]]: edges list, each edge is a tuple (v1, v2, weight).
