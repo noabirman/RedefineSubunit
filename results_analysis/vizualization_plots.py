@@ -365,7 +365,7 @@ def draw_curve(ax, angle1, angle2, r_inner, color="gray", alpha=0.5, lw=0.5, cur
     ax.plot(x, y, color=color, alpha=alpha, lw=lw)
 
 
-def show_subunit_circle_graph(graph: nx.Graph, subunit_info: dict, output_path: str,path_to_chain_mapping_json: str):
+def show_subunit_circle_graph(graph: nx.Graph, subunit_info: dict, output_path: str,path_to_chain_mapping_json: str, protein_name_map: dict = None):
     """
     Circular arc graph:
     - Each protein is an arc (size ∝ total length)
@@ -567,13 +567,14 @@ def show_subunit_circle_graph(graph: nx.Graph, subunit_info: dict, output_path: 
                 rotation_mode='anchor',
                 color='black'
             )
-        # Protein label
+        # Protein label - use mapped name if available
+        display_name = protein_name_map.get(protein, protein) if protein_name_map else protein
         mid_angle = math.radians((p_start + p_end) / 2)
         label_radius = ruler_radius + 4.0  # Further out, past the ruler
         ax.text(
             label_radius * math.cos(mid_angle),
             label_radius * math.sin(mid_angle),
-            protein,
+            display_name,
             ha="center",
             va="center",
             fontsize=18,
