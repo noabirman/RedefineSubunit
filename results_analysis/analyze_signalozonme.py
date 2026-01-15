@@ -3,7 +3,7 @@ import os
 import pickle
 import sys
 
-from results_analysis.vizualization_plots import show_subunit_circle_graph
+from vizualization_plots import show_subunit_circle_graph
 
 uniprot_to_protein = {
     "P06239": "Lck",
