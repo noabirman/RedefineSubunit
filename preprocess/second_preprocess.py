@@ -1,33 +1,31 @@
+#!/usr/bin/env python3
+# changed to create pairwise msa input instead if single
+"""
+Reads a subunits_info JSON, assigns alphabetical labels, and creates 
+pairwise AlphaFold 3 JSONs. Routes pairs to msa_inputs or msa_output 
+based on sequence lengths.
+"""
 import os
 import json
 import string
 import itertools
-import sys
+import argparse
 
-def rename_subunits_and_create_msa_input(input_file, dir_path, min_length):
-    """
-    Renames subunits from a subunits_info JSON file, creates msa_input files for subunits
-    with sequence length >= min_length, msa_output files for shorter ones, and saves a mapping file.
-
-    Args:
-        input_file (str): Path to the input subunits_info JSON file.
-        dir_path (str): Directory where the msa_inputs folder and mapping file will be created.
-        min_length (int): Minimum sequence length required to generate an msa_input file.
-    """
+def combine_and_pair_subunits(input_file, dir_path, min_length):
     # Load the input JSON file
     with open(input_file, 'r') as f:
         subunits_data = json.load(f)
 
-    # Create msa_inputs and msa_output directories
+    # Create directories
     msa_inputs_dir = os.path.join(dir_path, "msa_inputs")
     msa_outputs_dir = os.path.join(dir_path, "msa_output")
     os.makedirs(msa_inputs_dir, exist_ok=True)
     os.makedirs(msa_outputs_dir, exist_ok=True)
 
-    # Initialize mapping dictionary
     mapping = {}
+    chains = {}
 
-    # Generate labels A, B, ..., Z, AA, AB, ...
+    # Generate labels A, B, ..., Z, AA, AB...
     def generate_labels():
         alphabet = string.ascii_uppercase
         for letter in alphabet:
@@ -37,86 +35,84 @@ def rename_subunits_and_create_msa_input(input_file, dir_path, min_length):
 
     label_generator = generate_labels()
 
-    # Process each subunit
+    # Step 1: Parse subunits and determine length status
     for subunit_name, subunit_info in subunits_data.items():
         new_label = next(label_generator)
-        sequence = subunit_info["sequence"]
+        seq = subunit_info["sequence"]
+        seq_len = len(seq)
         start_res = subunit_info["start_res"]
-        sequence_length = len(sequence)
-        end_res = start_res + sequence_length - 1
-
-        # Update the mapping
+        
+        # Save mapping info
         mapping[new_label] = {
             "chain_id": subunit_info["chain_names"][0],
             "start": start_res,
-            "end": end_res
+            "end": start_res + seq_len - 1
+        }
+        
+        # Store sequence and short/long status for combinatorial pairing
+        chains[new_label] = {
+            "sequence": seq,
+            "is_short": seq_len < min_length
         }
 
-        # Short sequence → msa_output
-        if sequence_length < min_length:
-            msa_output = {
-                "name": new_label,
-                "modelSeeds": [1],
-                "sequences": [
-                    {
-                        "protein": {
-                            "id": new_label,
-                            "sequence": sequence,
-                            "unpairedMsa": "",
-                            "pairedMsa": "",
-                            "templates": []
-                        }
-                    }
-                ],
-                "dialect": "alphafold3",
-                "version": 1
-            }
-            label_lower = new_label.lower()
-            output_subdir = os.path.join(msa_outputs_dir, label_lower)
+    # Step 2: Generate all pairwise combinations
+    chain_ids = sorted(chains.keys())
+    print(f"Chains detected: {chain_ids}\n")
+
+    for A, B in itertools.combinations(chain_ids, 2):
+        pair_name = f"{A}_{B}"
+        is_A_short = chains[A]["is_short"]
+        is_B_short = chains[B]["is_short"]
+        
+        # Base JSON structure for an AF3 pair
+        pair_data = {
+            "name": pair_name,
+            "modelSeeds": [1],
+            "sequences": [
+                {"protein": {"id": A, "sequence": chains[A]["sequence"]}},
+                {"protein": {"id": B, "sequence": chains[B]["sequence"]}}
+            ],
+            "dialect": "alphafold3",
+            "version": 1
+        }
+
+        # Step 3: Route based on length logic
+        if is_A_short and is_B_short:
+            # Short + Short: Bypass MSA pipeline completely
+            pair_data["sequences"][0]["protein"].update({"unpairedMsa": "", "pairedMsa": "", "templates": []})
+            pair_data["sequences"][1]["protein"].update({"unpairedMsa": "", "pairedMsa": "", "templates": []})
+            
+            output_subdir = os.path.join(msa_outputs_dir, pair_name.lower())
             os.makedirs(output_subdir, exist_ok=True)
-            output_file = os.path.join(output_subdir, f"{label_lower}_data.json")
-            with open(output_file, 'w') as f:
-                json.dump(msa_output, f, indent=4)
-            print(f"Short sequence. Saved msa_output: {output_file}")
-
-        # Long enough sequence → msa_input
+            out_path = os.path.join(output_subdir, f"{pair_name.lower()}_data.json")
+            print(f"Short+Short Pair: Saved to msa_output -> {out_path}")
         else:
-            msa_input = {
-                "name": new_label,
-                "modelSeeds": [1],
-                "sequences": [
-                    {
-                        "protein": {
-                            "id": new_label,
-                            "sequence": sequence
-                        }
-                    }
-                ],
-                "dialect": "alphafold3",
-                "version": 1
-            }
-            output_file = os.path.join(msa_inputs_dir, f"{new_label}.json")
-            with open(output_file, 'w') as f:
-                json.dump(msa_input, f, indent=4)
-            print(f"Saved msa_input: {output_file}")
+            # Long+Long OR Long+Short: Sent to inputs for MSA processing
+            out_path = os.path.join(msa_inputs_dir, f"{pair_name}.json")
+            print(f"Needs MSA Pipeline: Saved to msa_inputs -> {out_path}")
 
-    # Save the mapping file
+        with open(out_path, 'w') as f:
+            json.dump(pair_data, f, indent=4)
+
+    # Save mapping file
     mapping_file_path = os.path.join(dir_path, "chain_id_mapping.json")
     with open(mapping_file_path, 'w') as f:
         json.dump(mapping, f, indent=4)
-    print(f"Mapping file saved to {mapping_file_path}")
+    print(f"\nMapping file saved to {mapping_file_path}")
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2 or len(sys.argv) > 4:
-        print("Usage: script <combfold_dir_path> [min_length] [input_file]")
-        sys.exit(1)
-
-    combfold_dir_path = os.path.abspath(sys.argv[1])
-    input_file = os.path.join(combfold_dir_path, 'subunits_info.json') if len(sys.argv) < 4 else os.path.abspath(sys.argv[3])
-    min_length = int(sys.argv[2]) if len(sys.argv) == 3 else 10
-
-    print(f"Directory path: {combfold_dir_path}")
+    parser = argparse.ArgumentParser(description="Process subunits and create pairwise AF3 JSONs.")
+    parser.add_argument("combfold_dir", help="Directory path for outputs")
+    parser.add_argument("--min_length", type=int, default=10, help="Minimum sequence length for MSA (default: 10)")
+    parser.add_argument("--input_file", help="Path to subunits_info.json (optional)")
+    
+    args = parser.parse_args()
+    
+    # Default to subunits_info.json in the combfold_dir if not explicitly provided
+    input_file = args.input_file if args.input_file else os.path.join(os.path.abspath(args.combfold_dir), 'subunits_info.json')
+    
+    print(f"Directory path: {os.path.abspath(args.combfold_dir)}")
     print(f"Input file: {input_file}")
-    print(f"Minimum sequence length for msa_input: {min_length}")
-
-    rename_subunits_and_create_msa_input(input_file, combfold_dir_path, min_length)
+    print(f"Minimum sequence length for MSA: {args.min_length}\n")
+    
+    combine_and_pair_subunits(input_file, os.path.abspath(args.combfold_dir), args.min_length)
