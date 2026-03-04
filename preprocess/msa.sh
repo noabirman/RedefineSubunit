@@ -7,7 +7,6 @@
 #SBATCH --mail-type=END
 #SBATCH --mail-user=noa.birman@mail.huji.ac.il
 
-#SBATCH --exclude=sm-01,sm-16,sm-02,sm-03,sm-04,sm-08
 
 #SBATCH --output=/cs/labs/dina/noabirman/slurms_outs/msa/%j.out
 
