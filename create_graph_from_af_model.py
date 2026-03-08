@@ -296,7 +296,7 @@ def token_to_residue_pae(pae_as_arr: np.ndarray, token_res_ids: list[int], token
     return final_res_pae
 
 
-def graph(structure_path: str, data_path: str, af_version: str, ipsae_path: str = None) -> nx.Graph:
+def graph(structure_path: str, data_path: str, af_version: str, pae_threshold: int, ipsae_path: str = None) -> nx.Graph:
     # args: "fold_mll4_1100_end_rbbp5_wdr5_p53x2/fold_mll4_1100_end_rbbp5_wdr5_p53x2_model_0.cif" "fold_mll4_1100_end_rbbp5_wdr5_p53x2/fold_mll4_1100_end_rbbp5_wdr5_p53x2_full_data_0.json" 3
     # args: "example/cdf_ddf/cdf_ddf_model.cif" "example/cdf_ddf/cdf_ddf_confidences.json" 3
     with open(data_path, "r") as file:
@@ -361,9 +361,31 @@ def graph(structure_path: str, data_path: str, af_version: str, ipsae_path: str 
     # Now residue_pae.shape == (num_residues, num_residues
 
     subunits_info = extract_subunit_info(groups_indices, residue_chain_ids, full_seq)
+    # # --- ADD LOW-CONFIDENCE ONLY CHAINS ---
+    # all_chains = sorted(set(residue_chain_ids))
+    # existing_chains = {sub.chain_names[0] for sub in subunits_info}  # chains already in high-confidence subunits
+    # chain_occ_counter = Counter([sub.chain_names[0] for sub in subunits_info])
+
+    # for chain in all_chains:
+    #     if chain not in existing_chains:
+    #         # find start and end indices for this chain in residue_chain_ids
+    #         start_idx = residue_chain_ids.index(chain)
+    #         end_idx = len(residue_chain_ids) - 1 - residue_chain_ids[::-1].index(chain)
+    #         # ensure unique numbering
+    #         occ_num = chain_occ_counter[chain] + 1
+    #         low_subunit = SubunitInfo(
+    #             name=f"{chain}_{occ_num}_low",       # naturally mark as low-confidence
+    #             chain_names=[chain],
+    #             start=start_idx,
+    #             end=end_idx,
+    #             sequence=full_seq[start_idx:end_idx+1]
+    #         )
+    #         subunits_info.append(low_subunit)
+    #         chain_occ_counter[chain] += 1
+    # # --- END ADDITION ---
 
     G = nx.Graph()
-    edges = find_edges(subunits_info, residue_pae, threshold=15)
+    edges = find_edges(subunits_info, residue_pae, threshold=pae_threshold)
     # index per chain instead of per full seq (by doing token_res_ids[subunit.start])
     res_num = np.unique(token_res_ids) #addition for phosp
     updated_subunits = [
@@ -382,8 +404,9 @@ if __name__ == '__main__':
     if len(sys.argv) == 4:
         structure_path, data_path, af_version = os.path.abspath(sys.argv[1]),os.path.abspath(sys.argv[2]),sys.argv[3]
     else:
-        print("usage: <script> structure_path data_path af_version")
-    g = graph(structure_path, data_path, af_version)
+        print("usage: <script> structure_path data_path af_version pae_threshold")
+        sys.exit(1)
+    g = graph(structure_path, data_path, af_version, pae_threshold=int(sys.argv[4]))
     print (g)
     #plot_pae_plddt(pae_as_arr, plddt_array, nodes_as_req, edges, 'skip4_pae15_')
     #plot_pae_plddt2(pae_as_arr, plddt_array, nodes_as_req, edges, 'with_weights')

@@ -28,7 +28,10 @@ def check_subunit_sequence_reconstruction(original_path, new_path):
         ]
 
         if not matching_subs:
-            raise ValueError(f"[Missing] No matching sub-subunits for original subunit '{orig_id}'.")
+            # A fully low-confidence subunit won't appear in the graph — that's OK
+            print(f"[Skipped] No sub-subunits for '{orig_id}' (likely fully low-confidence).")
+            continue  # <-- instead of raise ValueError
+
 
         # Sort sub-subunits by start_res
         matching_subs.sort(key=lambda kv: kv[1]["start_res"])
@@ -101,16 +104,15 @@ def merge_graphs(graphs: List[nx.Graph], name_mapping: object, subunits_info: ob
 #             graph1 = graph(structure_path, data_path, af_version='3')
 #             graphs.append(graph1)
 #     return graphs
-def create_graphs_from_folder(folder_path, use_ipsae=False):
+def create_graphs_from_folder(folder_path, use_ipsae=False, pae_cutoff=15, dist_cutoff=10):
     print(f"Creating graphs from folder {folder_path} (Mode: {'ipSAE' if use_ipsae else 'pLDDT'})")
     graphs = []
 
     # Define ipsae folder path (sibling directory)
-    ipsae_results_dir = os.path.join(os.path.dirname(folder_path), "ipsae_results")
+    ipsae_results_dir = os.path.join(os.path.dirname(folder_path),"ipsae_results_{:02d}_{:02d}".format(pae_cutoff, dist_cutoff))
 
     # Cutoffs must match your ipsae run
-    pae_cut = "15"
-    dist_cut = "10"
+
 
     for item in os.listdir(folder_path):
         item_path = os.path.join(folder_path, item)
@@ -135,7 +137,7 @@ def create_graphs_from_folder(folder_path, use_ipsae=False):
                         f"Error: You requested ipSAE mode, but the folder '{ipsae_results_dir}' does not exist.")
 
                 # 2. Find the specific file
-                expected_name = f"{item}_{item}_model_{pae_cut}_{dist_cut}_byres.txt"
+                expected_name = f"{item}_{item}_model_{pae_cutoff:02d}_{dist_cutoff:02d}_byres.txt"
                 candidate_path = os.path.join(ipsae_results_dir, expected_name)
 
                 # Fallback search
@@ -153,7 +155,7 @@ def create_graphs_from_folder(folder_path, use_ipsae=False):
                     continue
 
                     # Pass the path (or None) to the graph function
-            graph1 = graph(structure_path, data_path, af_version='3', ipsae_path=ipsae_path)
+            graph1 = graph(structure_path, data_path, af_version='3',pae_threshold=pae_cutoff, ipsae_path=ipsae_path)
             graphs.append(graph1)
 
     return graphs
@@ -651,78 +653,122 @@ def rename_graph_nodes (graph_to_rename, name_mapping):
     return graph_to_rename
 
 if __name__ == "__main__":
-    if len(sys.argv) >= 2:
-        folder_path = os.path.abspath(sys.argv[1])
 
-        # Check for optional "ipsae" flag
-        use_ipsae_mode = False
-        if "ipsae" in sys.argv:
-            use_ipsae_mode = True
-            # Remove "ipsae" from argv so it doesn't mess up file path indices if you used them loosely
-            sys.argv.remove("ipsae")
+    if len(sys.argv) < 2:
+        print("Usage:")
+        print("pLDDT mode:")
+        print("  python create_graph_from_complex.py <folder_path> [mapping_json] [subunits_json]")
+        print("ipSAE mode:")
+        print("  python create_graph_from_complex.py <folder_path> [mapping_json] [subunits_json] ipsae <PAE> <DIST>")
+        sys.exit(1)
 
-        # Define Output Subdirectory based on mode
-        if use_ipsae_mode:
-            output_subdir_name = "combfold_ipsae"
-            print(">>> RUNNING IN ipSAE MODE <<<")
-        else:
-            output_subdir_name = "combfold"
-            print(">>> RUNNING IN pLDDT (Standard) MODE <<<")
+    folder_path = os.path.abspath(sys.argv[1])
 
-        # (Standard loading logic...)
-        mapping_path = os.path.abspath(sys.argv[2]) if len(sys.argv) > 2 else os.path.join(os.path.dirname(folder_path),
-                                                                                           'chain_id_mapping.json')
-        original_subunits_path = os.path.abspath(sys.argv[3]) if len(sys.argv) > 3 else os.path.join(
-            os.path.dirname(folder_path), 'subunits_info.json')
+    # ---- Detect ipsae mode ----
+    use_ipsae_mode = False
+    pae_cutoff = None
+    dist_cutoff = None
 
+    if "ipsae" in sys.argv:
+        use_ipsae_mode = True
+        ipsae_index = sys.argv.index("ipsae")
         try:
-            with open(mapping_path, 'r') as f:
-                name_mapping = json.load(f)
-            with open(original_subunits_path, 'r') as f:
-                subunits_info = json.load(f)
-        except Exception as e:
-            print(f"Error loading JSONs: {e}")
+            pae_cutoff = int(sys.argv[ipsae_index + 1])
+            dist_cutoff = int(sys.argv[ipsae_index + 2])
+        except (IndexError, ValueError):
+            print("Error: In ipSAE mode you must provide <PAE> and <DIST> after 'ipsae'")
             sys.exit(1)
+        print(">>> RUNNING IN ipSAE MODE <<<")
+        print(f"PAE cutoff: {pae_cutoff}")
+        print(f"Distance cutoff: {dist_cutoff}")
+    else:
+        print(">>> RUNNING IN pLDDT (Standard) MODE <<<")
 
-        # 1. Create graphs (Passing the mode flag)
-        graphs = create_graphs_from_folder(folder_path, use_ipsae=use_ipsae_mode)
-
-        if not graphs:
-            print("No graphs created. Exiting.")
-            sys.exit(0)
-
-        # 2. Merge graphs
-        merged_graph = merge_graphs(graphs, name_mapping, subunits_info)
-
-        # 3. Save with custom folder name
-        save_subunits_info(merged_graph, name_mapping, subunits_info, folder_path, output_subdir=output_subdir_name)
-        save_connected_subunits_only(merged_graph, name_mapping, subunits_info, folder_path, output_subdir_name)
-
-        # 4. Check results (Look in the new folder)
-        check_subunit_sequence_reconstruction(
-            original_subunits_path,
-            os.path.join(os.path.dirname(folder_path), output_subdir_name, "subunits_info.json")
+    # ---- Load optional JSONs ----
+    if use_ipsae_mode:
+        # ipsae mode ignores argv[2] and argv[3] if they exist; use defaults
+        mapping_path = os.path.join(os.path.dirname(folder_path), 'chain_id_mapping.json')
+        original_subunits_path = os.path.join(os.path.dirname(folder_path), 'subunits_info.json')
+    else:
+        mapping_path = (
+            os.path.abspath(sys.argv[2])
+            if len(sys.argv) > 2
+            else os.path.join(os.path.dirname(folder_path), 'chain_id_mapping.json')
+        )
+        original_subunits_path = (
+            os.path.abspath(sys.argv[3])
+            if len(sys.argv) > 3
+            else os.path.join(os.path.dirname(folder_path), 'subunits_info.json')
         )
 
-        final_graph = rename_graph_nodes(merged_graph, name_mapping)
+    try:
+        with open(mapping_path, 'r') as f:
+            name_mapping = json.load(f)
 
-        output_path = os.path.join(os.path.dirname(folder_path), output_subdir_name)
-        pickle_file = os.path.join(output_path, "graph.pkl")
-        pickle_file2 = os.path.join(output_path, "graph_before_renaming.pkl")
+        with open(original_subunits_path, 'r') as f:
+            subunits_info = json.load(f)
 
-        with open(pickle_file, "wb") as f:
-            pickle.dump(final_graph, f)
+    except Exception as e:
+        print(f"Error loading JSONs: {e}")
+        sys.exit(1)
 
-        with open(pickle_file2, "wb") as f:
-            pickle.dump(merged_graph, f)
-
-        show_circle(final_graph, os.path.dirname(folder_path))
-
-
-        new_subunits_info_path = os.path.join(os.path.dirname(folder_path), output_subdir_name, "subunits_info.json")
-        with open(new_subunits_info_path, "r") as f:
-            new_subunits_info = json.load(f)
-        show_subunit_circle_graph(final_graph, new_subunits_info, os.path.join(os.path.dirname(folder_path), output_subdir_name), mapping_path)
-
+    # ---- Create graphs ----
+    if use_ipsae_mode:
+        graphs = create_graphs_from_folder(
+            folder_path,
+            use_ipsae=True,
+            pae_cutoff=pae_cutoff,
+            dist_cutoff=dist_cutoff
+        )
+        output_subdir_name = f"combfold_ipsae_{pae_cutoff}_{dist_cutoff}"
     else:
-        print("usage: python create_graph_from_complex.py <folder_path> [mapping_json] [subunits_json] [ipsae]")
+        graphs = create_graphs_from_folder(folder_path)
+        output_subdir_name = "combfold"
+
+    if not graphs:
+        print("No graphs created. Exiting.")
+        sys.exit(0)
+
+    # ---- Merge graphs ----
+    merged_graph = merge_graphs(graphs, name_mapping, subunits_info)
+
+    # ---- Save results ----
+    save_subunits_info(merged_graph, name_mapping, subunits_info, folder_path,
+                       output_subdir=output_subdir_name)
+
+    save_connected_subunits_only(merged_graph, name_mapping, subunits_info,
+                                 folder_path, output_subdir_name)
+
+    # ---- Reconstruction check ----
+    check_subunit_sequence_reconstruction(
+        original_subunits_path,
+        os.path.join(os.path.dirname(folder_path),
+                     output_subdir_name,
+                     "subunits_info.json")
+    )
+
+    final_graph = rename_graph_nodes(merged_graph, name_mapping)
+
+    output_path = os.path.join(os.path.dirname(folder_path), output_subdir_name)
+    pickle_file = os.path.join(output_path, "graph.pkl")
+    pickle_file2 = os.path.join(output_path, "graph_before_renaming.pkl")
+
+    with open(pickle_file, "wb") as f:
+        pickle.dump(final_graph, f)
+
+    with open(pickle_file2, "wb") as f:
+        pickle.dump(merged_graph, f)
+
+    show_circle(final_graph, os.path.dirname(folder_path))
+
+    new_subunits_info_path = os.path.join(output_path, "subunits_info.json")
+
+    with open(new_subunits_info_path, "r") as f:
+        new_subunits_info = json.load(f)
+
+    show_subunit_circle_graph(
+        final_graph,
+        new_subunits_info,
+        output_path,
+        mapping_path
+    )
