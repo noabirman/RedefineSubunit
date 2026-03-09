@@ -169,4 +169,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    #run the second with 2 data2/phospho_after_first_preprocess.json data2/chain_id_mapping.json
